@@ -8,16 +8,19 @@ import {
     type UserUpdate,
 } from '@/lib/schemas/user'
 import { UserService } from '@/services/users'
+import { ProfileService } from '@/services/profiles'
 import { DatabaseError } from '@/lib/errors'
+import type { ProfileRow } from '@/lib/schemas/profile'
 
-const service = new UserService()
+const userService = new UserService()
+const profileService = new ProfileService()
 
 export async function getUser(id: string): Promise<{
     data: UserRow | null
     error: string | null
 }> {
     try {
-        const data = await service.findById(id)
+        const data = await userService.findById(id)
         return { data, error: null }
     } catch (error) {
         console.error('[getUser]', error)
@@ -36,7 +39,7 @@ export async function getUserByEmail(email: string): Promise<{
     error: string | null
 }> {
     try {
-        const data = await service.findByEmail(email)
+        const data = await userService.findByEmail(email)
         return { data, error: null }
     } catch (error) {
         console.error('[getUserByEmail]', error)
@@ -57,7 +60,7 @@ export async function getAllActiveUsersExcept(excludeId: string): Promise<{
     error: string | null
 }> {
     try {
-        const data = await service.findAllActiveExcept(excludeId)
+        const data = await userService.findAllActiveExcept(excludeId)
         return { data, error: null }
     } catch (error) {
         console.error('[getAllActiveUsersExcept]', error)
@@ -77,7 +80,7 @@ export async function createUser(input: UserInsert): Promise<{
 }> {
     try {
         const validated = userInsertSchema.parse(input)
-        const data = await service.create(validated)
+        const data = await userService.create(validated)
         revalidatePath('/users')
         return { data, error: null }
     } catch (error) {
@@ -100,7 +103,7 @@ export async function updateUser(
     error: string | null
 }> {
     try {
-        const data = await service.update(id, input)
+        const data = await userService.update(id, input)
         revalidatePath('/users')
         revalidatePath(`/users/${id}`)
         return { data, error: null }
@@ -120,7 +123,7 @@ export async function updateUserLastSignIn(id: string): Promise<{
     error: string | null
 }> {
     try {
-        await service.updateLastSignIn(id)
+        await userService.updateLastSignIn(id)
         revalidatePath('/users')
         revalidatePath(`/users/${id}`)
         return { error: null }
@@ -131,6 +134,25 @@ export async function updateUserLastSignIn(id: string): Promise<{
                 error instanceof DatabaseError
                     ? error.message
                     : 'Failed to update user last sign in',
+        }
+    }
+}
+
+export async function getProfile(userId: string): Promise<{
+    data: ProfileRow | null
+    error: string | null
+}> {
+    try {
+        const data = await profileService.findByUserId(userId)
+        return { data, error: null }
+    } catch (error) {
+        console.error('[getProfile]', error)
+        return {
+            data: null,
+            error:
+                error instanceof DatabaseError
+                    ? error.message
+                    : 'Failed to fetch user profile',
         }
     }
 }

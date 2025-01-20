@@ -9,6 +9,7 @@ import {
 } from '@/lib/schemas/tickets'
 import { DatabaseError } from '@/lib/errors'
 import type { Tables } from '@/lib/supabase/types'
+import type { TicketStats } from '@/services/tickets'
 import { z } from 'zod'
 
 const service = new TicketService()
@@ -90,6 +91,25 @@ export async function getTickets(options?: {
                 error instanceof DatabaseError
                     ? error.message
                     : 'Failed to fetch tickets',
+        }
+    }
+}
+
+export async function getTicketStats(): Promise<{
+    data: TicketStats | null
+    error: string | null
+}> {
+    try {
+        const data = await service.getStats()
+        return { data, error: null }
+    } catch (error) {
+        console.error('[getTicketStats]', error)
+        return {
+            data: null,
+            error:
+                error instanceof DatabaseError
+                    ? error.message
+                    : 'Failed to fetch ticket statistics',
         }
     }
 }

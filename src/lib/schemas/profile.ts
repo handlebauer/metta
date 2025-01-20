@@ -14,8 +14,8 @@ export type ProfileUpdate = TablesUpdate<'profiles'>
 export const profileSchema = z.object({
     id: z.string(),
     user_id: z.string(),
-    created_at: z.string().datetime(),
-    updated_at: z.string().datetime(),
+    created_at: z.string().transform(str => new Date(str).toISOString()),
+    updated_at: z.string().transform(str => new Date(str).toISOString()),
     full_name: z.string().nullable(),
     avatar_url: z.string().url().nullable(),
     bio: z.string().nullable(),

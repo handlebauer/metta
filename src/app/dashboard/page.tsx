@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Inbox, Clock, CheckCircle2 } from 'lucide-react'
+import { getTicketStats } from '@/actions/tickets'
+import { getProfile } from '@/actions/users'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -13,6 +15,14 @@ export default async function DashboardPage() {
         redirect('/login')
     }
 
+    // Get user profile and ticket stats
+    const [profileResult, statsResult] = await Promise.all([
+        getProfile(user.id),
+        getTicketStats(),
+    ])
+
+    const stats = statsResult.data || { total: 0, open: 0, closedToday: 0 }
+
     return (
         <div className="flex-1 space-y-4 p-8">
             <div className="flex items-center justify-between">
@@ -21,7 +31,8 @@ export default async function DashboardPage() {
                         Dashboard
                     </h2>
                     <p className="text-muted-foreground">
-                        Welcome back, {user.email}
+                        Welcome back,{' '}
+                        {profileResult.data?.full_name || user.email}
                     </p>
                 </div>
             </div>
@@ -35,7 +46,7 @@ export default async function DashboardPage() {
                         <Inbox className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">0</div>
+                        <div className="text-2xl font-bold">{stats.total}</div>
                         <p className="text-xs text-muted-foreground">
                             Across all statuses
                         </p>
@@ -49,7 +60,7 @@ export default async function DashboardPage() {
                         <Clock className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">0</div>
+                        <div className="text-2xl font-bold">{stats.open}</div>
                         <p className="text-xs text-muted-foreground">
                             Awaiting response
                         </p>
@@ -63,7 +74,9 @@ export default async function DashboardPage() {
                         <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">0</div>
+                        <div className="text-2xl font-bold">
+                            {stats.closedToday}
+                        </div>
                         <p className="text-xs text-muted-foreground">
                             In the last 24h
                         </p>
@@ -90,8 +103,9 @@ export default async function DashboardPage() {
                 <h2 className="text-lg font-semibold mb-4">Recent Tickets</h2>
                 <Card className="p-6">
                     <p className="text-muted-foreground">
-                        No tickets found. Create your first ticket to get
-                        started.
+                        {stats.total === 0
+                            ? 'No tickets found. Create your first ticket to get started.'
+                            : 'Loading recent tickets...'}
                     </p>
                 </Card>
             </div>

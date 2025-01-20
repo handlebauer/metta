@@ -9,6 +9,12 @@ import {
 import type { Tables } from '@/lib/supabase/types'
 import { z } from 'zod'
 
+export interface TicketStats {
+    total: number
+    open: number
+    closedToday: number
+}
+
 export class TicketService {
     async findById(id: string): Promise<TicketRow | null> {
         try {
@@ -139,6 +145,43 @@ export class TicketService {
             return ticketSchema.parse(data)
         } catch (error) {
             console.error('[TicketService.update]', error)
+            throw error
+        }
+    }
+
+    async getStats(): Promise<TicketStats> {
+        try {
+            const db = await createClient()
+
+            // Get total and open tickets
+            const { data: countData, error: countError } = await db
+                .from('tickets')
+                .select('status', { count: 'exact' })
+
+            if (countError) throw new DatabaseError(countError.message)
+
+            // Get tickets closed in the last 24 hours
+            const yesterday = new Date()
+            yesterday.setDate(yesterday.getDate() - 1)
+
+            const { data: closedToday, error: closedError } = await db
+                .from('tickets')
+                .select('id', { count: 'exact' })
+                .eq('status', 'closed')
+                .gte('updated_at', yesterday.toISOString())
+
+            if (closedError) throw new DatabaseError(closedError.message)
+
+            const openTickets =
+                countData?.filter(t => t.status === 'open').length || 0
+
+            return {
+                total: countData?.length || 0,
+                open: openTickets,
+                closedToday: closedToday?.length || 0,
+            }
+        } catch (error) {
+            console.error('[TicketService.getStats]', error)
             throw error
         }
     }
