@@ -10,16 +10,26 @@ AutoCRM is an AI-powered Customer Relationship Management system designed to min
 4. Use Client Components only when necessary for interactivity or client-side state.
 5. Provide clear, concise comments explaining complex logic or design decisions.
 
-## Next.js Project Structure
+## Project Structure
 
-1. Use the `app` directory for all components and pages.
-2. Use the `components` directory for all UI components.
-3. Use the `lib` directory for all utility functions and types.
-  - Use `lib/supabase` for all supabase related code.
-  - Use `lib/schemas` for all zod schemas.
-4. Use the `hooks` directory for all custom hooks.
+1. Use the `src` directory as the root for all application code:
+   - `app/` - Next.js app router pages and layouts
+   - `actions/` - Server actions organized by feature
+   - `auth/` - Authentication related code
+   - `components/` - UI components (ui/ for shadcn, feature/ for others)
+   - `hooks/` - Custom React hooks
+   - `lib/` - Shared utilities, schemas, and configurations
+   - `services/` - Database operations by feature
 
-NOTE: Assume the `app` directory and all other Next.js directories are located in the ./src directory.
+2. File naming conventions:
+   - Client Components: `*.client.tsx`
+   - Server Components: `*.tsx` (default)
+   - Use feature-based organization within directories
+
+3. External directories:
+   - `supabase/` - Database migrations and configuration
+   - `tests/` - E2E tests
+   - `scripts/` - Build and database scripts
 
 ## Next.js Code Style
 
@@ -42,11 +52,10 @@ NOTE: Assume the `app` directory and all other Next.js directories are located i
     import Link from 'next/link';
 
     <Link href="/about">About</Link>
-
     ```
 3. Implement dynamic routes using folder names with square brackets (e.g., `[id]`).
 
-## Next.jsStyling and Theming
+## Next.js Styling and Theming
 
 1. Use Tailwind CSS for styling.
 2. Create custom Tailwind classes in the `tailwind.config.js` file for reusable styles.
@@ -67,22 +76,9 @@ NOTE: Assume the `app` directory and all other Next.js directories are located i
 
 ## Next.js Performance
 
-1. Use `useMemo` for expensive calculations to avoid unnecessary re-renders.
-    ```typescript
-    const memoizedValue = useMemo(() => expensiveCalculation(a, b), [a, b])
-    return <div>Current value: {memoizedValue}</div>
-    ```
-2. Use `useCallback` for expensive functions to avoid unnecessary re-renders.
-    ```typescript
-    const memoizedHandler = useCallback(() => /* expensive function logic */, [a, b])
-    return <Component onClick={memoizedHandler} />
-    ```
+1. Use `useMemo` for expensive calculations.
+2. Use `useCallback` for expensive functions.
 3. Implement parallel data fetching using `Promise.all`.
-    ```typescript
-    const dataPromise = fetch('<https://api.example.com/data>');
-    const userPromise = fetch('<https://api.example.com/user>');
-    const [data, user] = await Promise.all([dataPromise, userPromise])
-    ```
 
 # Composer Mode
 
