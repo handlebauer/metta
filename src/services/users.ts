@@ -44,6 +44,49 @@ export class UserService {
         }
     }
 
+    async findAllActiveExcept(excludeId: string): Promise<
+        (UserRow & {
+            profile: { full_name: string | null; role: 'customer' | 'agent' }
+        })[]
+    > {
+        try {
+            const db = await createClient()
+            const { data, error } = await db
+                .from('users')
+                .select(
+                    `
+                    *,
+                    profile:profiles (
+                        full_name,
+                        role
+                    )
+                `,
+                )
+                .eq('is_active', true)
+                .neq('id', excludeId)
+
+            if (error) throw new DatabaseError(error.message)
+
+            // Filter out users without profiles or roles
+            const usersWithProfiles =
+                data?.filter(
+                    (
+                        user,
+                    ): user is UserRow & {
+                        profile: {
+                            full_name: string | null
+                            role: 'customer' | 'agent'
+                        }
+                    } => user.profile?.role != null,
+                ) || []
+
+            return usersWithProfiles
+        } catch (error) {
+            console.error('[UserService.findAllActiveExcept]', error)
+            throw error
+        }
+    }
+
     async create(input: UserInsert): Promise<UserRow> {
         try {
             const validated = userInsertSchema.parse(input)

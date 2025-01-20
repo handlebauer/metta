@@ -50,6 +50,27 @@ export async function getUserByEmail(email: string): Promise<{
     }
 }
 
+export async function getAllActiveUsersExcept(excludeId: string): Promise<{
+    data: (UserRow & {
+        profile: { full_name: string | null; role: 'customer' | 'agent' }
+    })[]
+    error: string | null
+}> {
+    try {
+        const data = await service.findAllActiveExcept(excludeId)
+        return { data, error: null }
+    } catch (error) {
+        console.error('[getAllActiveUsersExcept]', error)
+        return {
+            data: [],
+            error:
+                error instanceof DatabaseError
+                    ? error.message
+                    : 'Failed to fetch users',
+        }
+    }
+}
+
 export async function createUser(input: UserInsert): Promise<{
     data: UserRow | null
     error: string | null
