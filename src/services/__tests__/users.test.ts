@@ -1,4 +1,4 @@
-import { expect, test, beforeAll, afterAll, mock } from 'bun:test'
+import { expect, test, mock } from 'bun:test'
 import { UserService } from '../users'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/types'
@@ -25,90 +25,18 @@ mock.module('@/lib/supabase/server', () => ({
 
 const service = new UserService()
 
-type UserRole = Database['public']['Enums']['user_role']
-
-// Test data
-const TEST_USERS = [
-    {
-        email: 'test1@example.com',
-        password: 'test123456',
-        name: 'Test User 1',
-        role: 'customer' as UserRole,
-        bio: 'Test user 1',
-    },
-    {
-        email: 'test2@example.com',
-        password: 'test123456',
-        name: 'Test User 2',
-        role: 'agent' as UserRole,
-        bio: 'Test user 2',
-    },
-]
-
-const createdUsers: { id: string }[] = []
-
-beforeAll(async () => {
-    // Create test users
-    for (const userData of TEST_USERS) {
-        // Create auth user
-        const { data: authUser, error: authError } =
-            await supabaseAdmin.auth.admin.createUser({
-                email: userData.email,
-                password: userData.password,
-                email_confirm: true,
-            })
-
-        if (authError) throw authError
-
-        // Create app user
-        const { data: user, error: userError } = await supabaseAdmin
-            .from('users')
-            .upsert(
-                {
-                    id: authUser.user.id,
-                    email: userData.email,
-                    is_active: true,
-                },
-                { onConflict: 'id' },
-            )
-            .select()
-            .single()
-
-        if (userError) throw userError
-
-        // Create profile
-        const { error: profileError } = await supabaseAdmin
-            .from('profiles')
-            .upsert({
-                id: user.id,
-                user_id: user.id,
-                full_name: userData.name,
-                bio: userData.bio,
-                role: userData.role,
-                avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.email}`,
-            })
-
-        if (profileError) throw profileError
-        createdUsers.push({ id: user.id })
-    }
-})
-
-afterAll(async () => {
-    // Clean up test users
-    for (const user of createdUsers) {
-        // Delete in correct order due to foreign key constraints
-        await supabaseAdmin.from('profiles').delete().eq('user_id', user.id)
-        await supabaseAdmin.from('users').delete().eq('id', user.id)
-        await supabaseAdmin.auth.admin.deleteUser(user.id)
-    }
-})
-
 test('findAllActiveExcept - should return all active users except the excluded one', async () => {
-    // Get first test user to exclude
-    const excludeUserId = createdUsers[0].id
+    // Get demo user to exclude (first user created in seed data)
+    const { data: demoUser } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .eq('email', 'demo@example.com')
+        .single()
 
-    // Get all users except the first one
-    const users = await service.findAllActiveExcept(excludeUserId)
+    expect(demoUser).toBeDefined()
+
+    // Get all users except demo user
+    const users = await service.findAllActiveExcept(demoUser!.id)
 
     // Log the results for debugging
     console.log('Found users:', users)
@@ -116,15 +44,19 @@ test('findAllActiveExcept - should return all active users except the excluded o
     // Assertions
     expect(users).toBeDefined()
     expect(Array.isArray(users)).toBe(true)
+    expect(users.length).toBeGreaterThan(0)
 
-    // Find our test user in the results
-    const testUser = users.find(u => u.email === TEST_USERS[1].email)
+    // Verify demo user is excluded
+    const demoUserInResults = users.find(u => u.email === 'demo@example.com')
+    expect(demoUserInResults).toBeUndefined()
+
+    // Verify a known test user is included
+    const testUser = users.find(u => u.email === 'customer1@example.com')
     expect(testUser).toBeDefined()
-    expect(testUser?.id).not.toBe(excludeUserId)
     expect(testUser?.is_active).toBe(true)
     expect(testUser?.profile).toBeDefined()
-    expect(testUser?.profile.role).toBe(TEST_USERS[1].role)
-    expect(testUser?.profile.full_name).toBe(TEST_USERS[1].name)
+    expect(testUser?.profile.role).toBe('customer')
+    expect(testUser?.profile.full_name).toBe('Alice Johnson')
 })
 
 test('findAllActiveExcept - should handle non-existent excludeId', async () => {
@@ -136,18 +68,16 @@ test('findAllActiveExcept - should handle non-existent excludeId', async () => {
     // Assertions
     expect(users).toBeDefined()
     expect(Array.isArray(users)).toBe(true)
+    expect(users.length).toBeGreaterThan(0)
 
-    // Find our test users in the results
-    const testEmails = TEST_USERS.map(u => u.email)
-    const foundTestUsers = users.filter(u => testEmails.includes(u.email))
-    expect(foundTestUsers.length).toBe(2) // Should find both our test users
+    // Verify known seed users are present
+    const demoUser = users.find(u => u.email === 'demo@example.com')
+    expect(demoUser).toBeDefined()
+    expect(demoUser?.profile.role).toBe('agent')
+    expect(demoUser?.profile.full_name).toBe('Demo User')
 
-    // Verify our test users have correct data
-    foundTestUsers.forEach(user => {
-        const testUser = TEST_USERS.find(t => t.email === user.email)!
-        expect(user.is_active).toBe(true)
-        expect(user.profile).toBeDefined()
-        expect(user.profile.role).toBe(testUser.role)
-        expect(user.profile.full_name).toBe(testUser.name)
-    })
+    const customer = users.find(u => u.email === 'customer1@example.com')
+    expect(customer).toBeDefined()
+    expect(customer?.profile.role).toBe('customer')
+    expect(customer?.profile.full_name).toBe('Alice Johnson')
 })
