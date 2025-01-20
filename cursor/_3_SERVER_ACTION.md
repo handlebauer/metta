@@ -5,6 +5,7 @@
 You need server actions when:
 
 - You need to perform mutations (POST, PUT, PATCH, DELETE)
+- NOT when performing read-only operations (GET)
 - Handling form submissions in React Server Components
 - Managing client-server data flow without API endpoints
 - Performing mutations that need immediate cache revalidation
