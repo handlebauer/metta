@@ -1,47 +1,15 @@
-import { createClient } from '@supabase/supabase-js'
-
-const DEMO_USER = {
-    email: 'demo@example.com',
-    password: 'demo123456',
-    name: 'Demo User',
-    role: 'agent',
-    bio: 'Demo account for testing',
-}
-
-// Additional test users
-const TEST_USERS = [
-    {
-        email: 'customer1@example.com',
-        password: 'test123456',
-        name: 'Alice Johnson',
-        role: 'customer',
-        bio: 'Regular customer account',
-    },
-    {
-        email: 'customer2@example.com',
-        password: 'test123456',
-        name: 'Bob Smith',
-        role: 'customer',
-        bio: 'Premium customer account',
-    },
-    {
-        email: 'agent1@example.com',
-        password: 'test123456',
-        name: 'Carol Williams',
-        role: 'agent',
-        bio: 'Support agent - Level 1',
-    },
-    {
-        email: 'agent2@example.com',
-        password: 'test123456',
-        name: 'David Brown',
-        role: 'agent',
-        bio: 'Support agent - Level 2',
-    },
-]
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { DEMO_USER, TEST_USERS, type SeedUser } from './seed-data/users'
+import { SEED_TICKETS } from './seed-data/tickets'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+interface User {
+    id: string
+    email: string
+    is_active: boolean
+}
 
 async function cleanDatabase() {
     try {
@@ -60,7 +28,7 @@ async function cleanDatabase() {
     }
 }
 
-async function ensureUsers(users: (typeof TEST_USERS)[0][]) {
+async function ensureUsers(users: SeedUser[]) {
     try {
         console.log('👥 Ensuring users exist...')
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -138,6 +106,49 @@ async function ensureUsers(users: (typeof TEST_USERS)[0][]) {
     }
 }
 
+async function createSeedTickets(supabase: SupabaseClient, users: User[]) {
+    try {
+        console.log('🎫 Creating seed tickets...')
+
+        // First user is demo user, rest are from TEST_USERS
+        const demoUser = users[0]
+        const testUsers = users.slice(1)
+
+        const customers = testUsers.filter(
+            user =>
+                TEST_USERS.find(u => u.email === user.email)?.role ===
+                'customer',
+        )
+
+        const agents = testUsers.filter(
+            user =>
+                TEST_USERS.find(u => u.email === user.email)?.role === 'agent',
+        )
+
+        const tickets = SEED_TICKETS.map(ticket => ({
+            subject: ticket.subject,
+            description: ticket.description,
+            status: ticket.status,
+            customer_id:
+                ticket.customer_index === -1
+                    ? demoUser.id
+                    : customers[ticket.customer_index].id,
+            agent_id:
+                ticket.agent_index !== undefined
+                    ? agents[ticket.agent_index - 2].id
+                    : undefined,
+        }))
+
+        const { error } = await supabase.from('tickets').insert(tickets)
+
+        if (error) throw error
+        console.log('✅ Seed tickets created successfully')
+    } catch (error) {
+        console.error('❌ Error creating seed tickets:', error)
+        throw error
+    }
+}
+
 async function seed() {
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
         console.error('❌ Missing Supabase credentials')
@@ -153,7 +164,11 @@ async function seed() {
 
         // Create all users (including demo user) in one go
         const allUsers = [DEMO_USER, ...TEST_USERS]
-        await ensureUsers(allUsers)
+        const createdUsers = await ensureUsers(allUsers)
+
+        // Create seed tickets
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+        await createSeedTickets(supabase, createdUsers)
 
         console.log('✅ Development seed data created successfully')
     } catch (error) {
