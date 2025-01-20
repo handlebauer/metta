@@ -3,19 +3,54 @@ import { createClient } from '@supabase/supabase-js'
 const DEMO_USER = {
     email: 'demo@example.com',
     password: 'demo123456',
+    name: 'Demo User',
+    role: 'agent',
+    bio: 'Demo account for testing',
 }
+
+// Additional test users
+const TEST_USERS = [
+    {
+        email: 'customer1@example.com',
+        password: 'test123456',
+        name: 'Alice Johnson',
+        role: 'customer',
+        bio: 'Regular customer account',
+    },
+    {
+        email: 'customer2@example.com',
+        password: 'test123456',
+        name: 'Bob Smith',
+        role: 'customer',
+        bio: 'Premium customer account',
+    },
+    {
+        email: 'agent1@example.com',
+        password: 'test123456',
+        name: 'Carol Williams',
+        role: 'agent',
+        bio: 'Support agent - Level 1',
+    },
+    {
+        email: 'agent2@example.com',
+        password: 'test123456',
+        name: 'David Brown',
+        role: 'agent',
+        bio: 'Support agent - Level 2',
+    },
+]
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 async function cleanDatabase() {
     try {
         console.log('🧹 Cleaning existing data...')
-        const supabase = createClient(
-            process.env.SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        )
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-        // Delete all profiles first (due to foreign key constraints)
+        // Delete in correct order due to foreign key constraints
+        await supabase.from('tickets').delete().neq('id', '')
         await supabase.from('profiles').delete().neq('id', '')
-        // Delete all users
         await supabase.from('users').delete().neq('id', '')
 
         console.log('✅ Database cleaned')
@@ -25,95 +60,100 @@ async function cleanDatabase() {
     }
 }
 
-async function ensureAuthUser() {
+async function ensureUsers(users: (typeof TEST_USERS)[0][]) {
     try {
-        console.log('🔐 Ensuring demo auth user exists...')
-        const supabase = createClient(
-            process.env.SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            {
-                auth: {
-                    autoRefreshToken: false,
-                    persistSession: false,
-                },
+        console.log('👥 Ensuring users exist...')
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false,
             },
-        )
+        })
 
-        // Check if auth user exists
-        const { data: existingUser } = await supabase.auth.admin.listUsers()
-        const demoUser = existingUser?.users.find(
-            u => u.email === DEMO_USER.email,
-        )
+        // Get all existing users in one call
+        const { data: existingUsers } = await supabase.auth.admin.listUsers()
+        const createdUsers = []
 
-        if (!demoUser) {
-            // Create demo user in Supabase Auth
-            const { error: createError } = await supabase.auth.admin.createUser(
-                {
-                    email: DEMO_USER.email,
-                    password: DEMO_USER.password,
-                    email_confirm: true,
-                },
+        for (const userData of users) {
+            const existingUser = existingUsers?.users.find(
+                u => u.email === userData.email,
             )
 
-            if (createError) throw createError
-            console.log('✅ Demo auth user created')
-        } else {
-            console.log('✅ Demo auth user already exists')
+            let authUser
+            if (!existingUser) {
+                // Create auth user if doesn't exist
+                const { data: newAuthUser, error: authError } =
+                    await supabase.auth.admin.createUser({
+                        email: userData.email,
+                        password: userData.password,
+                        email_confirm: true,
+                    })
+
+                if (authError) throw authError
+                authUser = newAuthUser.user
+                console.log(`✅ Created auth user: ${userData.email}`)
+            } else {
+                authUser = existingUser
+                console.log(`✅ Using existing auth user: ${userData.email}`)
+            }
+
+            // Upsert app user
+            const { data: user, error: userError } = await supabase
+                .from('users')
+                .upsert(
+                    {
+                        id: authUser.id,
+                        email: userData.email,
+                        is_active: true,
+                    },
+                    { onConflict: 'id' },
+                )
+                .select()
+                .single()
+
+            if (userError) throw userError
+
+            // Upsert profile
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .upsert(
+                    {
+                        user_id: user.id,
+                        full_name: userData.name,
+                        bio: userData.bio,
+                        role: userData.role,
+                        avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.email}`,
+                    },
+                    { onConflict: 'user_id' },
+                )
+
+            if (profileError) throw profileError
+            createdUsers.push(user)
         }
 
-        return demoUser?.id
+        return createdUsers
     } catch (error) {
-        console.error('❌ Error ensuring auth user:', error)
+        console.error('❌ Error ensuring users:', error)
         throw error
     }
 }
 
 async function seed() {
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
         console.error('❌ Missing Supabase credentials')
         console.log(
-            'Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables',
+            'Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables',
         )
         process.exit(1)
     }
 
     try {
         await cleanDatabase()
-        const authUserId = await ensureAuthUser()
-
-        if (!authUserId) {
-            throw new Error('Failed to get auth user ID')
-        }
-
         console.log('🌱 Creating application data...')
-        const supabase = createClient(
-            process.env.SUPABASE_URL,
-            process.env.SUPABASE_SERVICE_ROLE_KEY,
-        )
 
-        // Create demo user in the application database
-        const { data: user, error: userError } = await supabase
-            .from('users')
-            .insert({
-                id: authUserId,
-                email: DEMO_USER.email,
-                is_active: true,
-            })
-            .select()
-            .single()
-
-        if (userError) throw userError
-        if (!user) throw new Error('Failed to create user')
-
-        // Create demo user profile
-        const { error: profileError } = await supabase.from('profiles').insert({
-            user_id: user.id,
-            full_name: 'Demo User',
-            bio: 'Demo account for testing',
-            avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo',
-        })
-
-        if (profileError) throw profileError
+        // Create all users (including demo user) in one go
+        const allUsers = [DEMO_USER, ...TEST_USERS]
+        await ensureUsers(allUsers)
 
         console.log('✅ Development seed data created successfully')
     } catch (error) {
