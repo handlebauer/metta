@@ -56,7 +56,7 @@ export class UserService {
                 .select(
                     `
                     *,
-                    profile:profiles (
+                    profiles (
                         full_name,
                         role
                     )
@@ -73,14 +73,17 @@ export class UserService {
                     (
                         user,
                     ): user is UserRow & {
-                        profile: {
+                        profiles: {
                             full_name: string | null
                             role: 'customer' | 'agent'
                         }
-                    } => user.profile?.role != null,
+                    } => user.profiles?.role != null,
                 ) || []
 
-            return usersWithProfiles
+            return usersWithProfiles.map(user => ({
+                ...user,
+                profile: user.profiles,
+            }))
         } catch (error) {
             console.error('[UserService.findAllActiveExcept]', error)
             throw error

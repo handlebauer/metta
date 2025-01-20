@@ -2,8 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Inbox, Clock, CheckCircle2 } from 'lucide-react'
-import { getTicketStats } from '@/actions/tickets'
+import { getTicketStats, getTickets } from '@/actions/tickets'
 import { getProfile } from '@/actions/users'
+import { TicketList } from '@/components/tickets/ticket-list'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -15,10 +16,11 @@ export default async function DashboardPage() {
         redirect('/login')
     }
 
-    // Get user profile and ticket stats
-    const [profileResult, statsResult] = await Promise.all([
+    // Get user profile, ticket stats, and recent tickets
+    const [profileResult, statsResult, ticketsResult] = await Promise.all([
         getProfile(user.id),
         getTicketStats(),
+        getTickets({ limit: 5 }),
     ])
 
     const stats = statsResult.data || { total: 0, open: 0, closedToday: 0 }
@@ -98,16 +100,13 @@ export default async function DashboardPage() {
                 </Card>
             </div>
 
-            {/* Placeholder for ticket list - we'll implement this next */}
             <div className="mt-8">
                 <h2 className="text-lg font-semibold mb-4">Recent Tickets</h2>
-                <Card className="p-6">
-                    <p className="text-muted-foreground">
-                        {stats.total === 0
-                            ? 'No tickets found. Create your first ticket to get started.'
-                            : 'Loading recent tickets...'}
-                    </p>
-                </Card>
+                <TicketList
+                    tickets={ticketsResult.data}
+                    error={ticketsResult.error}
+                    className="space-y-3"
+                />
             </div>
         </div>
     )

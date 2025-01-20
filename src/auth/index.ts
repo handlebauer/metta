@@ -51,7 +51,6 @@ export async function signInWithMagicLink(email: string) {
 export async function signInAsDemoUser() {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({
-        // These credentials should be set up in your Supabase project
         email: 'demo@example.com',
         password: 'demo123456',
     })
@@ -59,7 +58,7 @@ export async function signInAsDemoUser() {
     console.log('[Auth] Signing in as demo user')
 
     if (error) {
-        throw error
+        throw new Error('The database may not be seeded yet')
     }
 }
 

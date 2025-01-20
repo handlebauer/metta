@@ -13,8 +13,8 @@ export type TicketUpdate = TablesUpdate<'tickets'>
 // Base schema matching database exactly
 export const ticketSchema = z.object({
     id: z.string(),
-    created_at: z.string().datetime(),
-    updated_at: z.string().datetime(),
+    created_at: z.string().nullable(),
+    updated_at: z.string().nullable(),
     subject: z.string().min(1),
     description: z.string(),
     status: z.enum(['new', 'open', 'closed']),
