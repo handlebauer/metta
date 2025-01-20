@@ -31,6 +31,11 @@ AutoCRM is an AI-powered Customer Relationship Management system designed to min
    - `tests/` - E2E tests
    - `scripts/` - Build and database scripts
 
+## Database
+
+1. After any migration file is changed/added, run `bun run supabase:init` to migrate and generate types.
+2. If there is a mismatch between our schema and the generated types, you must run `bun run supabase:init`
+
 ## Next.js Code Style
 
 1. Define components using the function keyword with TypeScript:
