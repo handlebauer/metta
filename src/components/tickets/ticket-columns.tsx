@@ -58,13 +58,23 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
     {
         accessorKey: 'updated_at',
         header: 'Updated',
-        cell: ({ row }) => (
-            <div
-                className="text-muted-foreground"
-                title={formatDate(row.getValue('updated_at'))}
-            >
-                {formatTimeAgo(row.getValue('updated_at'))}
-            </div>
-        ),
+        cell: ({ row }) => {
+            const createdAt = row.getValue('created_at') as string | null
+            const updatedAt = row.getValue('updated_at') as string | null
+
+            // Show "Never" if same as created_at or if either is null
+            if (!createdAt || !updatedAt || createdAt === updatedAt) {
+                return <div className="text-muted-foreground">Never</div>
+            }
+
+            return (
+                <div
+                    className="text-muted-foreground"
+                    title={formatDate(updatedAt)}
+                >
+                    {formatTimeAgo(updatedAt)}
+                </div>
+            )
+        },
     },
 ]
