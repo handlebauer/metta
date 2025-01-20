@@ -1,0 +1,93 @@
+# Project Summary
+
+This project is a Next.js application with Supabase for authentication and database management. It uses shadcn/ui for UI components, tailwindcss for styling, zustand for state management, and playwright for end-to-end testing.
+
+# Rules for Next.js 15 Development
+
+1. Use bun for all package management and build tasks.
+2. Implement the App Router, which is the recommended routing system for Next.js 14.
+3. Utilize Server Components by default.
+4. Use Client Components only when necessary for interactivity or client-side state.
+5. Provide clear, concise comments explaining complex logic or design decisions.
+
+## Next.js Project Structure
+
+1. Use the `app` directory for all components and pages.
+2. Use the `components` directory for all UI components.
+3. Use the `lib` directory for all utility functions and types.
+  - Use `lib/supabase` for all supabase related code.
+  - Use `lib/schemas` for all zod schemas.
+4. Use the `hooks` directory for all custom hooks.
+
+NOTE: Assume the `app` directory and all other Next.js directories are located in the ./src directory.
+
+## Next.js Code Style
+
+1. Define components using the function keyword with TypeScript:
+    ```tsx
+    interface ComponentProps {
+      // Props definition
+    }
+
+    export function Component({ prop1, prop2 }: ComponentProps) {
+      // Component logic
+    }
+    ```
+
+## Next.js Routing and Navigation
+
+1. Implement nested routing using folder structure in the `app` directory.
+2. Use the `<Link>` component from `next/link` for client-side navigation:
+    ```tsx
+    import Link from 'next/link';
+
+    <Link href="/about">About</Link>
+
+    ```
+3. Implement dynamic routes using folder names with square brackets (e.g., `[id]`).
+
+## Next.jsStyling and Theming
+
+1. Use Tailwind CSS for styling.
+2. Create custom Tailwind classes in the `tailwind.config.js` file for reusable styles.
+3. When using `clsx` for conditional class names, keep performance in mind.
+    ```typescript
+    const className = useMemo(() => clsx('base-class', {
+        'conditional-class': condition,
+    }), [condition]);
+
+    // ✅ GOOD:
+    return <div className={className}>...</div>;
+
+    // ❌ BAD:
+    return <div className={clsx('base-class', {
+        'conditional-class': condition,
+    })}>...</div>;
+    ```
+
+## Next.js Performance
+
+1. Use `useMemo` for expensive calculations to avoid unnecessary re-renders.
+    ```typescript
+    const memoizedValue = useMemo(() => expensiveCalculation(a, b), [a, b])
+    return <div>Current value: {memoizedValue}</div>
+    ```
+2. Use `useCallback` for expensive functions to avoid unnecessary re-renders.
+    ```typescript
+    const memoizedHandler = useCallback(() => /* expensive function logic */, [a, b])
+    return <Component onClick={memoizedHandler} />
+    ```
+3. Implement parallel data fetching using `Promise.all`.
+    ```typescript
+    const dataPromise = fetch('<https://api.example.com/data>');
+    const userPromise = fetch('<https://api.example.com/user>');
+    const [data, user] = await Promise.all([dataPromise, userPromise])
+    ```
+
+# Composer Mode
+
+1. When using Composer mode, provide clear, natural language descriptions of desired changes or additions.
+2. For multi-file operations, specify the files involved and their relationships.
+3. When requesting code generation, provide context about the desired functionality and how it fits into the existing project structure.
+4. For refactoring tasks, describe the current code structure and the desired outcome.
+5. When addressing errors, provide details about the error message and the surrounding code context.
