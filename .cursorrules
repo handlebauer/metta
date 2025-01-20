@@ -1,6 +1,6 @@
 # Project Summary
 
-AutoCRM is an AI-powered Customer Relationship Management system designed to minimize manual support workload by leveraging generative AI to handle customer interactions and support tickets. The system integrates existing help resources with LLM capabilities to deliver an interactive support experience, featuring a comprehensive ticket management system, employee interfaces, administrative controls, and customer-facing features like self-service tools and multi-channel support.
+Metta is an AI-powered Customer Relationship Management system designed to minimize manual support workload by leveraging generative AI to handle customer interactions and support tickets. The system integrates existing help resources with LLM capabilities to deliver an interactive support experience, featuring a comprehensive ticket management system, employee interfaces, administrative controls, and customer-facing features like self-service tools and multi-channel support.
 
 # Rules for Next.js 15 Development
 
