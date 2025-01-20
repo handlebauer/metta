@@ -5,6 +5,7 @@ import {
     ticketInsertSchema,
     ticketUpdateSchema,
     type TicketRow,
+    type TicketWithCustomer,
 } from '@/lib/schemas/tickets'
 import type { Tables } from '@/lib/supabase/types'
 import { z } from 'zod'
@@ -71,10 +72,28 @@ export class TicketService {
         status?: Tables<'tickets'>['status']
         limit?: number
         offset?: number
-    }): Promise<TicketRow[]> {
+    }): Promise<TicketWithCustomer[]> {
         try {
             const db = await createClient()
-            let query = db.from('tickets').select('*')
+
+            type JoinedTicket = TicketRow & {
+                users: {
+                    email: string
+                    profiles: {
+                        full_name: string | null
+                    } | null
+                }
+            }
+
+            let query = db.from('tickets').select(`
+                    *,
+                    users!customer_id (
+                        email,
+                        profiles (
+                            full_name
+                        )
+                    )
+                `)
 
             if (options?.status) {
                 query = query.eq('status', options.status)
@@ -96,7 +115,18 @@ export class TicketService {
             })
 
             if (error) throw new DatabaseError(error.message)
-            return data ? z.array(ticketSchema).parse(data) : []
+
+            // Transform the nested data structure to match our expected format
+            const tickets =
+                (data as JoinedTicket[])?.map(({ users, ...ticket }) => ({
+                    ...ticket,
+                    customer: {
+                        email: users.email,
+                        full_name: users.profiles?.full_name ?? null,
+                    },
+                })) || []
+
+            return tickets
         } catch (error) {
             console.error('[TicketService.findAll]', error)
             throw error

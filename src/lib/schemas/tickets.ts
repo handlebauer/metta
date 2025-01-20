@@ -10,6 +10,14 @@ export type TicketRow = Tables<'tickets'>
 export type TicketInsert = TablesInsert<'tickets'>
 export type TicketUpdate = TablesUpdate<'tickets'>
 
+// Extended type for tickets with customer info
+export interface TicketWithCustomer extends TicketRow {
+    customer: {
+        email: string
+        full_name: string | null
+    }
+}
+
 // Base schema matching database exactly
 export const ticketSchema = z.object({
     id: z.string(),
