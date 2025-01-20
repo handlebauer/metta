@@ -35,12 +35,3 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# template
-src/lib/supabase/types.ts
-supabase/.temp
-supabase/.branches
-src/lib/utils.ts
-components.json
-.template
-!.template/install.ts
-tests/.auth/
