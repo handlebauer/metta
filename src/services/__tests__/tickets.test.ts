@@ -1,8 +1,10 @@
-import { expect, test, mock } from 'bun:test'
-import { TicketService } from '../tickets'
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from '@/lib/supabase/types'
+import { expect, mock, test } from 'bun:test'
 import dotenv from 'dotenv'
+
+import { TicketService } from '../tickets'
+
+import type { Database } from '@/lib/supabase/types'
 
 dotenv.config({ path: '.env.local' })
 

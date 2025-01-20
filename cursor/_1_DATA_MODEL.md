@@ -30,8 +30,9 @@ bun run supabase:init
 4. Create schema: @/lib/schemas/tasks.ts
 
 ```typescript
-import { type Tables, type TablesInsert } from '@/lib/supabase/types'
 import { z } from 'zod'
+
+import { type Tables, type TablesInsert } from '@/lib/supabase/types'
 
 // Runtime validation schema - use at service layer entry points
 export const taskSchema = z.object({

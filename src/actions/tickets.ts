@@ -1,16 +1,15 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { TicketService } from '@/services/tickets'
-import {
-    ticketInsertSchema,
-    ticketUpdateSchema,
-    type TicketRow,
-} from '@/lib/schemas/tickets'
+import { z } from 'zod'
+
 import { DatabaseError } from '@/lib/errors'
+import { ticketInsertSchema, ticketUpdateSchema } from '@/lib/schemas/tickets'
+import { TicketService } from '@/services/tickets'
+
+import type { TicketRow, TicketWithCustomer } from '@/lib/schemas/tickets'
 import type { Tables } from '@/lib/supabase/types'
 import type { TicketStats } from '@/services/tickets'
-import { z } from 'zod'
 
 const service = new TicketService()
 
@@ -77,7 +76,7 @@ export async function getTickets(options?: {
     limit?: number
     offset?: number
 }): Promise<{
-    data: TicketRow[]
+    data: TicketWithCustomer[]
     error: string | null
 }> {
     try {

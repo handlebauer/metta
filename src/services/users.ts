@@ -1,13 +1,12 @@
-import { createClient } from '@/lib/supabase/server'
 import { DatabaseError } from '@/lib/errors'
 import {
-    userSchema,
     userInsertSchema,
+    userSchema,
     userUpdateSchema,
-    type UserRow,
-    type UserInsert,
-    type UserUpdate,
 } from '@/lib/schemas/user'
+import { createClient } from '@/lib/supabase/server'
+
+import type { UserInsert, UserRow, UserUpdate } from '@/lib/schemas/user'
 
 export class UserService {
     async findById(id: string): Promise<UserRow | null> {

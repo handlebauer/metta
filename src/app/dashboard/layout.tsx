@@ -1,10 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
-import { UserNav } from '@/components/dashboard/user-nav'
-import { Brand } from '@/components/ui/brand'
-import { redirect } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { PlusCircle, Inbox, Clock, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { CheckCircle2, Clock, Inbox, PlusCircle } from 'lucide-react'
+
+import { Brand } from '@/components/ui/brand'
+import { Button } from '@/components/ui/button'
+import { UserNav } from '@/components/dashboard/user-nav'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function DashboardLayout({
     children,

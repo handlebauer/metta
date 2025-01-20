@@ -1,7 +1,8 @@
-import { Button } from '@/components/ui/button'
-import { IconBrandGithub, IconBrandDiscord } from '@tabler/icons-react'
-import { signInWithGitHub, signInWithDiscord } from '@/auth'
 import { useState } from 'react'
+import { signInWithDiscord, signInWithGitHub } from '@/auth'
+import { IconBrandDiscord, IconBrandGithub } from '@tabler/icons-react'
+
+import { Button } from '@/components/ui/button'
 
 export interface SocialButtonsProps {
     onStateChange: (loading: boolean) => void

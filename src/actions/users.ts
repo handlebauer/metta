@@ -1,16 +1,14 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import {
-    userInsertSchema,
-    type UserRow,
-    type UserInsert,
-    type UserUpdate,
-} from '@/lib/schemas/user'
-import { UserService } from '@/services/users'
-import { ProfileService } from '@/services/profiles'
+
 import { DatabaseError } from '@/lib/errors'
+import { userInsertSchema } from '@/lib/schemas/user'
+import { ProfileService } from '@/services/profiles'
+import { UserService } from '@/services/users'
+
 import type { ProfileRow } from '@/lib/schemas/profile'
+import type { UserInsert, UserRow, UserUpdate } from '@/lib/schemas/user'
 
 const userService = new UserService()
 const profileService = new ProfileService()

@@ -4,11 +4,13 @@
 
 ```typescript
 // @/services/tasks.ts
-import { createClient } from '@/lib/supabase/server'
-import { DatabaseError } from '@/lib/errors'
-import { taskSchema, createTaskSchema } from '@/lib/schemas/tasks'
-import type { Tables } from '@/lib/supabase/types'
 import { z } from 'zod'
+
+import { DatabaseError } from '@/lib/errors'
+import { createTaskSchema, taskSchema } from '@/lib/schemas/tasks'
+import { createClient } from '@/lib/supabase/server'
+
+import type { Tables } from '@/lib/supabase/types'
 
 export class TaskService {
     private db = createClient() // requires `await` before use

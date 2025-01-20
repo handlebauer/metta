@@ -1,5 +1,12 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
+
 import { Button } from '@/components/ui/button'
 import {
     Form,
@@ -11,7 +18,6 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
     Select,
     SelectContent,
@@ -19,14 +25,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { Textarea } from '@/components/ui/textarea'
 import { ticketInsertSchema } from '@/lib/schemas/tickets'
 import { createTicket } from '@/actions/tickets'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { toast } from 'sonner'
-import { z } from 'zod'
+
 import type { UserRow } from '@/lib/schemas/user'
 
 interface NewTicketFormProps {

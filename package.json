@@ -44,6 +44,7 @@
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3",
+        "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
         "@playwright/test": "^1.49.1",
         "@types/bun": "^1.1.17",
         "@types/node": "^20",

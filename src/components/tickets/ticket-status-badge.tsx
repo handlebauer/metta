@@ -1,5 +1,7 @@
+import { AlertCircle, CheckCircle2, Clock } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
-import { Clock, CheckCircle2, AlertCircle } from 'lucide-react'
+
 import type { TicketRow } from '@/lib/schemas/tickets'
 
 interface TicketStatusBadgeProps {

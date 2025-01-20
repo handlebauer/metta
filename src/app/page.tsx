@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { UserNav } from '@/components/dashboard/user-nav'
+
 import { Brand } from '@/components/ui/brand'
+import { UserNav } from '@/components/dashboard/user-nav'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function HomePage() {
     const supabase = await createClient()

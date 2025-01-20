@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { signInWithMagicLink } from '@/auth'
+import { Check, X } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Check, X } from 'lucide-react'
-import { signInWithMagicLink } from '@/auth'
 
 export interface MagicLinkFormProps {
     onStateChange?: (loading: boolean) => void

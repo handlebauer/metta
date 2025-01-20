@@ -4,8 +4,8 @@
 
 ```typescript
 // tests/tasks.spec.ts
-import { test, expect } from '@playwright/test'
 import path from 'path'
+import { expect, test } from '@playwright/test'
 
 // Use auth state across all tests
 const authFile = path.join(__dirname, '.auth/state.json')

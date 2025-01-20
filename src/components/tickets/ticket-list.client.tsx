@@ -4,13 +4,12 @@ import { useState } from 'react'
 import {
     flexRender,
     getCoreRowModel,
-    useReactTable,
     getSortedRowModel,
-    type SortingState,
+    useReactTable,
 } from '@tanstack/react-table'
+
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
 import {
     Table,
     TableBody,
@@ -19,8 +18,12 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import { cn } from '@/lib/utils'
+
 import { ticketColumns } from './ticket-columns'
+
 import type { TicketWithCustomer } from '@/lib/schemas/tickets'
+import type { SortingState } from '@tanstack/react-table'
 
 export interface TicketListProps {
     tickets: TicketWithCustomer[]

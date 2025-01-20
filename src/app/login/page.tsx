@@ -1,4 +1,3 @@
-import { SignIn } from '@/components/auth/sign-in.client'
 import {
     Card,
     CardContent,
@@ -6,6 +5,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
+import { SignIn } from '@/components/auth/sign-in.client'
 
 export default function LoginPage() {
     return (

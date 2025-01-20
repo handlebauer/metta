@@ -1,6 +1,8 @@
-import { chromium, request, type FullConfig } from '@playwright/test'
 import { mkdir } from 'fs/promises'
 import { join } from 'path'
+import { chromium, request } from '@playwright/test'
+
+import type { FullConfig } from '@playwright/test'
 
 const TEST_EMAIL_ADDRESS = 'hello@hello.com'
 const MAX_RETRY_ATTEMPTS = 10

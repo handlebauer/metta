@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation'
+
 import {
     Card,
     CardContent,
@@ -5,9 +7,8 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { NewTicketForm } from '@/components/tickets/new-ticket-form'
+import { createClient } from '@/lib/supabase/server'
 import { getAllActiveUsersExcept } from '@/actions/users'
 
 export default async function NewTicketPage() {

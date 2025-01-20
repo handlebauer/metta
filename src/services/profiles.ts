@@ -1,12 +1,15 @@
-import { createClient } from '@/lib/supabase/server'
 import { DatabaseError } from '@/lib/errors'
 import {
-    profileSchema,
     profileInsertSchema,
+    profileSchema,
     profileUpdateSchema,
-    type ProfileRow,
-    type ProfileInsert,
-    type ProfileUpdate,
+} from '@/lib/schemas/profile'
+import { createClient } from '@/lib/supabase/server'
+
+import type {
+    ProfileInsert,
+    ProfileRow,
+    ProfileUpdate,
 } from '@/lib/schemas/profile'
 
 export class ProfileService {

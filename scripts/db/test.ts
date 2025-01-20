@@ -1,5 +1,5 @@
-import { UserService } from '@/services/users'
 import { ProfileService } from '@/services/profiles'
+import { UserService } from '@/services/users'
 
 const userService = new UserService()
 const profileService = new ProfileService()

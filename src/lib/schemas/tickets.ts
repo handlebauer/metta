@@ -1,9 +1,10 @@
+import { z } from 'zod'
+
 import {
     type Tables,
     type TablesInsert,
     type TablesUpdate,
 } from '@/lib/supabase/types'
-import { z } from 'zod'
 
 // Database types
 export type TicketRow = Tables<'tickets'>

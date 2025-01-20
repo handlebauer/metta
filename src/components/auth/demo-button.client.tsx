@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { IconUserCircle } from '@tabler/icons-react'
-import { signInAsDemoUser } from '@/auth'
 import { useRouter } from 'next/navigation'
+import { signInAsDemoUser } from '@/auth'
+import { IconUserCircle } from '@tabler/icons-react'
+
+import { Button } from '@/components/ui/button'
 
 export interface DemoButtonProps {
     onStateChange: (loading: boolean) => void

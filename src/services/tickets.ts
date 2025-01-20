@@ -1,14 +1,15 @@
-import { createClient } from '@/lib/supabase/server'
+import { z } from 'zod'
+
 import { DatabaseError } from '@/lib/errors'
 import {
-    ticketSchema,
     ticketInsertSchema,
+    ticketSchema,
     ticketUpdateSchema,
-    type TicketRow,
-    type TicketWithCustomer,
 } from '@/lib/schemas/tickets'
+import { createClient } from '@/lib/supabase/server'
+
+import type { TicketRow, TicketWithCustomer } from '@/lib/schemas/tickets'
 import type { Tables } from '@/lib/supabase/types'
-import { z } from 'zod'
 
 export interface TicketStats {
     total: number

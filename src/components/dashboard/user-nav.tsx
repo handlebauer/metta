@@ -1,4 +1,5 @@
 import { User } from '@supabase/supabase-js'
+
 import { SignOutButton } from '../auth/sign-out.client'
 
 export function UserNav({ user }: { user: User }) {

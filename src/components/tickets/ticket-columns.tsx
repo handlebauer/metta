@@ -1,7 +1,9 @@
-import type { ColumnDef } from '@tanstack/react-table'
-import type { TicketWithCustomer } from '@/lib/schemas/tickets'
-import { TicketStatusBadge } from './ticket-status-badge'
 import { formatDate, formatTimeAgo } from '@/lib/utils/dates'
+
+import { TicketStatusBadge } from './ticket-status-badge'
+
+import type { TicketWithCustomer } from '@/lib/schemas/tickets'
+import type { ColumnDef } from '@tanstack/react-table'
 
 export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
     {
