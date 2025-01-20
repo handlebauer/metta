@@ -41,6 +41,7 @@ export type Database = {
                     created_at: string | null
                     full_name: string | null
                     id: string
+                    role: Database['public']['Enums']['user_role']
                     updated_at: string | null
                     user_id: string
                 }
@@ -50,6 +51,7 @@ export type Database = {
                     created_at?: string | null
                     full_name?: string | null
                     id?: string
+                    role?: Database['public']['Enums']['user_role']
                     updated_at?: string | null
                     user_id: string
                 }
@@ -59,6 +61,7 @@ export type Database = {
                     created_at?: string | null
                     full_name?: string | null
                     id?: string
+                    role?: Database['public']['Enums']['user_role']
                     updated_at?: string | null
                     user_id?: string
                 }
@@ -67,6 +70,54 @@ export type Database = {
                         foreignKeyName: 'profiles_user_id_fkey'
                         columns: ['user_id']
                         isOneToOne: true
+                        referencedRelation: 'users'
+                        referencedColumns: ['id']
+                    },
+                ]
+            }
+            tickets: {
+                Row: {
+                    agent_id: string | null
+                    created_at: string | null
+                    customer_id: string
+                    description: string
+                    id: string
+                    status: Database['public']['Enums']['ticket_status'] | null
+                    subject: string
+                    updated_at: string | null
+                }
+                Insert: {
+                    agent_id?: string | null
+                    created_at?: string | null
+                    customer_id: string
+                    description: string
+                    id?: string
+                    status?: Database['public']['Enums']['ticket_status'] | null
+                    subject: string
+                    updated_at?: string | null
+                }
+                Update: {
+                    agent_id?: string | null
+                    created_at?: string | null
+                    customer_id?: string
+                    description?: string
+                    id?: string
+                    status?: Database['public']['Enums']['ticket_status'] | null
+                    subject?: string
+                    updated_at?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: 'tickets_agent_id_fkey'
+                        columns: ['agent_id']
+                        isOneToOne: false
+                        referencedRelation: 'users'
+                        referencedColumns: ['id']
+                    },
+                    {
+                        foreignKeyName: 'tickets_customer_id_fkey'
+                        columns: ['customer_id']
+                        isOneToOne: false
                         referencedRelation: 'users'
                         referencedColumns: ['id']
                     },
@@ -110,7 +161,8 @@ export type Database = {
             }
         }
         Enums: {
-            [_ in never]: never
+            ticket_status: 'new' | 'open' | 'closed'
+            user_role: 'customer' | 'agent'
         }
         CompositeTypes: {
             [_ in never]: never
