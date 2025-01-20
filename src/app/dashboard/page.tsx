@@ -29,10 +29,7 @@ export default async function DashboardPage() {
         <div className="flex-1 space-y-4 p-8">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight">
-                        Dashboard
-                    </h2>
-                    <p className="text-muted-foreground">
+                    <p className="text-xl font-bold">
                         Welcome back,{' '}
                         {profileResult.data?.full_name || user.email}
                     </p>
