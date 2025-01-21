@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -303,7 +304,14 @@ export function NewTicketForm({
                         Cancel
                     </Button>
                     <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? 'Creating...' : 'Create Ticket'}
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Creating...
+                            </>
+                        ) : (
+                            'Create Ticket'
+                        )}
                     </Button>
                 </div>
             </form>
