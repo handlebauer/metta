@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-    title: 'Supabase Zustand Next',
+    title: 'Metta',
     description:
-        'A modern Next.js template with Supabase authentication and Zustand state management',
+        'Metta is an AI-powered Customer Relationship Management system designed to minimize manual support workload by leveraging generative AI to handle customer interactions and support tickets ',
 }
 
 export default function RootLayout({
