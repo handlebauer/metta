@@ -11,9 +11,8 @@
         "prepare": "husky",
         "format": "prettier --write .",
         "supabase:gen-types": "bunx supabase gen types typescript --local > src/lib/supabase/types.ts",
-        "supabase:init": "bunx supabase db reset && bun run supabase:gen-types && bun run supabase:seed:dev",
-        "supabase:seed:dev": "bun run scripts/db/dev.ts",
-        "supabase:seed:test": "bun run scripts/db/test.ts",
+        "supabase:init": "bunx supabase db reset && bun run supabase:gen-types && bun run supabase:seed",
+        "supabase:seed": "bun run scripts/db/seed.ts",
         "shadcn:add": "bunx --bun shadcn@latest add",
         "test": "playwright test --config=playwright.config.ts"
     },

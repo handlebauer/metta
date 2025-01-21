@@ -34,7 +34,7 @@ async function main() {
         await seedUsers(supabase)
         await seedTickets(supabase)
         await seedMessages(supabase)
-        console.log('✅ Development seed data created successfully')
+        console.log('✅ Seed data created successfully')
     } catch (error) {
         console.error('❌ Failed to seed database:', error)
         process.exit(1)
