@@ -45,6 +45,9 @@ const config = {
                     DEFAULT: 'hsl(var(--muted))',
                     foreground: 'hsl(var(--muted-foreground))',
                 },
+                'semi-muted': {
+                    foreground: 'hsl(var(--semi-muted-foreground))',
+                },
                 accent: {
                     DEFAULT: 'hsl(var(--accent))',
                     foreground: 'hsl(var(--accent-foreground))',

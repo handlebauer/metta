@@ -77,7 +77,7 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
                 'customer',
             ) as TicketWithCustomer['customer']
             return (
-                <div className="text-muted-foreground">
+                <div className="text-semi-muted-foreground">
                     {customer.full_name || customer.email}
                 </div>
             )
@@ -103,7 +103,7 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
             />
         ),
         cell: ({ row }) => (
-            <div className="text-muted-foreground line-clamp-1">
+            <div className="text-semi-muted-foreground line-clamp-1">
                 {row.getValue('description')}
             </div>
         ),
