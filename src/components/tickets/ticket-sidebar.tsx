@@ -54,6 +54,11 @@ export function TicketSidebar({
 
     const isAgent = user.role === 'agent'
 
+    const displayDate = useMemo(
+        () => formatConversationalDate(ticket.created_at),
+        [ticket.created_at],
+    )
+
     return (
         <div className="w-[360px] border-l bg-muted/10 flex flex-col h-full">
             <div className="flex flex-col flex-1">
@@ -119,9 +124,7 @@ export function TicketSidebar({
                                     Created
                                 </span>
                                 <span className="font-medium">
-                                    {formatConversationalDate(
-                                        ticket.created_at,
-                                    )}
+                                    {displayDate}
                                 </span>
                             </div>
                         </div>
