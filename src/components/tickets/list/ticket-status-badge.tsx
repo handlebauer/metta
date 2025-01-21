@@ -8,7 +8,14 @@ interface TicketStatusBadgeProps {
 
 export function TicketStatusBadge({ status }: TicketStatusBadgeProps) {
     const variant = getVariant(status)
-    return <Badge variant={variant}>{status}</Badge>
+    return (
+        <Badge
+            variant={variant}
+            className="min-w-[60px] text-center justify-center"
+        >
+            {status}
+        </Badge>
+    )
 }
 
 function getVariant(

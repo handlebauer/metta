@@ -38,7 +38,12 @@ export function TicketList({
     error,
     className,
 }: TicketListProps) {
-    const [sorting, setSorting] = useState<SortingState>([])
+    const [sorting, setSorting] = useState<SortingState>([
+        {
+            id: 'status',
+            desc: false,
+        },
+    ])
 
     const table = useReactTable({
         data: tickets,

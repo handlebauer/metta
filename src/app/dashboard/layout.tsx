@@ -1,11 +1,10 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { CheckCircle2, Clock, Inbox, PlusCircle } from 'lucide-react'
 
 import { Brand } from '@/components/ui/brand'
-import { Button } from '@/components/ui/button'
 import { UserNav } from '@/components/dashboard/user-nav'
 import { createClient } from '@/lib/supabase/server'
+
+import { SidebarNav } from './sidebar-nav.client'
 
 export default async function DashboardLayout({
     children,
@@ -37,46 +36,7 @@ export default async function DashboardLayout({
                 {/* Sidebar Navigation */}
                 <aside className="w-64 border-r bg-muted/30 flex-none">
                     <nav className="flex flex-col gap-2 p-4">
-                        <Button
-                            asChild
-                            variant="ghost"
-                            className="justify-start"
-                        >
-                            <Link href="/dashboard/tickets/new">
-                                <PlusCircle className="mr-2 h-4 w-4" />
-                                New Ticket
-                            </Link>
-                        </Button>
-                        <Button
-                            asChild
-                            variant="ghost"
-                            className="justify-start"
-                        >
-                            <Link href="/dashboard/tickets">
-                                <Inbox className="mr-2 h-4 w-4" />
-                                All Tickets
-                            </Link>
-                        </Button>
-                        <Button
-                            asChild
-                            variant="ghost"
-                            className="justify-start"
-                        >
-                            <Link href="/dashboard/tickets?status=open">
-                                <Clock className="mr-2 h-4 w-4" />
-                                Open Tickets
-                            </Link>
-                        </Button>
-                        <Button
-                            asChild
-                            variant="ghost"
-                            className="justify-start"
-                        >
-                            <Link href="/dashboard/tickets?status=closed">
-                                <CheckCircle2 className="mr-2 h-4 w-4" />
-                                Closed Tickets
-                            </Link>
-                        </Button>
+                        <SidebarNav />
                     </nav>
                 </aside>
 
