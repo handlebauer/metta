@@ -51,6 +51,12 @@ export function TicketList({
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         onSortingChange: setSorting,
+        columnResizeMode: 'onChange',
+        enableColumnResizing: true,
+        defaultColumn: {
+            minSize: 50,
+            maxSize: 500,
+        },
         state: {
             sorting,
         },
@@ -90,12 +96,17 @@ export function TicketList({
     // Data state
     return (
         <div className={cn('rounded-md border', className)}>
-            <Table>
+            <Table className="table-fixed">
                 <TableHeader>
                     {table.getHeaderGroups().map(headerGroup => (
                         <TableRow key={headerGroup.id}>
                             {headerGroup.headers.map(header => (
-                                <TableHead key={header.id}>
+                                <TableHead
+                                    key={header.id}
+                                    style={{
+                                        width: header.getSize(),
+                                    }}
+                                >
                                     {header.isPlaceholder
                                         ? null
                                         : flexRender(

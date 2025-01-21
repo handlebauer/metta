@@ -60,6 +60,7 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
                 {row.getValue('subject')}
             </div>
         ),
+        size: 200,
     },
     {
         accessorKey: 'status',
@@ -77,6 +78,7 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
             const statusB = rowB.getValue('status') as string
             return statusOrder[statusA] - statusOrder[statusB]
         },
+        size: 80,
     },
     {
         accessorKey: 'priority',
@@ -94,6 +96,7 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
             const priorityB = rowB.getValue('priority') as string
             return priorityOrder[priorityA] - priorityOrder[priorityB]
         },
+        size: 80,
     },
     {
         accessorKey: 'customer',
@@ -124,6 +127,7 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
             const nameB = customerB.full_name || customerB.email
             return nameA.localeCompare(nameB)
         },
+        size: 120,
     },
     {
         accessorKey: 'description',
@@ -138,6 +142,7 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
                 {row.getValue('description')}
             </div>
         ),
+        size: 400,
     },
     {
         accessorKey: 'created_at',
@@ -155,6 +160,7 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
                 {formatTimeAgo(row.getValue('created_at'))}
             </div>
         ),
+        size: 80,
     },
     {
         accessorKey: 'updated_at',
@@ -182,5 +188,6 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
                 </div>
             )
         },
+        size: 80,
     },
 ]
