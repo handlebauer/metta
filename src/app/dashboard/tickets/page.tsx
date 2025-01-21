@@ -42,16 +42,28 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
     return (
         <div className="flex-1 space-y-4 p-8">
             <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold">Tickets</h1>
-                </div>
-                <div className="flex items-center gap-4">
-                    <Button asChild>
-                        <Link href="/dashboard/tickets/new" prefetch={true}>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            New Ticket
-                        </Link>
-                    </Button>
+                <div className="flex items-center">
+                    <h1 className="text-2xl font-bold flex items-center">
+                        Tickets
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            asChild
+                            className="ml-2 h-8 hover:bg-transparent group"
+                            aria-label="Create new ticket"
+                        >
+                            <Link
+                                href="/dashboard/tickets/new"
+                                prefetch={true}
+                                className="flex items-center gap-1"
+                            >
+                                <PlusCircle className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                                <span className="text-sm font-normal text-muted-foreground group-hover:text-foreground transition-colors">
+                                    Create
+                                </span>
+                            </Link>
+                        </Button>
+                    </h1>
                 </div>
             </div>
 
