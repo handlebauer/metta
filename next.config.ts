@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
         const isDev = process.env.NODE_ENV === 'development'
 
         const domains = {
-            client: isDev ? 'client-site.localhost' : 'client-site.metta.com',
+            client: isDev ? 'client-site.localhost' : 'client-site.metta.now',
         }
 
         return {
