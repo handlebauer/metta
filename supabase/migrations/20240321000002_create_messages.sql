@@ -1,4 +1,4 @@
-create type message_role as enum ('customer', 'agent', 'system');
+create type message_role as enum ('customer', 'agent', 'admin');
 
 create table messages (
     id text primary key default gen_ulid(),

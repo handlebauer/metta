@@ -257,7 +257,7 @@ export type Database = {
             }
         }
         Enums: {
-            message_role: 'customer' | 'agent' | 'system'
+            message_role: 'customer' | 'agent' | 'admin'
             ticket_priority: 'low' | 'medium' | 'high' | 'urgent'
             ticket_status: 'new' | 'open' | 'closed'
             user_role: 'customer' | 'agent' | 'admin'
