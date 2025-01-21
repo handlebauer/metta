@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { CheckCircle2, Clock, Inbox } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TicketList } from '@/components/tickets/ticket-list.client'
+import { TicketList } from '@/components/tickets/list/ticket-list.client'
 import { createClient } from '@/lib/supabase/server'
 import { getTickets, getTicketStats } from '@/actions/tickets'
 import { getProfile } from '@/actions/users'

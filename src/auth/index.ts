@@ -52,7 +52,7 @@ export async function signInAsDemoUser() {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({
         email: 'demo@example.com',
-        password: 'demo123456',
+        password: 'demo123',
     })
 
     console.log('[Auth] Signing in as demo user')

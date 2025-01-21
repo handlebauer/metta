@@ -7,7 +7,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import { NewTicketForm } from '@/components/tickets/new-ticket-form'
+import { NewTicketForm } from '@/components/tickets/form/new-ticket-form.client'
 import { createClient } from '@/lib/supabase/server'
 import { getAllActiveUsersExcept } from '@/actions/users'
 

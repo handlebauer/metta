@@ -34,6 +34,54 @@ export type Database = {
     }
     public: {
         Tables: {
+            messages: {
+                Row: {
+                    content: string
+                    created_at: string
+                    html_content: string
+                    id: string
+                    role: Database['public']['Enums']['message_role']
+                    ticket_id: string
+                    updated_at: string
+                    user_id: string
+                }
+                Insert: {
+                    content: string
+                    created_at?: string
+                    html_content: string
+                    id?: string
+                    role: Database['public']['Enums']['message_role']
+                    ticket_id: string
+                    updated_at?: string
+                    user_id: string
+                }
+                Update: {
+                    content?: string
+                    created_at?: string
+                    html_content?: string
+                    id?: string
+                    role?: Database['public']['Enums']['message_role']
+                    ticket_id?: string
+                    updated_at?: string
+                    user_id?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: 'messages_ticket_id_fkey'
+                        columns: ['ticket_id']
+                        isOneToOne: false
+                        referencedRelation: 'tickets'
+                        referencedColumns: ['id']
+                    },
+                    {
+                        foreignKeyName: 'messages_user_id_fkey'
+                        columns: ['user_id']
+                        isOneToOne: false
+                        referencedRelation: 'users'
+                        referencedColumns: ['id']
+                    },
+                ]
+            }
             profiles: {
                 Row: {
                     avatar_url: string | null
@@ -161,6 +209,7 @@ export type Database = {
             }
         }
         Enums: {
+            message_role: 'customer' | 'agent' | 'system'
             ticket_status: 'new' | 'open' | 'closed'
             user_role: 'customer' | 'agent'
         }
