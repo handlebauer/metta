@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-import type { TicketPriority } from '@/lib/schemas/ticket.schemas'
+import type { TicketInsert, TicketPriority } from '@/lib/schemas/ticket.schemas'
 import type { Database } from '@/lib/supabase/types'
 
 export interface SeedTicket {
@@ -153,7 +153,7 @@ export async function seedTickets(
         throw new Error('Failed to find seed users')
     }
 
-    const tickets = SEED_TICKETS.map(ticket => ({
+    const tickets: TicketInsert[] = SEED_TICKETS.map(ticket => ({
         subject: ticket.subject,
         description: ticket.description,
         status: ticket.status,

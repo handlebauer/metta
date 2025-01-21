@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/client'
 
+import { DEMO_USER } from '../../scripts/db/seed-data/users'
+
 export async function signInWithGitHub() {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithOAuth({
@@ -51,8 +53,8 @@ export async function signInWithMagicLink(email: string) {
 export async function signInAsDemoUser() {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({
-        email: 'demo@example.com',
-        password: 'demo123',
+        email: DEMO_USER.email,
+        password: DEMO_USER.password,
     })
 
     console.log('[Auth] Signing in as demo user')

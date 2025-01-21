@@ -39,8 +39,6 @@ export async function updateSession(request: NextRequest) {
 
     const pathname = request.nextUrl.pathname
 
-    console.log('[Middleware] Request Path:', pathname)
-
     /**
      * If user is not signed in and tries to access auth routes, redirect to login
      */

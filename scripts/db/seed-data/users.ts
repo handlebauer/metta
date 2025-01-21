@@ -1,58 +1,76 @@
 import { createClient } from '@supabase/supabase-js'
 
+import type { ProfileInsert } from '@/lib/schemas/profile.schemas'
+import type { UserInsert } from '@/lib/schemas/user.schemas'
 import type { Database } from '@/lib/supabase/types'
 
 export interface SeedUser {
     email: string
     password: string
-    name: string | null
-    bio: string | null
-    role: 'customer' | 'agent'
+    profile: Omit<ProfileInsert, 'user_id'>
 }
 
 export const DEMO_USER: SeedUser = {
     email: 'demo@example.com',
     password: 'demo123',
-    name: 'Demo Agent',
-    bio: 'This is a demo agent account for testing support agent functionality.',
-    role: 'agent',
+    profile: {
+        full_name: 'Demo Agent',
+        bio: 'This is a demo agent account for testing support agent functionality.',
+        role: 'agent',
+        avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=demo@example.com`,
+    },
 }
 
 export const TEST_USERS: SeedUser[] = [
     {
         email: 'testcustomer@example.com',
         password: 'test123',
-        name: 'Test Customer',
-        bio: 'Primary test customer account for demo interactions',
-        role: 'customer',
+        profile: {
+            full_name: 'Test Customer',
+            bio: 'Primary test customer account for demo interactions',
+            role: 'customer',
+            avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=testcustomer@example.com`,
+        },
     },
     {
         email: 'customer1@example.com',
         password: 'customer1',
-        name: 'Alice Johnson',
-        bio: 'Customer 1 bio',
-        role: 'customer',
+        profile: {
+            full_name: 'Alice Johnson',
+            bio: 'Customer 1 bio',
+            role: 'customer',
+            avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=customer1@example.com`,
+        },
     },
     {
         email: 'customer2@example.com',
         password: 'customer2',
-        name: 'Bob Smith',
-        bio: 'Customer 2 bio',
-        role: 'customer',
+        profile: {
+            full_name: 'Bob Smith',
+            bio: 'Customer 2 bio',
+            role: 'customer',
+            avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=customer2@example.com`,
+        },
     },
     {
         email: 'agent1@example.com',
         password: 'agent1',
-        name: 'Charlie Brown',
-        bio: 'Agent 1 bio',
-        role: 'agent',
+        profile: {
+            full_name: 'Charlie Brown',
+            bio: 'Agent 1 bio',
+            role: 'agent',
+            avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=agent1@example.com`,
+        },
     },
     {
         email: 'agent2@example.com',
         password: 'agent2',
-        name: 'Diana Prince',
-        bio: 'Agent 2 bio',
-        role: 'agent',
+        profile: {
+            full_name: 'Diana Prince',
+            bio: 'Agent 2 bio',
+            role: 'agent',
+            avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=agent2@example.com`,
+        },
     },
 ]
 
@@ -89,33 +107,32 @@ export async function seedUsers(
             console.log(`✅ Using existing auth user: ${userData.email}`)
         }
 
+        // Prepare user insert data
+        const userInsert: UserInsert = {
+            id: authUser.id,
+            email: userData.email,
+            is_active: true,
+        }
+
         // Upsert app user
         const { data: user, error: userError } = await supabase
             .from('users')
-            .upsert(
-                {
-                    id: authUser.id,
-                    email: userData.email,
-                    is_active: true,
-                },
-                { onConflict: 'id' },
-            )
+            .upsert(userInsert, { onConflict: 'id' })
             .select()
             .single()
 
         if (userError) throw userError
 
+        // Prepare profile insert data
+        const profileInsert: ProfileInsert = {
+            user_id: user.id,
+            ...userData.profile,
+        }
+
         // Upsert profile
-        const { error: profileError } = await supabase.from('profiles').upsert(
-            {
-                user_id: user.id,
-                full_name: userData.name,
-                bio: userData.bio,
-                role: userData.role,
-                avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.email}`,
-            },
-            { onConflict: 'user_id' },
-        )
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert(profileInsert, { onConflict: 'user_id' })
 
         if (profileError) throw profileError
         createdUsers.push(user)
