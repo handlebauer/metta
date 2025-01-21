@@ -3,14 +3,18 @@ import { z } from 'zod'
 import { DatabaseError } from '@/lib/errors'
 import {
     ticketInsertSchema,
+    ticketInternalNoteInsertSchema,
+    ticketInternalNoteSchema,
     ticketSchema,
     ticketUpdateSchema,
 } from '@/lib/schemas/ticket.schemas'
 import { createClient } from '@/lib/supabase/server'
 
 import type {
+    TicketInternalNoteRow,
     TicketRow,
     TicketWithCustomer,
+    TicketWithInternalNotes,
 } from '@/lib/schemas/ticket.schemas'
 import type { Tables } from '@/lib/supabase/types'
 
@@ -34,6 +38,40 @@ export class TicketService {
             return data ? ticketSchema.parse(data) : null
         } catch (error) {
             console.error('[TicketService.findById]', error)
+            throw error
+        }
+    }
+
+    async findByIdWithInternalNotes(
+        id: string,
+    ): Promise<TicketWithInternalNotes | null> {
+        try {
+            const db = await createClient()
+            const { data, error } = await db
+                .from('tickets')
+                .select(
+                    `
+                    *,
+                    internal_notes:ticket_internal_notes(*)
+                `,
+                )
+                .eq('id', id)
+                .single()
+
+            if (error) throw new DatabaseError(error.message)
+            if (!data) return null
+
+            const ticket = ticketSchema.parse(data)
+            const internalNotes = z
+                .array(ticketInternalNoteSchema)
+                .parse(data.internal_notes)
+
+            return {
+                ...ticket,
+                internal_notes: internalNotes,
+            }
+        } catch (error) {
+            console.error('[TicketService.findByIdWithInternalNotes]', error)
             throw error
         }
     }
@@ -74,6 +112,7 @@ export class TicketService {
 
     async findAll(options?: {
         status?: Tables<'tickets'>['status']
+        priority?: Tables<'tickets'>['priority']
         limit?: number
         offset?: number
     }): Promise<TicketWithCustomer[]> {
@@ -101,6 +140,10 @@ export class TicketService {
 
             if (options?.status) {
                 query = query.eq('status', options.status)
+            }
+
+            if (options?.priority) {
+                query = query.eq('priority', options.priority)
             }
 
             if (options?.limit) {
@@ -183,6 +226,47 @@ export class TicketService {
         }
     }
 
+    async addInternalNote(
+        input: z.infer<typeof ticketInternalNoteInsertSchema>,
+    ): Promise<TicketInternalNoteRow> {
+        try {
+            const validated = ticketInternalNoteInsertSchema.parse(input)
+            const db = await createClient()
+            const { data, error } = await db
+                .from('ticket_internal_notes')
+                .insert(validated)
+                .select()
+                .single()
+
+            if (error) throw new DatabaseError(error.message)
+            if (!data) throw new DatabaseError('Failed to create internal note')
+
+            return ticketInternalNoteSchema.parse(data)
+        } catch (error) {
+            console.error('[TicketService.addInternalNote]', error)
+            throw error
+        }
+    }
+
+    async findInternalNotes(
+        ticketId: string,
+    ): Promise<TicketInternalNoteRow[]> {
+        try {
+            const db = await createClient()
+            const { data, error } = await db
+                .from('ticket_internal_notes')
+                .select('*')
+                .eq('ticket_id', ticketId)
+                .order('created_at', { ascending: false })
+
+            if (error) throw new DatabaseError(error.message)
+            return data ? z.array(ticketInternalNoteSchema).parse(data) : []
+        } catch (error) {
+            console.error('[TicketService.findInternalNotes]', error)
+            throw error
+        }
+    }
+
     async getStats(): Promise<TicketStats> {
         try {
             const db = await createClient()
@@ -207,7 +291,8 @@ export class TicketService {
             if (closedError) throw new DatabaseError(closedError.message)
 
             const openTickets =
-                countData?.filter(t => t.status === 'open').length || 0
+                countData?.filter(ticket => ticket.status === 'open').length ||
+                0
 
             return {
                 total: countData?.length || 0,

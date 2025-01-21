@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button'
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -26,7 +25,10 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { ticketInsertSchema } from '@/lib/schemas/ticket.schemas'
+import {
+    ticketInsertSchema,
+    ticketPriorityEnum,
+} from '@/lib/schemas/ticket.schemas'
 import { createTicket } from '@/actions/ticket.actions'
 
 import type { UserRow } from '@/lib/schemas/user.schemas'
@@ -75,6 +77,7 @@ export function NewTicketForm({
         defaultValues: {
             subject: '',
             description: '',
+            priority: 'medium',
             // If current user is a customer, they can only create tickets for themselves
             // If current user is an agent, they need to select a customer
             customer_id: userRole === 'customer' ? customerId : '',
@@ -114,125 +117,163 @@ export function NewTicketForm({
             )
         })
 
+    const priorities = ticketPriorityEnum.options
+
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                {/* Agent-only fields */}
                 {userRole === 'agent' && (
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="customer_id"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Requester</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a user" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {users
+                                                .filter(
+                                                    user =>
+                                                        user.profile.role ===
+                                                        'customer',
+                                                )
+                                                .map(user => (
+                                                    <SelectItem
+                                                        key={user.id}
+                                                        value={user.id}
+                                                    >
+                                                        {user.profile
+                                                            .full_name ||
+                                                            user.email}
+                                                    </SelectItem>
+                                                ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="agent_id"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Assignee</FormLabel>
+                                    <Select
+                                        onValueChange={val =>
+                                            field.onChange(
+                                                val === 'unassigned'
+                                                    ? null
+                                                    : val,
+                                            )
+                                        }
+                                        value={field.value ?? 'unassigned'}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select an agent" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem
+                                                value="unassigned"
+                                                className="text-muted-foreground"
+                                            >
+                                                Leave unassigned
+                                            </SelectItem>
+                                            <SelectItem value={customerId}>
+                                                {currentUser.profile
+                                                    .full_name ||
+                                                    currentUser.email}{' '}
+                                                (me)
+                                            </SelectItem>
+                                            {agents
+                                                .filter(
+                                                    a => a.id !== customerId,
+                                                )
+                                                .map(agent => (
+                                                    <SelectItem
+                                                        key={agent.id}
+                                                        value={agent.id}
+                                                    >
+                                                        {agent.profile
+                                                            .full_name ||
+                                                            'Other agent'}
+                                                    </SelectItem>
+                                                ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                )}
+
+                {/* Main ticket fields */}
+                <div className="grid grid-cols-[1fr,auto] gap-4">
                     <FormField
                         control={form.control}
-                        name="customer_id"
+                        name="subject"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Requester</FormLabel>
+                                <FormLabel>Subject</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Brief description of your issue"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="priority"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Priority</FormLabel>
                                 <Select
                                     onValueChange={field.onChange}
                                     defaultValue={field.value}
                                 >
                                     <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select a user" />
+                                        <SelectTrigger className="w-[120px]">
+                                            <SelectValue placeholder="Priority" />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {users
-                                            .filter(
-                                                user =>
-                                                    user.profile.role ===
-                                                    'customer',
-                                            )
-                                            .map(user => (
-                                                <SelectItem
-                                                    key={user.id}
-                                                    value={user.id}
-                                                >
-                                                    {user.profile.full_name ||
-                                                        user.email}
-                                                </SelectItem>
-                                            ))}
+                                        {priorities.map(priority => (
+                                            <SelectItem
+                                                key={priority}
+                                                value={priority}
+                                            >
+                                                {priority
+                                                    .charAt(0)
+                                                    .toUpperCase() +
+                                                    priority.slice(1)}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
-                                <FormDescription>
-                                    Select the user this ticket is for
-                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                )}
-
-                {userRole === 'agent' && (
-                    <FormField
-                        control={form.control}
-                        name="agent_id"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Assignee</FormLabel>
-                                <Select
-                                    onValueChange={val =>
-                                        field.onChange(
-                                            val === 'unassigned' ? null : val,
-                                        )
-                                    }
-                                    value={field.value ?? 'unassigned'}
-                                >
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select an agent" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem
-                                            value="unassigned"
-                                            className="text-muted-foreground"
-                                        >
-                                            Leave unassigned
-                                        </SelectItem>
-                                        <SelectItem value={customerId}>
-                                            {currentUser.profile.full_name ||
-                                                currentUser.email}{' '}
-                                            (me)
-                                        </SelectItem>
-                                        {agents
-                                            .filter(a => a.id !== customerId)
-                                            .map(agent => (
-                                                <SelectItem
-                                                    key={agent.id}
-                                                    value={agent.id}
-                                                >
-                                                    {agent.profile.full_name ||
-                                                        'Other agent'}
-                                                </SelectItem>
-                                            ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormDescription>
-                                    Choose who will handle this ticket
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
-
-                <FormField
-                    control={form.control}
-                    name="subject"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Subject</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="Brief description of your issue"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormDescription>
-                                Keep it short and descriptive
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                </div>
 
                 <FormField
                     control={form.control}
@@ -243,20 +284,16 @@ export function NewTicketForm({
                             <FormControl>
                                 <Textarea
                                     placeholder="Provide detailed information about your issue"
-                                    className="min-h-[150px] resize-y"
+                                    className="min-h-[120px] resize-y"
                                     {...field}
                                 />
                             </FormControl>
-                            <FormDescription>
-                                Include any relevant details that might help us
-                                assist you
-                            </FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
 
-                <div className="flex justify-end gap-4">
+                <div className="flex justify-end gap-4 pt-2">
                     <Button
                         type="button"
                         variant="outline"

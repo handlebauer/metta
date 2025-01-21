@@ -6,13 +6,16 @@ import { z } from 'zod'
 import { DatabaseError } from '@/lib/errors'
 import {
     ticketInsertSchema,
+    ticketInternalNoteInsertSchema,
     ticketUpdateSchema,
 } from '@/lib/schemas/ticket.schemas'
 import { TicketService } from '@/services/ticket.services'
 
 import type {
+    TicketInternalNoteRow,
     TicketRow,
     TicketWithCustomer,
+    TicketWithInternalNotes,
 } from '@/lib/schemas/ticket.schemas'
 import type { Tables } from '@/lib/supabase/types'
 import type { TicketStats } from '@/services/ticket.services'
@@ -35,6 +38,44 @@ export async function getTicket(id: string): Promise<{
                 error instanceof DatabaseError
                     ? error.message
                     : 'Failed to fetch ticket',
+        }
+    }
+}
+
+export async function getTicketWithNotes(id: string): Promise<{
+    data: TicketWithInternalNotes | null
+    error: string | null
+}> {
+    try {
+        const data = await service.findByIdWithInternalNotes(id)
+        return { data, error: null }
+    } catch (error) {
+        console.error('[getTicketWithNotes]', error)
+        return {
+            data: null,
+            error:
+                error instanceof DatabaseError
+                    ? error.message
+                    : 'Failed to fetch ticket with notes',
+        }
+    }
+}
+
+export async function getTicketInternalNotes(ticketId: string): Promise<{
+    data: TicketInternalNoteRow[]
+    error: string | null
+}> {
+    try {
+        const data = await service.findInternalNotes(ticketId)
+        return { data, error: null }
+    } catch (error) {
+        console.error('[getTicketInternalNotes]', error)
+        return {
+            data: [],
+            error:
+                error instanceof DatabaseError
+                    ? error.message
+                    : 'Failed to fetch internal notes',
         }
     }
 }
@@ -79,6 +120,7 @@ export async function getAgentTickets(agentId: string): Promise<{
 
 export async function getTickets(options?: {
     status?: Tables<'tickets'>['status']
+    priority?: Tables<'tickets'>['priority']
     limit?: number
     offset?: number
 }): Promise<{
@@ -175,6 +217,11 @@ export async function updateTicket(
                               | Tables<'tickets'>['status']
                               | undefined,
                       }),
+                      ...(input.get('priority') && {
+                          priority: input.get('priority') as
+                              | Tables<'tickets'>['priority']
+                              | undefined,
+                      }),
                       ...(input.get('agent_id') && {
                           agent_id: input.get('agent_id') || undefined,
                       }),
@@ -203,6 +250,41 @@ export async function updateTicket(
                 error instanceof DatabaseError
                     ? error.message
                     : 'Failed to update ticket',
+        }
+    }
+}
+
+export async function addInternalNote(
+    input: FormData | z.infer<typeof ticketInternalNoteInsertSchema>,
+): Promise<{
+    data: TicketInternalNoteRow | null
+    error: string | null
+}> {
+    try {
+        // Handle both FormData and direct object input
+        const noteData =
+            input instanceof FormData
+                ? {
+                      content: input.get('content') as string,
+                      ticket_id: input.get('ticket_id') as string,
+                      created_by: input.get('created_by') as string,
+                  }
+                : input
+
+        const data = await service.addInternalNote(noteData)
+
+        // Revalidate relevant paths
+        revalidatePath(`/tickets/${noteData.ticket_id}`)
+
+        return { data, error: null }
+    } catch (error) {
+        console.error('[addInternalNote]', error)
+        return {
+            data: null,
+            error:
+                error instanceof DatabaseError
+                    ? error.message
+                    : 'Failed to add internal note',
         }
     }
 }

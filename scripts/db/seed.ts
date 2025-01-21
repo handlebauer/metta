@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import dotenv from 'dotenv'
 
+import { seedInternalNotes } from './seed-data/internal-notes'
 import { seedMessages } from './seed-data/messages'
 import { seedTickets } from './seed-data/tickets'
 import { seedUsers } from './seed-data/users'
@@ -63,6 +64,11 @@ async function main() {
         }
 
         console.log('🧹 Cleaning existing data...')
+        await supabase
+            .from('ticket_internal_notes')
+            .delete()
+            .neq('id', '0')
+            .throwOnError()
         await supabase.from('messages').delete().neq('id', '0').throwOnError()
         await supabase.from('tickets').delete().neq('id', '0').throwOnError()
         await supabase.from('profiles').delete().neq('id', '0').throwOnError()
@@ -72,6 +78,7 @@ async function main() {
         console.log('🌱 Creating application data...')
         await seedUsers(supabase)
         await seedTickets(supabase)
+        await seedInternalNotes(supabase)
         await seedMessages(supabase)
         console.log('✅ Seed data created successfully')
     } catch (error) {

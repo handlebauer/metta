@@ -123,6 +123,45 @@ export type Database = {
                     },
                 ]
             }
+            ticket_internal_notes: {
+                Row: {
+                    content: string
+                    created_at: string | null
+                    created_by: string
+                    id: string
+                    ticket_id: string
+                }
+                Insert: {
+                    content: string
+                    created_at?: string | null
+                    created_by: string
+                    id?: string
+                    ticket_id: string
+                }
+                Update: {
+                    content?: string
+                    created_at?: string | null
+                    created_by?: string
+                    id?: string
+                    ticket_id?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: 'ticket_internal_notes_created_by_fkey'
+                        columns: ['created_by']
+                        isOneToOne: false
+                        referencedRelation: 'users'
+                        referencedColumns: ['id']
+                    },
+                    {
+                        foreignKeyName: 'ticket_internal_notes_ticket_id_fkey'
+                        columns: ['ticket_id']
+                        isOneToOne: false
+                        referencedRelation: 'tickets'
+                        referencedColumns: ['id']
+                    },
+                ]
+            }
             tickets: {
                 Row: {
                     agent_id: string | null
@@ -130,6 +169,9 @@ export type Database = {
                     customer_id: string
                     description: string
                     id: string
+                    priority:
+                        | Database['public']['Enums']['ticket_priority']
+                        | null
                     status: Database['public']['Enums']['ticket_status'] | null
                     subject: string
                     updated_at: string | null
@@ -140,6 +182,9 @@ export type Database = {
                     customer_id: string
                     description: string
                     id?: string
+                    priority?:
+                        | Database['public']['Enums']['ticket_priority']
+                        | null
                     status?: Database['public']['Enums']['ticket_status'] | null
                     subject: string
                     updated_at?: string | null
@@ -150,6 +195,9 @@ export type Database = {
                     customer_id?: string
                     description?: string
                     id?: string
+                    priority?:
+                        | Database['public']['Enums']['ticket_priority']
+                        | null
                     status?: Database['public']['Enums']['ticket_status'] | null
                     subject?: string
                     updated_at?: string | null
@@ -210,6 +258,7 @@ export type Database = {
         }
         Enums: {
             message_role: 'customer' | 'agent' | 'system'
+            ticket_priority: 'low' | 'medium' | 'high' | 'urgent'
             ticket_status: 'new' | 'open' | 'closed'
             user_role: 'customer' | 'agent'
         }

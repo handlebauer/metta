@@ -3,6 +3,7 @@ import { ArrowUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { formatDate, formatTimeAgo } from '@/lib/utils/dates'
 
+import { TicketPriorityBadge } from './ticket-priority-badge'
 import { TicketStatusBadge } from './ticket-status-badge'
 
 import type { TicketWithCustomer } from '@/lib/schemas/ticket.schemas'
@@ -13,6 +14,14 @@ const statusOrder: Record<string, number> = {
     new: 0,
     open: 1,
     closed: 2,
+}
+
+// Priority sort order: urgent -> high -> medium -> low
+const priorityOrder: Record<string, number> = {
+    urgent: 0,
+    high: 1,
+    medium: 2,
+    low: 3,
 }
 
 function SortableHeader<TData>({
@@ -44,7 +53,12 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
             />
         ),
         cell: ({ row }) => (
-            <div className="font-medium">{row.getValue('subject')}</div>
+            <div
+                className="font-medium truncate max-w-[300px]"
+                title={row.getValue('subject')}
+            >
+                {row.getValue('subject')}
+            </div>
         ),
     },
     {
@@ -62,6 +76,23 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
             const statusA = rowA.getValue('status') as string
             const statusB = rowB.getValue('status') as string
             return statusOrder[statusA] - statusOrder[statusB]
+        },
+    },
+    {
+        accessorKey: 'priority',
+        header: ({ column }) => (
+            <SortableHeader<TicketWithCustomer>
+                column={column}
+                title="Priority"
+            />
+        ),
+        cell: ({ row }) => (
+            <TicketPriorityBadge priority={row.getValue('priority')} />
+        ),
+        sortingFn: (rowA, rowB) => {
+            const priorityA = rowA.getValue('priority') as string
+            const priorityB = rowB.getValue('priority') as string
+            return priorityOrder[priorityA] - priorityOrder[priorityB]
         },
     },
     {
