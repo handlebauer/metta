@@ -18,7 +18,7 @@ export const messageSchema = z.object({
     updated_at: z.string().datetime(),
     ticket_id: z.string(),
     user_id: z.string(),
-    role: z.enum(['customer', 'agent', 'system']),
+    role: z.enum(['customer', 'agent', 'admin']),
     content: z.string(),
     html_content: z.string(),
 }) satisfies z.ZodType<MessageRow>
