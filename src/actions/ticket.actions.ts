@@ -13,6 +13,7 @@ import { TicketService } from '@/services/ticket.services'
 
 import type {
     TicketInternalNoteRow,
+    TicketPriority,
     TicketRow,
     TicketWithCustomer,
     TicketWithInternalNotes,
@@ -177,6 +178,8 @@ export async function createTicket(
                       description: input.get('description') as string,
                       customer_id: input.get('customer_id') as string,
                       agent_id: input.get('agent_id') as string,
+                      priority:
+                          (input.get('priority') as TicketPriority) || 'medium',
                   }
                 : input
 
