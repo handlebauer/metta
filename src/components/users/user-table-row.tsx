@@ -44,7 +44,7 @@ export function UserTableRow({
 
     return (
         <TableRow>
-            <TableCell className="flex items-center gap-3">
+            <TableCell className="flex items-center gap-3 w-[300px]">
                 <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-primary/10 text-primary text-xs">
                         {initials}
@@ -59,31 +59,45 @@ export function UserTableRow({
                     </div>
                 </div>
             </TableCell>
-            <TableCell>
-                <Badge
-                    variant={
-                        user.profile.role === 'admin'
-                            ? 'destructive'
-                            : user.profile.role === 'agent'
-                              ? 'default'
-                              : 'secondary'
-                    }
-                >
-                    {user.profile.role}
-                </Badge>
+            <TableCell className="text-center w-[120px]">
+                <div className="flex justify-center">
+                    <Badge
+                        variant={
+                            user.profile.role === 'admin'
+                                ? 'destructive'
+                                : user.profile.role === 'agent'
+                                  ? 'default'
+                                  : 'secondary'
+                        }
+                    >
+                        {user.profile.role}
+                    </Badge>
+                </div>
             </TableCell>
-            <TableCell>
-                <Badge variant={isActive ? 'default' : 'secondary'}>
-                    {isActive ? 'Active' : 'Inactive'}
-                </Badge>
+            <TableCell className="text-center w-[120px]">
+                <div className="flex justify-center">
+                    <Badge variant={isActive ? 'default' : 'secondary'}>
+                        {isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+                </div>
             </TableCell>
-            <TableCell className="text-muted-foreground">
+            <TableCell className="text-center w-[100px]">
+                <span className="tabular-nums text-sm font-medium">
+                    {user.ticket_counts.assigned}
+                </span>
+            </TableCell>
+            <TableCell className="text-center w-[100px]">
+                <span className="tabular-nums text-sm font-medium">
+                    {user.ticket_counts.created}
+                </span>
+            </TableCell>
+            <TableCell className="text-center text-muted-foreground w-[150px]">
                 {user.last_sign_in_at
                     ? formatConversationalDate(user.last_sign_in_at)
                     : 'Never'}
             </TableCell>
-            <TableCell>
-                <div className="text-right">
+            <TableCell className="w-[70px]">
+                <div className="flex justify-end">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">

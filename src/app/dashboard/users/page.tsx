@@ -4,6 +4,8 @@ import { UsersTable } from '@/components/users/users-table.client'
 import { createClient } from '@/lib/supabase/server'
 import { getProfile } from '@/actions/user.actions'
 
+import type { UserWithProfile } from '@/components/users/users-table.client'
+
 interface PageProps {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
@@ -36,11 +38,13 @@ export default async function UsersPage({ searchParams }: PageProps) {
     let query = supabase.from('users').select(
         `
             *,
-            profile:profiles!inner (
+            profiles!inner (
                 full_name,
                 role,
                 avatar_url
-            )
+            ),
+            assigned_tickets:tickets!agent_id (count),
+            created_tickets:tickets!customer_id (count)
         `,
     )
 
@@ -52,7 +56,7 @@ export default async function UsersPage({ searchParams }: PageProps) {
         | undefined
 
     if (type) {
-        query = query.eq('profile.role', type)
+        query = query.eq('profiles.role', type)
     }
 
     // Get users with their profiles
@@ -65,15 +69,19 @@ export default async function UsersPage({ searchParams }: PageProps) {
     }
 
     // Transform the data to match our component's expected format
-    const transformedUsers = users.map(user => ({
+    const transformedUsers: UserWithProfile[] = users.map(user => ({
         id: user.id,
         email: user.email,
         is_active: user.is_active ?? false,
         last_sign_in_at: user.last_sign_in_at,
-        profile: user.profile || {
-            full_name: null,
-            role: 'customer',
-            avatar_url: null,
+        profile: {
+            full_name: user.profiles?.full_name ?? null,
+            role: user.profiles?.role ?? 'customer',
+            avatar_url: user.profiles?.avatar_url ?? null,
+        },
+        ticket_counts: {
+            assigned: user.assigned_tickets?.[0]?.count ?? 0,
+            created: user.created_tickets?.[0]?.count ?? 0,
         },
     }))
 

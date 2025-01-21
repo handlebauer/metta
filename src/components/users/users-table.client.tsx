@@ -2,7 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { flexRender } from '@tanstack/react-table'
+import {
+    flexRender,
+    getCoreRowModel,
+    getSortedRowModel,
+    useReactTable,
+} from '@tanstack/react-table'
 
 import {
     AlertDialog,
@@ -30,16 +35,20 @@ import {
     updateUserRole,
 } from '@/actions/user-management.actions'
 import { toast } from '@/hooks/use-toast'
-import { useUsersTable } from '@/hooks/use-users-table'
 
+import { userColumns } from './user-columns'
 import { UserTableRow } from './user-table-row'
 import { EmptyState, ErrorState, LoadingState } from './users-table-states'
 
-import type { HeaderGroup, Row } from '@tanstack/react-table'
+import type { SortingState } from '@tanstack/react-table'
 
 export interface UserWithProfile
     extends Pick<UserRow, 'id' | 'email' | 'is_active' | 'last_sign_in_at'> {
     profile: Pick<ProfileRow, 'full_name' | 'role' | 'avatar_url'>
+    ticket_counts: {
+        assigned: number
+        created: number
+    }
 }
 
 export interface UsersTableProps {
@@ -59,7 +68,24 @@ export function UsersTable({
     const [userToDelete, setUserToDelete] = useState<UserWithProfile | null>(
         null,
     )
-    const { table } = useUsersTable({ users })
+    const [sorting, setSorting] = useState<SortingState>([])
+
+    const table = useReactTable({
+        data: users,
+        columns: userColumns,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        onSortingChange: setSorting,
+        columnResizeMode: 'onChange',
+        enableColumnResizing: true,
+        defaultColumn: {
+            minSize: 50,
+            maxSize: 500,
+        },
+        state: {
+            sorting,
+        },
+    })
 
     const handleToggleActive = async (userId: string, isActive: boolean) => {
         const { error } = await toggleUserActive(userId, !isActive)
@@ -134,42 +160,39 @@ export function UsersTable({
     return (
         <>
             <div className={cn('rounded-md border', className)}>
-                <Table>
+                <Table className="table-fixed">
                     <TableHeader>
-                        {table
-                            .getHeaderGroups()
-                            .map(
-                                (headerGroup: HeaderGroup<UserWithProfile>) => (
-                                    <TableRow key={headerGroup.id}>
-                                        {headerGroup.headers.map(header => (
-                                            <TableHead key={header.id}>
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                          header.column
-                                                              .columnDef.header,
-                                                          header.getContext(),
-                                                      )}
-                                            </TableHead>
-                                        ))}
-                                    </TableRow>
-                                ),
-                            )}
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => (
+                                    <TableHead
+                                        key={header.id}
+                                        style={{
+                                            width: header.getSize(),
+                                        }}
+                                    >
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(
+                                                  header.column.columnDef
+                                                      .header,
+                                                  header.getContext(),
+                                              )}
+                                    </TableHead>
+                                ))}
+                            </TableRow>
+                        ))}
                     </TableHeader>
                     <TableBody>
-                        {table
-                            .getRowModel()
-                            .rows.map((row: Row<UserWithProfile>) => (
-                                <UserTableRow
-                                    key={row.id}
-                                    user={row.original}
-                                    onToggleActive={handleToggleActive}
-                                    onUpdateRole={handleUpdateRole}
-                                    onDelete={() =>
-                                        setUserToDelete(row.original)
-                                    }
-                                />
-                            ))}
+                        {table.getRowModel().rows.map(row => (
+                            <UserTableRow
+                                key={row.id}
+                                user={row.original}
+                                onToggleActive={handleToggleActive}
+                                onUpdateRole={handleUpdateRole}
+                                onDelete={() => setUserToDelete(row.original)}
+                            />
+                        ))}
                     </TableBody>
                 </Table>
             </div>
