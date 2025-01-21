@@ -1,4 +1,4 @@
-import { Geist_Mono, Outfit } from 'next/font/google'
+import { Geist_Mono, Inter, Outfit } from 'next/font/google'
 
 import type { Metadata } from 'next'
 
@@ -7,6 +7,11 @@ import './globals.css'
 const outfit = Outfit({
     subsets: ['latin'],
     variable: '--font-outfit',
+})
+
+const inter = Inter({
+    subsets: ['latin'],
+    variable: '--font-inter',
 })
 
 const geistMono = Geist_Mono({
@@ -28,7 +33,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body
-                className={`${outfit.variable} ${geistMono.variable} font-outfit antialiased`}
+                className={`${outfit.variable} ${geistMono.variable} ${inter.variable} font-inter antialiased`}
             >
                 {children}
             </body>

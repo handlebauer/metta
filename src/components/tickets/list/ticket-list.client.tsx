@@ -107,7 +107,7 @@ export function TicketList({
                         </TableRow>
                     ))}
                 </TableHeader>
-                <TableBody>
+                <TableBody className="text-xs">
                     {table.getRowModel().rows.map(row => (
                         <TableRow
                             key={row.id}

@@ -21,6 +21,7 @@ const config = {
             fontFamily: {
                 outfit: ['var(--font-outfit)'],
                 mono: ['var(--font-geist-mono)'],
+                inter: ['var(--font-inter)'],
             },
             colors: {
                 border: 'hsl(var(--border))',
