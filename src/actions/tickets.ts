@@ -128,6 +128,7 @@ export async function createTicket(
                       subject: input.get('subject') as string,
                       description: input.get('description') as string,
                       customer_id: input.get('customer_id') as string,
+                      agent_id: input.get('agent_id') as string,
                   }
                 : input
 
