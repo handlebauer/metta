@@ -7,7 +7,13 @@ import { seedUsers } from './seed-data/users'
 
 import type { Database } from '@/lib/supabase/types'
 
-dotenv.config({ path: '.env.local' })
+const isProd = process.env.NODE_ENV === 'production'
+const envFile = isProd ? '.env.production' : '.env.local'
+
+console.log(
+    `🌍 Using ${isProd ? 'production' : 'local'} environment (${envFile})`,
+)
+dotenv.config({ path: envFile })
 
 // Create a Supabase client with service role for seeding
 const supabase = createClient<Database>(

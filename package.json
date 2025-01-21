@@ -13,6 +13,8 @@
         "supabase:gen-types": "bunx supabase gen types typescript --local > src/lib/supabase/types.ts",
         "supabase:init": "bunx supabase db reset && bun run supabase:gen-types && bun run supabase:seed",
         "supabase:seed": "bun run scripts/db/seed.ts",
+        "supabase:seed:local": "bun run scripts/db/seed.ts",
+        "supabase:seed:prod": "NODE_ENV=production bun run scripts/db/seed.ts",
         "shadcn:add": "bunx --bun shadcn@latest add",
         "test": "playwright test --config=playwright.config.ts"
     },
@@ -50,6 +52,7 @@
         "@playwright/test": "^1.49.1",
         "@types/bun": "^1.1.17",
         "@types/node": "^20",
+        "@types/prompt-sync": "^4.2.3",
         "@types/react": "^19",
         "@types/react-dom": "^19",
         "dotenv": "^16.4.7",
