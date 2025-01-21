@@ -32,7 +32,7 @@ export const NewTicketNotification: React.FC<
         <p>{ticket.description}</p>
         <p>
             <a
-                href={`${process.env.NEXT_PUBLIC_APP_URL}/dashboard/tickets/${ticket.id}`}
+                href={`${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/tickets/${ticket.id}`}
                 style={{
                     display: 'inline-block',
                     padding: '10px 20px',
