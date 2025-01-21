@@ -6,49 +6,49 @@ export interface SeedTicket {
     subject: string
     description: string
     status: 'new' | 'open' | 'closed'
-    customer_index: number // -1 for demo user, 0-1 for customers
-    agent_index?: number // 2-3 for agents
+    customer_index: number // -2 for test customer, 0-1 for other customers
+    agent_index?: number // -1 for demo agent, 2-3 for other agents
 }
 
 export const SEED_TICKETS: SeedTicket[] = [
-    // Demo user tickets
+    // Test customer tickets (previously demo user tickets)
     {
         subject: 'Need help with API integration',
         description:
             'Looking to integrate your REST API with our existing system. Can you provide documentation?',
         status: 'new',
-        customer_index: -1, // Demo User
+        customer_index: -2, // Test Customer
     },
     {
         subject: 'Billing cycle question',
         description:
             'When does the billing cycle start? I was charged on an unexpected date.',
         status: 'open',
-        customer_index: -1, // Demo User
-        agent_index: 2, // agent1
+        customer_index: -2, // Test Customer
+        agent_index: -1, // Demo Agent
     },
     {
         subject: 'Password reset not working',
         description:
             'The password reset link in my email is not working. Can you help?',
         status: 'closed',
-        customer_index: -1, // Demo User
-        agent_index: 3, // agent2
+        customer_index: -2, // Test Customer
+        agent_index: -1, // Demo Agent
     },
     {
         subject: 'Feature suggestion: Teams',
         description:
             'It would be great to have team management features for enterprise accounts.',
         status: 'open',
-        customer_index: -1, // Demo User
-        agent_index: 2, // agent1
+        customer_index: -2, // Test Customer
+        agent_index: -1, // Demo Agent
     },
     {
         subject: 'Urgent: Service downtime',
         description:
             'Getting 503 errors when trying to access the dashboard. Is there an outage?',
         status: 'new',
-        customer_index: -1, // Demo User
+        customer_index: -2, // Test Customer
     },
 
     // Customer 1 tickets
@@ -112,8 +112,14 @@ export async function seedTickets(
 ) {
     console.log('🎫 Creating seed tickets...')
 
-    // Get demo user and test users
-    const { data: demoUser } = await supabase
+    // Get all required users
+    const { data: testCustomer } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', 'testcustomer@example.com')
+        .single()
+
+    const { data: demoAgent } = await supabase
         .from('users')
         .select('id')
         .eq('email', 'demo@example.com')
@@ -129,7 +135,7 @@ export async function seedTickets(
         .select('id')
         .in('email', ['agent1@example.com', 'agent2@example.com'])
 
-    if (!demoUser || !customers || !agents) {
+    if (!testCustomer || !demoAgent || !customers || !agents) {
         throw new Error('Failed to find seed users')
     }
 
@@ -138,13 +144,15 @@ export async function seedTickets(
         description: ticket.description,
         status: ticket.status,
         customer_id:
-            ticket.customer_index === -1
-                ? demoUser.id
+            ticket.customer_index === -2
+                ? testCustomer.id
                 : customers[ticket.customer_index].id,
         agent_id:
-            ticket.agent_index !== undefined
-                ? agents[ticket.agent_index - 2].id
-                : null,
+            ticket.agent_index === -1
+                ? demoAgent.id
+                : ticket.agent_index !== undefined
+                  ? agents[ticket.agent_index - 2].id
+                  : null,
     }))
 
     const { error } = await supabase.from('tickets').insert(tickets)

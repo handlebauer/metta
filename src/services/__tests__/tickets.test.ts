@@ -48,11 +48,11 @@ test('findById - should return a ticket by id', async () => {
 })
 
 test('findByCustomerId - should return tickets for a customer', async () => {
-    // Get customer1 from seed data
+    // Get test customer from seed data
     const { data: customer } = await supabaseAdmin
         .from('users')
         .select('id')
-        .eq('email', 'customer1@example.com')
+        .eq('email', 'testcustomer@example.com')
         .single()
 
     expect(customer).toBeDefined()
@@ -67,11 +67,11 @@ test('findByCustomerId - should return tickets for a customer', async () => {
 })
 
 test('findByAgentId - should return tickets for an agent', async () => {
-    // Get agent1 from seed data
+    // Get demo agent from seed data
     const { data: agent } = await supabaseAdmin
         .from('users')
         .select('id')
-        .eq('email', 'agent1@example.com')
+        .eq('email', 'demo@example.com')
         .single()
 
     expect(agent).toBeDefined()
@@ -114,11 +114,11 @@ test('getStats - should return ticket statistics', async () => {
 })
 
 test('create and update - should create and update a ticket', async () => {
-    // Get customer1 from seed data for creating ticket
+    // Get test customer from seed data for creating ticket
     const { data: customer } = await supabaseAdmin
         .from('users')
         .select('id')
-        .eq('email', 'customer1@example.com')
+        .eq('email', 'testcustomer@example.com')
         .single()
 
     expect(customer).toBeDefined()
@@ -137,11 +137,11 @@ test('create and update - should create and update a ticket', async () => {
     expect(newTicket.customer_id).toBe(customer!.id)
     expect(newTicket.status).toBe('new')
 
-    // Get agent1 from seed data for updating ticket
+    // Get demo agent from seed data for updating ticket
     const { data: agent } = await supabaseAdmin
         .from('users')
         .select('id')
-        .eq('email', 'agent1@example.com')
+        .eq('email', 'demo@example.com')
         .single()
 
     expect(agent).toBeDefined()

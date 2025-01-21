@@ -12,7 +12,7 @@ interface SeedMessage {
 }
 
 const SEED_MESSAGES: SeedMessage[] = [
-    // Billing cycle question (Demo User)
+    // Billing cycle question (Test Customer)
     {
         ticket_index: 1,
         messages: [
@@ -20,29 +20,29 @@ const SEED_MESSAGES: SeedMessage[] = [
                 role: 'customer',
                 content:
                     'Hi, I noticed I was charged on the 15th, but I thought billing was on the 1st of each month.',
-                user_email: 'demo@example.com',
+                user_email: 'testcustomer@example.com',
             },
             {
                 role: 'agent',
                 content:
                     'Hello! Let me check your billing settings. The billing date is typically set based on your signup date.',
-                user_email: 'agent1@example.com',
+                user_email: 'demo@example.com',
             },
             {
                 role: 'customer',
                 content:
                     'Ah, that makes sense. Is it possible to change it to the 1st?',
-                user_email: 'demo@example.com',
+                user_email: 'testcustomer@example.com',
             },
             {
                 role: 'agent',
                 content:
                     "Yes, we can adjust that for you. I'll prorate the charges accordingly. Would you like me to make that change?",
-                user_email: 'agent1@example.com',
+                user_email: 'demo@example.com',
             },
         ],
     },
-    // Password reset (Demo User)
+    // Password reset (Test Customer)
     {
         ticket_index: 2,
         messages: [
@@ -50,23 +50,23 @@ const SEED_MESSAGES: SeedMessage[] = [
                 role: 'customer',
                 content:
                     "The password reset link I received isn't working. It says the token is invalid.",
-                user_email: 'demo@example.com',
+                user_email: 'testcustomer@example.com',
             },
             {
                 role: 'agent',
                 content:
                     "I apologize for the inconvenience. The reset links expire after 1 hour for security. I'll send you a new one right away.",
-                user_email: 'agent2@example.com',
+                user_email: 'demo@example.com',
             },
             {
                 role: 'customer',
                 content: 'Got it, thanks! The new link worked perfectly.',
-                user_email: 'demo@example.com',
+                user_email: 'testcustomer@example.com',
             },
             {
                 role: 'agent',
                 content: 'Excellent! Let me know if you need anything else.',
-                user_email: 'agent2@example.com',
+                user_email: 'demo@example.com',
             },
         ],
     },

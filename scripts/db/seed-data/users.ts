@@ -13,12 +13,19 @@ export interface SeedUser {
 export const DEMO_USER: SeedUser = {
     email: 'demo@example.com',
     password: 'demo123',
-    name: 'Demo User',
-    bio: 'This is a demo user account.',
+    name: 'Demo Agent',
+    bio: 'This is a demo agent account for testing support agent functionality.',
     role: 'agent',
 }
 
 export const TEST_USERS: SeedUser[] = [
+    {
+        email: 'testcustomer@example.com',
+        password: 'test123',
+        name: 'Test Customer',
+        bio: 'Primary test customer account for demo interactions',
+        role: 'customer',
+    },
     {
         email: 'customer1@example.com',
         password: 'customer1',
