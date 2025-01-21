@@ -22,10 +22,12 @@ export function SidebarNav() {
                     isTicketsSection && 'bg-muted/50',
                 )}
             >
-                <div>
-                    <Inbox className="mr-2 h-3.5 w-3.5" />
-                    Tickets
-                </div>
+                <Link href="/dashboard/tickets">
+                    <div className="flex items-center">
+                        <Inbox className="mr-2 h-3.5 w-3.5" />
+                        Tickets
+                    </div>
+                </Link>
             </Button>
             <Button
                 asChild
