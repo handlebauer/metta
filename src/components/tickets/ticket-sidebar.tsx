@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { formatConversationalDate } from '@/lib/utils/dates'
 
 import { EditablePriority } from './details/editable-priority.client'
 import { TicketInternalNotes } from './notes/ticket-internal-notes.client'
@@ -118,7 +119,9 @@ export function TicketSidebar({
                                     Created
                                 </span>
                                 <span className="font-medium">
-                                    {ticket.created_at?.split('T')[0]}
+                                    {formatConversationalDate(
+                                        ticket.created_at,
+                                    )}
                                 </span>
                             </div>
                         </div>
