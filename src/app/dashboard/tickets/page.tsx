@@ -68,7 +68,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                             <Inbox className="h-4 w-4" />
                             All
                             <span className="text-muted-foreground">
-                                ({stats.total})
+                                {stats.total}
                             </span>
                         </Link>
                     </Button>
@@ -82,7 +82,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                             <Clock className="h-4 w-4" />
                             Open
                             <span className="text-muted-foreground">
-                                ({stats.open})
+                                {stats.open}
                             </span>
                         </Link>
                     </Button>
@@ -99,7 +99,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                             <CheckCircle2 className="h-4 w-4" />
                             Closed Today
                             <span className="text-muted-foreground">
-                                ({stats.closedToday})
+                                {stats.closedToday}
                             </span>
                         </Link>
                     </Button>
