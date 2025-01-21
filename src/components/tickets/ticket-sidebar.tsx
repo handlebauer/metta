@@ -52,7 +52,7 @@ export function TicketSidebar({
         [customerName],
     )
 
-    const isAgent = user.role === 'agent'
+    const isAgentOrAdmin = user.role === 'agent' || user.role === 'admin'
 
     const displayDate = useMemo(
         () => formatConversationalDate(ticket.created_at),
@@ -108,7 +108,7 @@ export function TicketSidebar({
                                 <span className="text-muted-foreground">
                                     Priority
                                 </span>
-                                {isAgent ? (
+                                {isAgentOrAdmin ? (
                                     <EditablePriority
                                         ticketId={ticket.id}
                                         initialPriority={ticket.priority}
@@ -132,7 +132,7 @@ export function TicketSidebar({
                 </div>
 
                 {/* Internal Notes Section (agents only) */}
-                {isAgent && (
+                {isAgentOrAdmin && (
                     <div className="flex-1 flex flex-col min-h-0">
                         <div className="px-6">
                             <h2 className="text-sm font-medium mb-1">

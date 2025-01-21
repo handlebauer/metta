@@ -14,9 +14,9 @@ export const DEMO_USER: SeedUser = {
     email: 'demo@example.com',
     password: 'demo123',
     profile: {
-        full_name: 'Demo Agent',
-        bio: 'This is a demo agent account for testing support agent functionality.',
-        role: 'agent',
+        full_name: 'Demo Admin',
+        bio: 'This is a demo admin account with full system access.',
+        role: 'admin',
         avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=demo@example.com`,
     },
 }

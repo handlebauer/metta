@@ -49,7 +49,10 @@ export class UserService {
 
     async findAllActiveExcept(excludeId: string): Promise<
         (UserRow & {
-            profile: { full_name: string | null; role: 'customer' | 'agent' }
+            profile: {
+                full_name: string | null
+                role: 'customer' | 'agent' | 'admin'
+            }
         })[]
     > {
         try {
@@ -78,7 +81,7 @@ export class UserService {
                     ): user is UserRow & {
                         profiles: {
                             full_name: string | null
-                            role: 'customer' | 'agent'
+                            role: 'customer' | 'agent' | 'admin'
                         }
                     } => user.profiles?.role != null,
                 ) || []

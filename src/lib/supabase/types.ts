@@ -260,7 +260,7 @@ export type Database = {
             message_role: 'customer' | 'agent' | 'system'
             ticket_priority: 'low' | 'medium' | 'high' | 'urgent'
             ticket_status: 'new' | 'open' | 'closed'
-            user_role: 'customer' | 'agent'
+            user_role: 'customer' | 'agent' | 'admin'
         }
         CompositeTypes: {
             [_ in never]: never

@@ -40,9 +40,10 @@ export default async function NewTicketPage() {
         profile: profileResult.data,
     }
 
-    // Get all users if agent
+    // Get all users if agent or admin
     const { data: users = [], error } =
-        profileResult.data.role === 'agent'
+        profileResult.data.role === 'agent' ||
+        profileResult.data.role === 'admin'
             ? await getAllActiveUsersExcept(user.id)
             : { data: [], error: null }
 

@@ -75,8 +75,8 @@ test('findAllActiveExcept - should handle non-existent excludeId', async () => {
     // Verify known seed users are present
     const demoUser = users.find(u => u.email === 'demo@example.com')
     expect(demoUser).toBeDefined()
-    expect(demoUser?.profile.role).toBe('agent')
-    expect(demoUser?.profile.full_name).toBe('Demo User')
+    expect(demoUser?.profile.role).toBe('admin')
+    expect(demoUser?.profile.full_name).toBe('Demo Admin')
 
     const customer = users.find(u => u.email === 'customer1@example.com')
     expect(customer).toBeDefined()

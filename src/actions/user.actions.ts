@@ -57,13 +57,24 @@ export async function getUserByEmail(email: string): Promise<{
 
 export async function getAllActiveUsersExcept(excludeId: string): Promise<{
     data: (UserRow & {
-        profile: { full_name: string | null; role: 'customer' | 'agent' }
+        profile: {
+            full_name: string | null
+            role: 'customer' | 'agent' | 'admin'
+        }
     })[]
     error: string | null
 }> {
     try {
         const data = await userService.findAllActiveExcept(excludeId)
-        return { data, error: null }
+        return {
+            data: data as (UserRow & {
+                profile: {
+                    full_name: string | null
+                    role: 'customer' | 'agent' | 'admin'
+                }
+            })[],
+            error: null,
+        }
     } catch (error) {
         console.error('[getAllActiveUsersExcept]', error)
         return {

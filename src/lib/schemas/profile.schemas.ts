@@ -20,7 +20,7 @@ export const profileSchema = z.object({
     full_name: z.string().nullable(),
     avatar_url: z.string().url().nullable(),
     bio: z.string().nullable(),
-    role: z.enum(['customer', 'agent']),
+    role: z.enum(['customer', 'agent', 'admin']),
 }) satisfies z.ZodType<ProfileRow>
 
 // Insert schema (omitting generated fields)

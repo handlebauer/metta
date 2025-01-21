@@ -35,7 +35,7 @@ let testProfile: {
     full_name: string | null
     avatar_url: string | null
     bio: string | null
-    role: 'customer' | 'agent'
+    role: 'customer' | 'agent' | 'admin'
 } | null = null
 
 test('setup test data', async () => {

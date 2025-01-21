@@ -32,8 +32,6 @@ import {
 } from '@/lib/schemas/ticket.schemas'
 import { createTicket } from '@/actions/ticket.actions'
 
-import type { UserRow } from '@/lib/schemas/user.schemas'
-
 interface NewTicketFormProps {
     /**
      * The ID of the current user (can be either a customer or an agent)
@@ -46,19 +44,29 @@ interface NewTicketFormProps {
      * - 'customer': Shows a simplified form without requester/assignee fields
      * - 'agent': Shows full form with ability to select requester and assignee
      */
-    userRole: 'customer' | 'agent'
+    userRole: 'customer' | 'agent' | 'admin'
     /**
      * List of all users (both customers and agents)
      * Used to populate the requester and assignee dropdowns when the current user is an agent
      */
-    users: (UserRow & {
-        profile: { full_name: string | null; role: 'customer' | 'agent' }
-    })[]
+    users: {
+        id: string
+        email: string
+        profile: {
+            full_name: string | null
+            role: 'customer' | 'agent' | 'admin'
+        }
+    }[]
     /**
      * The complete current user object including profile data
      */
-    currentUser: UserRow & {
-        profile: { full_name: string | null; role: 'customer' | 'agent' }
+    currentUser: {
+        id: string
+        email: string
+        profile: {
+            full_name: string | null
+            role: 'customer' | 'agent' | 'admin'
+        }
     }
 }
 
@@ -106,25 +114,24 @@ export function NewTicketForm({
         }
     }
 
-    // Filter and sort agents - current agent first, then alphabetically
-    const agents = users
-        .filter(user => user.profile.role === 'agent')
-        .sort((a, b) => {
-            // Current agent (customerId) should be first in the list
-            if (a.id === customerId) return -1
-            if (b.id === customerId) return 1
-            return (a.profile.full_name || a.email).localeCompare(
-                b.profile.full_name || b.email,
-            )
-        })
-
     const priorities = ticketPriorityEnum.options
+
+    // Update the agent filter to include admins who can also be assigned tickets
+    const availableAgents = users
+        .filter(
+            user =>
+                user.profile.role === 'agent' || user.profile.role === 'admin',
+        )
+        .map(user => ({
+            value: user.id,
+            label: user.profile.full_name || user.email,
+        }))
 
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 {/* Agent-only fields */}
-                {userRole === 'agent' && (
+                {(userRole === 'agent' || userRole === 'admin') && (
                     <div className="grid grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
@@ -199,20 +206,14 @@ export function NewTicketForm({
                                                     currentUser.email}{' '}
                                                 (me)
                                             </SelectItem>
-                                            {agents
-                                                .filter(
-                                                    a => a.id !== customerId,
-                                                )
-                                                .map(agent => (
-                                                    <SelectItem
-                                                        key={agent.id}
-                                                        value={agent.id}
-                                                    >
-                                                        {agent.profile
-                                                            .full_name ||
-                                                            'Other agent'}
-                                                    </SelectItem>
-                                                ))}
+                                            {availableAgents.map(agent => (
+                                                <SelectItem
+                                                    key={agent.value}
+                                                    value={agent.value}
+                                                >
+                                                    {agent.label}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />

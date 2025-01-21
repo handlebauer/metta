@@ -1,5 +1,5 @@
 -- Create user role enum
-CREATE TYPE user_role AS ENUM ('customer', 'agent');
+CREATE TYPE user_role AS ENUM ('customer', 'agent', 'admin');
 
 -- Add role column to profiles
 ALTER TABLE public.profiles
