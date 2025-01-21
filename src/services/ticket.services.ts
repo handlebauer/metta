@@ -10,6 +10,8 @@ import {
 } from '@/lib/schemas/ticket.schemas'
 import { createClient } from '@/lib/supabase/server'
 
+import { EmailService } from './email.services'
+
 import type {
     TicketInternalNoteRow,
     TicketRow,
@@ -195,7 +197,24 @@ export class TicketService {
             if (error) throw new DatabaseError(error.message)
             if (!data) throw new DatabaseError('Failed to create ticket')
 
-            return ticketSchema.parse(data)
+            const ticket = ticketSchema.parse(data)
+
+            // If an agent is assigned, send them an email notification
+            if (ticket.agent_id) {
+                const { data: agent } = await db
+                    .from('users')
+                    .select('*')
+                    .eq('id', ticket.agent_id)
+                    .single()
+
+                if (agent) {
+                    await EmailService.sendNewTicketNotification(ticket, agent)
+                } else {
+                    console.error('Agent not found')
+                }
+            }
+
+            return ticket
         } catch (error) {
             console.error('[TicketService.create]', error)
             throw error
