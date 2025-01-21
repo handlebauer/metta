@@ -128,6 +128,7 @@ test('create and update - should create and update a ticket', async () => {
         subject: 'Test Ticket',
         description: 'This is a test ticket',
         customer_id: customer!.id,
+        agent_id: null,
     })
 
     expect(newTicket).toBeDefined()

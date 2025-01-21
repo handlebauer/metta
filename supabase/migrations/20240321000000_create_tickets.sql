@@ -66,6 +66,16 @@ CREATE POLICY "Agents can update tickets"
     AND role = 'agent'
   ));
 
+-- Agents can create tickets
+CREATE POLICY "Agents can create tickets"
+  ON public.tickets
+  FOR INSERT
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE user_id = auth.uid()::text
+    AND role = 'agent'
+  ));
+
 -- Create indexes
 CREATE INDEX tickets_customer_id_idx ON public.tickets(customer_id);
 CREATE INDEX tickets_agent_id_idx ON public.tickets(agent_id);

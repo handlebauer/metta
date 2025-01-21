@@ -14,11 +14,11 @@ export type UserUpdate = TablesUpdate<'users'>
 // Base schema matching database exactly
 export const userSchema = z.object({
     id: z.string(),
-    created_at: z.string().datetime(),
-    updated_at: z.string().datetime(),
+    created_at: z.string().nullable(),
+    updated_at: z.string().nullable(),
     email: z.string().email(),
     is_active: z.boolean(),
-    last_sign_in_at: z.string().datetime().nullable(),
+    last_sign_in_at: z.string().nullable(),
 }) satisfies z.ZodType<UserRow>
 
 // Insert schema (omitting generated fields)

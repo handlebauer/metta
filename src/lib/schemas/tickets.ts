@@ -37,7 +37,6 @@ export const ticketInsertSchema = ticketSchema.omit({
     created_at: true,
     updated_at: true,
     status: true,
-    agent_id: true,
 }) satisfies z.ZodType<TicketInsert>
 
 // Update schema for agents (status and assignment)

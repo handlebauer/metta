@@ -9,32 +9,36 @@ import {
 } from '@/components/ui/card'
 import { NewTicketForm } from '@/components/tickets/form/new-ticket-form.client'
 import { createClient } from '@/lib/supabase/server'
-import { getAllActiveUsersExcept } from '@/actions/users'
+import { getAllActiveUsersExcept, getProfile, getUser } from '@/actions/users'
 
 export default async function NewTicketPage() {
     const supabase = await createClient()
     const {
-        data: { user },
+        data: { user: authUser },
     } = await supabase.auth.getUser()
 
-    if (!user) {
+    if (!authUser) {
         redirect('/login')
     }
 
-    // Get user's role from profile
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single()
+    // Get app-level user data and profile
+    const [userResult, profileResult] = await Promise.all([
+        getUser(authUser.id),
+        getProfile(authUser.id),
+    ])
 
-    if (!profile) {
-        throw new Error('Profile not found')
+    if (!userResult.data || !profileResult.data) {
+        throw new Error('User or profile not found')
     }
 
-    // Get all users except current user if agent
+    const user = {
+        ...userResult.data,
+        profile: profileResult.data,
+    }
+
+    // Get all users if agent
     const { data: users = [], error } =
-        profile.role === 'agent'
+        profileResult.data.role === 'agent'
             ? await getAllActiveUsersExcept(user.id)
             : { data: [], error: null }
 
@@ -65,8 +69,9 @@ export default async function NewTicketPage() {
                 <CardContent>
                     <NewTicketForm
                         customerId={user.id}
-                        userRole={profile.role}
+                        userRole={user.profile.role}
                         users={users}
+                        currentUser={user}
                     />
                 </CardContent>
             </Card>

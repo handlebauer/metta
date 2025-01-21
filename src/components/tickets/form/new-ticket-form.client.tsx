@@ -32,19 +32,40 @@ import { createTicket } from '@/actions/tickets'
 import type { UserRow } from '@/lib/schemas/user'
 
 interface NewTicketFormProps {
+    /**
+     * The ID of the current user (can be either a customer or an agent)
+     * - For customers: This ID will be used as the customer_id
+     * - For agents: This ID will be used to identify "Assign to me" in the assignee dropdown
+     */
     customerId: string
+    /**
+     * The role of the current user
+     * - 'customer': Shows a simplified form without requester/assignee fields
+     * - 'agent': Shows full form with ability to select requester and assignee
+     */
     userRole: 'customer' | 'agent'
+    /**
+     * List of all users (both customers and agents)
+     * Used to populate the requester and assignee dropdowns when the current user is an agent
+     */
     users: (UserRow & {
         profile: { full_name: string | null; role: 'customer' | 'agent' }
     })[]
+    /**
+     * The complete current user object including profile data
+     */
+    currentUser: UserRow & {
+        profile: { full_name: string | null; role: 'customer' | 'agent' }
+    }
 }
 
 type FormData = z.infer<typeof ticketInsertSchema>
 
 export function NewTicketForm({
-    customerId,
+    customerId, // Despite the name, this is the current user's ID (either customer or agent)
     userRole,
     users,
+    currentUser,
 }: NewTicketFormProps) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -54,7 +75,10 @@ export function NewTicketForm({
         defaultValues: {
             subject: '',
             description: '',
+            // If current user is a customer, they can only create tickets for themselves
+            // If current user is an agent, they need to select a customer
             customer_id: userRole === 'customer' ? customerId : '',
+            agent_id: null,
         },
     })
 
@@ -78,6 +102,18 @@ export function NewTicketForm({
         }
     }
 
+    // Filter and sort agents - current agent first, then alphabetically
+    const agents = users
+        .filter(user => user.profile.role === 'agent')
+        .sort((a, b) => {
+            // Current agent (customerId) should be first in the list
+            if (a.id === customerId) return -1
+            if (b.id === customerId) return 1
+            return (a.profile.full_name || a.email).localeCompare(
+                b.profile.full_name || b.email,
+            )
+        })
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -87,7 +123,7 @@ export function NewTicketForm({
                         name="customer_id"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>User</FormLabel>
+                                <FormLabel>Requester</FormLabel>
                                 <Select
                                     onValueChange={field.onChange}
                                     defaultValue={field.value}
@@ -99,16 +135,10 @@ export function NewTicketForm({
                                     </FormControl>
                                     <SelectContent>
                                         {users
-                                            .sort(
-                                                (a, b) =>
-                                                    (a.profile.role ===
-                                                    'customer'
-                                                        ? -1
-                                                        : 1) -
-                                                    (b.profile.role ===
-                                                    'customer'
-                                                        ? -1
-                                                        : 1),
+                                            .filter(
+                                                user =>
+                                                    user.profile.role ===
+                                                    'customer',
                                             )
                                             .map(user => (
                                                 <SelectItem
@@ -116,14 +146,67 @@ export function NewTicketForm({
                                                     value={user.id}
                                                 >
                                                     {user.profile.full_name ||
-                                                        user.email}{' '}
-                                                    ({user.profile.role})
+                                                        user.email}
                                                 </SelectItem>
                                             ))}
                                     </SelectContent>
                                 </Select>
                                 <FormDescription>
                                     Select the user this ticket is for
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                )}
+
+                {userRole === 'agent' && (
+                    <FormField
+                        control={form.control}
+                        name="agent_id"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Assignee</FormLabel>
+                                <Select
+                                    onValueChange={val =>
+                                        field.onChange(
+                                            val === 'unassigned' ? null : val,
+                                        )
+                                    }
+                                    value={field.value ?? 'unassigned'}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select an agent" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem
+                                            value="unassigned"
+                                            className="text-muted-foreground"
+                                        >
+                                            Leave unassigned
+                                        </SelectItem>
+                                        <SelectItem value={customerId}>
+                                            {currentUser.profile.full_name ||
+                                                currentUser.email}{' '}
+                                            (me)
+                                        </SelectItem>
+                                        {agents
+                                            .filter(a => a.id !== customerId)
+                                            .map(agent => (
+                                                <SelectItem
+                                                    key={agent.id}
+                                                    value={agent.id}
+                                                >
+                                                    {agent.profile.full_name ||
+                                                        'Other agent'}
+                                                </SelectItem>
+                                            ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormDescription>
+                                    Choose who will handle this ticket
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
