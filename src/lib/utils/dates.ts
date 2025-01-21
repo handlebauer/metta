@@ -16,9 +16,10 @@ export function formatDate(date: string | null): string {
 export function formatTimeAgo(date: string | null): string {
     if (!date) return ''
 
-    const now = new Date()
-    const past = new Date(date)
-    const diffMs = now.getTime() - past.getTime()
+    // Use a stable timestamp for both server and client
+    const stableNow = Math.floor(Date.now() / 60000) * 60000
+    const past = new Date(date).getTime()
+    const diffMs = stableNow - past
 
     // Convert to seconds, minutes, hours, days
     const diffSecs = Math.floor(diffMs / 1000)

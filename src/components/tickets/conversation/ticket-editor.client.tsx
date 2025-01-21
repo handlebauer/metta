@@ -65,7 +65,7 @@ export function TicketEditor({ onSend, isSending }: TicketEditorProps) {
     }, [editor, onSend])
 
     return (
-        <div className="p-4 pt-0">
+        <div className="pt-0">
             <div className={containerClass}>
                 <div className="flex flex-col h-full">
                     {/* Toolbar */}

@@ -36,16 +36,14 @@ export default async function TicketPage({ params }: TicketPageProps) {
     }
 
     return (
-        <div className="container py-8 space-y-8">
-            <TicketView
-                ticket={ticket}
-                user={{
-                    id: user.id,
-                    name: profileResult.data.full_name || user.email,
-                    email: user.email,
-                    role: profileResult.data.role,
-                }}
-            />
-        </div>
+        <TicketView
+            ticket={ticket}
+            user={{
+                id: user.id,
+                name: profileResult.data.full_name || user.email,
+                email: user.email,
+                role: profileResult.data.role,
+            }}
+        />
     )
 }

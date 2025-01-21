@@ -16,6 +16,9 @@ interface TicketInternalNotesProps {
     initialNotes: TicketInternalNoteRow[]
 }
 
+/**
+ * Internal notes component for tickets
+ */
 export function TicketInternalNotes({
     ticketId,
     userId,
@@ -54,14 +57,24 @@ export function TicketInternalNotes({
         }
     }
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
+            if (!isSubmitting && newNote.trim()) {
+                handleSubmit()
+            }
+        }
+    }
+
     return (
-        <div className="flex flex-col h-[400px]">
+        <div className="flex flex-col h-full">
             {/* Add new note */}
-            <div className="mb-2">
+            <div className="px-6 pb-2">
                 <Textarea
                     placeholder="Add an internal note..."
                     value={newNote}
                     onChange={e => setNewNote(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     className="min-h-[60px] resize-none text-xs"
                 />
                 <div className="flex justify-end mt-1.5">
@@ -77,7 +90,7 @@ export function TicketInternalNotes({
             </div>
 
             {/* Notes list */}
-            <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="flex-1 overflow-y-auto min-h-0 px-6">
                 <div className="space-y-2">
                     {notes.map(note => (
                         <div

@@ -204,7 +204,7 @@ export async function createTicket(
 
 export async function updateTicket(
     id: string,
-    input: FormData | z.infer<typeof ticketUpdateSchema>,
+    input: FormData | Omit<z.infer<typeof ticketUpdateSchema>, 'id'>,
 ): Promise<{
     data: TicketRow | null
     error: string | null
