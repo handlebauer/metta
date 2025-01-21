@@ -26,10 +26,10 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { ticketInsertSchema } from '@/lib/schemas/tickets'
-import { createTicket } from '@/actions/tickets'
+import { ticketInsertSchema } from '@/lib/schemas/ticket.schemas'
+import { createTicket } from '@/actions/ticket.actions'
 
-import type { UserRow } from '@/lib/schemas/user'
+import type { UserRow } from '@/lib/schemas/user.schemas'
 
 interface NewTicketFormProps {
     /**

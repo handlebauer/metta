@@ -2,8 +2,8 @@ import { notFound, redirect } from 'next/navigation'
 
 import { TicketView } from '@/components/tickets/ticket-view'
 import { createClient } from '@/lib/supabase/server'
-import { TicketService } from '@/services/tickets'
-import { getProfile } from '@/actions/users'
+import { TicketService } from '@/services/ticket.services'
+import { getProfile } from '@/actions/user.actions'
 
 interface TicketPageProps {
     params: Promise<{ id: string }>

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { TicketList } from '@/components/tickets/list/ticket-list.client'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
-import { getTickets, getTicketStats } from '@/actions/tickets'
+import { getTickets, getTicketStats } from '@/actions/ticket.actions'
 
 type TicketStatus = 'new' | 'open' | 'closed'
 

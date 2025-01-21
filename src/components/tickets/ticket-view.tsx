@@ -1,9 +1,9 @@
-import { getTicketMessages } from '@/actions/messages'
+import { getTicketMessages } from '@/actions/message.actions'
 
 import { TicketConversation } from './conversation/ticket-conversation.client'
 import { TicketStatusBadge } from './list/ticket-status-badge'
 
-import type { TicketRow } from '@/lib/schemas/tickets'
+import type { TicketRow } from '@/lib/schemas/ticket.schemas'
 
 interface TicketViewProps {
     ticket: TicketRow

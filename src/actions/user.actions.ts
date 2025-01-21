@@ -3,12 +3,16 @@
 import { revalidatePath } from 'next/cache'
 
 import { DatabaseError } from '@/lib/errors'
-import { userInsertSchema } from '@/lib/schemas/user'
-import { ProfileService } from '@/services/profiles'
-import { UserService } from '@/services/users'
+import { userInsertSchema } from '@/lib/schemas/user.schemas'
+import { ProfileService } from '@/services/profile.services'
+import { UserService } from '@/services/user.services'
 
-import type { ProfileRow } from '@/lib/schemas/profile'
-import type { UserInsert, UserRow, UserUpdate } from '@/lib/schemas/user'
+import type { ProfileRow } from '@/lib/schemas/profile.schemas'
+import type {
+    UserInsert,
+    UserRow,
+    UserUpdate,
+} from '@/lib/schemas/user.schemas'
 
 const userService = new UserService()
 const profileService = new ProfileService()

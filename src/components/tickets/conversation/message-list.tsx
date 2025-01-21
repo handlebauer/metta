@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 
 import { MessageItem } from './message-item'
 
-import type { MessageWithUser } from '@/lib/schemas/messages'
+import type { MessageWithUser } from '@/lib/schemas/message.schemas'
 
 interface MessageListProps {
     messages: MessageWithUser[]

@@ -3,14 +3,14 @@ import {
     profileInsertSchema,
     profileSchema,
     profileUpdateSchema,
-} from '@/lib/schemas/profile'
+} from '@/lib/schemas/profile.schemas'
 import { createClient } from '@/lib/supabase/server'
 
 import type {
     ProfileInsert,
     ProfileRow,
     ProfileUpdate,
-} from '@/lib/schemas/profile'
+} from '@/lib/schemas/profile.schemas'
 
 export class ProfileService {
     async findById(id: string): Promise<ProfileRow | null> {

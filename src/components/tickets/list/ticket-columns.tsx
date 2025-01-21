@@ -5,7 +5,7 @@ import { formatDate, formatTimeAgo } from '@/lib/utils/dates'
 
 import { TicketStatusBadge } from './ticket-status-badge'
 
-import type { TicketWithCustomer } from '@/lib/schemas/tickets'
+import type { TicketWithCustomer } from '@/lib/schemas/ticket.schemas'
 import type { Column, ColumnDef } from '@tanstack/react-table'
 
 // Status sort order: new -> open -> closed

@@ -3,10 +3,14 @@ import {
     userInsertSchema,
     userSchema,
     userUpdateSchema,
-} from '@/lib/schemas/user'
+} from '@/lib/schemas/user.schemas'
 import { createClient } from '@/lib/supabase/server'
 
-import type { UserInsert, UserRow, UserUpdate } from '@/lib/schemas/user'
+import type {
+    UserInsert,
+    UserRow,
+    UserUpdate,
+} from '@/lib/schemas/user.schemas'
 
 export class UserService {
     async findById(id: string): Promise<UserRow | null> {

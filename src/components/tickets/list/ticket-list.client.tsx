@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils'
 
 import { ticketColumns } from './ticket-columns'
 
-import type { TicketWithCustomer } from '@/lib/schemas/tickets'
+import type { TicketWithCustomer } from '@/lib/schemas/ticket.schemas'
 import type { SortingState } from '@tanstack/react-table'
 
 export interface TicketListProps {

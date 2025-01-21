@@ -2,12 +2,12 @@
 
 import { useCallback, useOptimistic, useState, useTransition } from 'react'
 
-import { createMessage } from '@/actions/messages'
+import { createMessage } from '@/actions/message.actions'
 
 import { MessageList } from './message-list'
 import { TicketEditor } from './ticket-editor.client'
 
-import type { MessageWithUser } from '@/lib/schemas/messages'
+import type { MessageWithUser } from '@/lib/schemas/message.schemas'
 
 interface TicketConversationProps {
     ticketId: string

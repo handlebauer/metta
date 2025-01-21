@@ -4,12 +4,18 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 import { DatabaseError } from '@/lib/errors'
-import { ticketInsertSchema, ticketUpdateSchema } from '@/lib/schemas/tickets'
-import { TicketService } from '@/services/tickets'
+import {
+    ticketInsertSchema,
+    ticketUpdateSchema,
+} from '@/lib/schemas/ticket.schemas'
+import { TicketService } from '@/services/ticket.services'
 
-import type { TicketRow, TicketWithCustomer } from '@/lib/schemas/tickets'
+import type {
+    TicketRow,
+    TicketWithCustomer,
+} from '@/lib/schemas/ticket.schemas'
 import type { Tables } from '@/lib/supabase/types'
-import type { TicketStats } from '@/services/tickets'
+import type { TicketStats } from '@/services/ticket.services'
 
 const service = new TicketService()
 

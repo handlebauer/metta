@@ -4,10 +4,10 @@ import { DatabaseError } from '@/lib/errors'
 import {
     messageInsertSchema,
     messageUpdateSchema,
-} from '@/lib/schemas/messages'
+} from '@/lib/schemas/message.schemas'
 import { createClient } from '@/lib/supabase/server'
 
-import type { MessageRow, MessageWithUser } from '@/lib/schemas/messages'
+import type { MessageRow, MessageWithUser } from '@/lib/schemas/message.schemas'
 
 export class MessageService {
     async findByTicketId(ticketId: string): Promise<MessageWithUser[]> {

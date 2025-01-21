@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache'
 
 import { createClient } from '@/lib/supabase/server'
-import { MessageService } from '@/services/messages'
-import { ProfileService } from '@/services/profiles'
+import { MessageService } from '@/services/message.services'
+import { ProfileService } from '@/services/profile.services'
 
 const messageService = new MessageService()
 const profileService = new ProfileService()

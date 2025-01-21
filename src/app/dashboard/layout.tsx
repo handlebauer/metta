@@ -1,10 +1,9 @@
 import { redirect } from 'next/navigation'
 
 import { Brand } from '@/components/ui/brand'
+import { SidebarNav } from '@/components/dashboard/sidebar-nav.client'
 import { UserNav } from '@/components/dashboard/user-nav'
 import { createClient } from '@/lib/supabase/server'
-
-import { SidebarNav } from './sidebar-nav.client'
 
 export default async function DashboardLayout({
     children,

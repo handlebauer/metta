@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { formatTimeAgo } from '@/lib/utils/dates'
 
-import type { MessageWithUser } from '@/lib/schemas/messages'
+import type { MessageWithUser } from '@/lib/schemas/message.schemas'
 
 interface MessageItemProps {
     message: MessageWithUser

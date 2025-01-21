@@ -5,10 +5,13 @@ import {
     ticketInsertSchema,
     ticketSchema,
     ticketUpdateSchema,
-} from '@/lib/schemas/tickets'
+} from '@/lib/schemas/ticket.schemas'
 import { createClient } from '@/lib/supabase/server'
 
-import type { TicketRow, TicketWithCustomer } from '@/lib/schemas/tickets'
+import type {
+    TicketRow,
+    TicketWithCustomer,
+} from '@/lib/schemas/ticket.schemas'
 import type { Tables } from '@/lib/supabase/types'
 
 export interface TicketStats {

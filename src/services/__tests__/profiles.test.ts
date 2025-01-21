@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { expect, mock, test } from 'bun:test'
 import dotenv from 'dotenv'
 
-import { ProfileService } from '../profiles'
+import { ProfileService } from '../profile.services'
 
 import type { Database } from '@/lib/supabase/types'
 

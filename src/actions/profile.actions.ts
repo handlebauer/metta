@@ -3,14 +3,14 @@
 import { revalidatePath } from 'next/cache'
 
 import { DatabaseError } from '@/lib/errors'
-import { profileInsertSchema } from '@/lib/schemas/profile'
-import { ProfileService } from '@/services/profiles'
+import { profileInsertSchema } from '@/lib/schemas/profile.schemas'
+import { ProfileService } from '@/services/profile.services'
 
 import type {
     ProfileInsert,
     ProfileRow,
     ProfileUpdate,
-} from '@/lib/schemas/profile'
+} from '@/lib/schemas/profile.schemas'
 
 const service = new ProfileService()
 

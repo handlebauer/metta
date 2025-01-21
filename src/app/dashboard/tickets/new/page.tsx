@@ -9,7 +9,11 @@ import {
 } from '@/components/ui/card'
 import { NewTicketForm } from '@/components/tickets/form/new-ticket-form.client'
 import { createClient } from '@/lib/supabase/server'
-import { getAllActiveUsersExcept, getProfile, getUser } from '@/actions/users'
+import {
+    getAllActiveUsersExcept,
+    getProfile,
+    getUser,
+} from '@/actions/user.actions'
 
 export default async function NewTicketPage() {
     const supabase = await createClient()
