@@ -47,7 +47,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                 </div>
                 <div className="flex items-center gap-4">
                     <Button asChild>
-                        <Link href="/dashboard/tickets/new">
+                        <Link href="/dashboard/tickets/new" prefetch={true}>
                             <PlusCircle className="mr-2 h-4 w-4" />
                             New Ticket
                         </Link>
