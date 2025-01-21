@@ -20,7 +20,7 @@ export function HeroSection({ isLoggedIn }: { isLoggedIn: boolean }) {
                     <div className="relative z-10 flex flex-col items-center -translate-x-14">
                         <h1 className="font-outfit scroll-m-20 text-4xl lg:text-5xl font-bold tracking-tight leading-[1.3] lg:leading-[1.2] text-center">
                             Support with{' '}
-                            <span className="p-2 bg-purple-100 rounded-[8px] whitespace-nowrap tracking-wide">
+                            <span className="p-2 bg-accent-purple rounded-[8px] whitespace-nowrap tracking-wide">
                                 Balance
                             </span>
                         </h1>

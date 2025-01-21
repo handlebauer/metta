@@ -29,6 +29,10 @@
     --ring: 0 0% 3.9%;
 
     --radius: 0.5rem;
+
+    /* New accent colors */
+    --accent-purple: 270 100% 97%;
+    --accent-emerald: 151 100% 96%;
 }
 
 body {
@@ -86,6 +90,10 @@ body {
         --chart-5: 27 87% 67%;
 
         --radius: 0.5rem;
+
+        /* New accent colors */
+        --accent-purple: 270 100% 97%;
+        --accent-emerald: 151 100% 96%;
     }
     .dark {
         --background: 0 0% 3.9%;
@@ -135,6 +143,10 @@ body {
         --chart-4: 280 65% 60%;
 
         --chart-5: 340 75% 55%;
+
+        /* New accent colors - darker variants */
+        --accent-purple: 270 100% 7%;
+        --accent-emerald: 151 100% 7%;
     }
 }
 
