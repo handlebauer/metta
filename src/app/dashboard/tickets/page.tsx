@@ -58,7 +58,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                                 className="flex items-center gap-1"
                             >
                                 <PlusCircle className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                                <span className="text-sm font-normal text-muted-foreground group-hover:text-foreground transition-colors">
+                                <span className="text-sm font-normal text-semi-muted-foreground group-hover:text-foreground transition-colors">
                                     Create
                                 </span>
                             </Link>
