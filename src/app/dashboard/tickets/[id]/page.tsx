@@ -6,9 +6,7 @@ import { TicketService } from '@/services/tickets'
 import { getProfile } from '@/actions/users'
 
 interface TicketPageProps {
-    params: Promise<{
-        id: string
-    }>
+    params: Promise<{ id: string }>
 }
 
 export default async function TicketPage({ params }: TicketPageProps) {
