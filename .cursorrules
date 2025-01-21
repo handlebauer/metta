@@ -41,7 +41,26 @@ Metta is an AI-powered Customer Relationship Management system designed to minim
 ## UI
 
 1. Check for shadcn/ui components in the `components/ui` directory
-2. As necessary, add shadcn components with `bun run shadcn:install <component-name>`
+2. As necessary, add shadcn components with `bun run shadcn:add <component-name>`
+3. When creating a new component, check for related types in the `lib/schemas` directory
+4. Keep UI logic in the function body and pass the values into the render body
+
+```tsx
+function Component(props: ComponentProps) {
+    // ✅ GOOD: Compute the value in the function body
+    const initials = useMemo(
+        () => props.name.split(' ').map(upperCase),
+        [props.name],
+    )
+
+    return <div>{initials}</div>
+}
+
+function Component(props: ComponentProps) {
+    // ❌ BAD: Compute the value in the render body
+    return <div>{props.name.split(' ').map(upperCase)}</div>
+}
+```
 
 ## Next.js Code Style
 

@@ -151,4 +151,16 @@ export class UserService {
             throw error
         }
     }
+
+    async delete(id: string): Promise<void> {
+        try {
+            const db = await createClient()
+            const { error } = await db.from('users').delete().eq('id', id)
+
+            if (error) throw new DatabaseError(error.message)
+        } catch (error) {
+            console.error('[UserService.delete]', error)
+            throw error
+        }
+    }
 }

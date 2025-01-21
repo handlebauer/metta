@@ -4,6 +4,7 @@ import { Brand } from '@/components/ui/brand'
 import { SidebarNav } from '@/components/dashboard/sidebar-nav.client'
 import { UserNav } from '@/components/dashboard/user-nav'
 import { createClient } from '@/lib/supabase/server'
+import { getProfile } from '@/actions/user.actions'
 
 export default async function DashboardLayout({
     children,
@@ -17,6 +18,13 @@ export default async function DashboardLayout({
 
     if (!user) {
         redirect('/login')
+    }
+
+    // Get user profile to check role
+    const { data: profile } = await getProfile(user.id)
+
+    if (!profile) {
+        throw new Error('User profile not found')
     }
 
     return (
@@ -35,7 +43,7 @@ export default async function DashboardLayout({
                 {/* Sidebar Navigation */}
                 <aside className="w-64 border-r bg-muted/30 flex-none">
                     <nav className="flex flex-col gap-2 p-4">
-                        <SidebarNav />
+                        <SidebarNav userRole={profile.role} />
                     </nav>
                 </aside>
 
