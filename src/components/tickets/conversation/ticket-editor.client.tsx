@@ -18,6 +18,7 @@ export function TicketEditor({ onSend, isSending }: TicketEditorProps) {
         extensions: [StarterKit],
         content: '',
         autofocus: true,
+        immediatelyRender: false,
         editorProps: {
             attributes: {
                 class: 'w-full text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-y-auto min-h-[24px] max-h-[200px]',
