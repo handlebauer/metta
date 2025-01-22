@@ -35,8 +35,8 @@ Metta is an AI-powered Customer Relationship Management system designed to minim
 
 ## Database
 
-1. After any migration file is changed/added, run `bun run supabase:init` to migrate and generate types.
-2. If there is a mismatch between our schema and the generated types, you must run `bun run supabase:init`
+1. After any migration file is changed/added, run `bun run supabase:init:local` to migrate and generate types.
+2. If there is a mismatch between our schema and the generated types, you must run `bun run supabase:init:local`
 
 ## UI
 
