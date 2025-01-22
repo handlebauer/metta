@@ -1,13 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
 import dotenv from 'dotenv'
+
+import { createServiceClient } from '@/lib/supabase/service'
 
 import { seedApiKeys } from './seed-data/api-keys'
 import { seedInternalNotes } from './seed-data/internal-notes'
 import { seedMessages } from './seed-data/messages'
 import { seedTickets } from './seed-data/tickets'
 import { seedUsers } from './seed-data/users'
-
-import type { Database } from '@/lib/supabase/types'
 
 // Load the environment variables first
 dotenv.config({ path: '.env.local' }) // Load local env first as fallback
@@ -21,35 +20,8 @@ if (isProd) {
     console.log('🌍 Using local environment (.env.local)')
 }
 
-// Validate required environment variables
-const requiredEnvVars = [
-    'NEXT_PUBLIC_SUPABASE_URL',
-    'SUPABASE_SERVICE_ROLE_KEY',
-]
-const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar])
-
-if (missingEnvVars.length > 0) {
-    console.error(
-        '❌ Missing required environment variables:',
-        missingEnvVars.join(', '),
-    )
-    console.error(
-        `Please ensure these are set in ${isProd ? '.env.production' : '.env.local'}`,
-    )
-    process.exit(1)
-}
-
 // Create a Supabase client with service role for seeding
-const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-        auth: {
-            autoRefreshToken: false,
-            persistSession: false,
-        },
-    },
-)
+const supabase = createServiceClient()
 
 async function main() {
     try {

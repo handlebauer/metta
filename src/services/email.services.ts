@@ -1,5 +1,8 @@
+import { createElement } from 'react'
+import { render } from '@react-email/render'
+
 import { NewAgentTicketNotification } from '@/components/emails/new-agent-ticket-notification'
-import { resend } from '@/lib/resend'
+import { sendgrid } from '@/lib/sendgrid'
 
 import type { TicketRow } from '@/lib/schemas/ticket.schemas'
 import type { UserRow } from '@/lib/schemas/user.schemas'
@@ -14,30 +17,31 @@ export class EmailService {
         let to: string
         let from: string
         if (process.env.NODE_ENV === 'development') {
-            to = process.env.RESEND_TEST_USER_EMAIL!
-            from = 'Metta Support <dev@metta.now>'
+            to = process.env.SENDGRID_TEST_EMAIL!
+            from = 'test@metta.now'
         } else {
             /**
              * XXX: FOR NOW, JUST SEND TO THE TEST USER IN PRODUCTION
              */
-            to = process.env.RESEND_TEST_USER_EMAIL!
-            from = 'Metta Support <support@metta.now>'
+            to = process.env.SENDGRID_TEST_EMAIL!
+            from = 'support@metta.now'
         }
 
         try {
-            const { data, error } = await resend.emails.send({
-                from,
-                to,
-                subject: `Ticket #${ticket.id} [Metta Support] - ${ticket.subject}`,
-                react: await NewAgentTicketNotification({ ticket }),
-            })
+            // Render the React email template to HTML
+            const html = await render(
+                createElement(NewAgentTicketNotification, { ticket }),
+            )
 
-            if (error) {
-                console.error('Failed to send email notification:', error)
-                throw error
+            const msg = {
+                to,
+                from,
+                subject: `[Metta] ${ticket.subject} (#${ticket.id})`,
+                html,
             }
 
-            return data
+            await sendgrid.send(msg)
+            return { success: true }
         } catch (error) {
             console.error('Failed to send email notification:', error)
             throw error

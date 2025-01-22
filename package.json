@@ -19,7 +19,8 @@
         "test": "playwright test --config=playwright.config.ts",
         "test:smoke": "playwright test --config=playwright.config.ts --grep @smoke",
         "test:critical": "playwright test --config=playwright.config.ts --grep @critical",
-        "email:test": "bun run scripts/email/test.ts"
+        "email:test": "bun run scripts/email/test.ts",
+        "verify-ticket": "bun run scripts/db/verify-ticket.ts"
     },
     "dependencies": {
         "@hookform/resolvers": "^3.10.0",
@@ -33,6 +34,7 @@
         "@radix-ui/react-switch": "^1.1.2",
         "@radix-ui/react-tabs": "^1.1.2",
         "@radix-ui/react-toast": "^1.2.4",
+        "@sendgrid/mail": "^8.1.4",
         "@supabase/ssr": "^0.5.2",
         "@tabler/icons-react": "^3.28.1",
         "@tanstack/react-table": "^8.20.6",
@@ -48,7 +50,6 @@
         "react-dom": "^19.0.0",
         "react-hook-form": "^7.54.2",
         "recharts": "^2.15.0",
-        "resend": "^4.1.1",
         "sonner": "^1.7.2",
         "svix": "^1.45.1",
         "swr": "^2.3.0",
