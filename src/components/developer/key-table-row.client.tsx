@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MoreHorizontal } from 'lucide-react'
+import { Copy, KeyRound, MoreHorizontal, ShieldOff } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -13,6 +13,7 @@ import {
 import { TableCell, TableRow } from '@/components/ui/table'
 import { formatDate } from '@/lib/utils/dates'
 import { revokeApiKeyAction } from '@/actions/api-key.actions'
+import { useToast } from '@/hooks/use-toast'
 
 import type { ApiKey } from '@/lib/schemas/api-key.schemas'
 
@@ -22,19 +23,40 @@ interface ApiKeyTableRowProps {
 
 export function ApiKeyTableRow({ apiKey }: ApiKeyTableRowProps) {
     const [isRevoking, setIsRevoking] = useState(false)
+    const { toast } = useToast()
 
     async function handleRevoke() {
         setIsRevoking(true)
         try {
-            await revokeApiKeyAction(apiKey.id)
+            const result = await revokeApiKeyAction(apiKey.id)
+            if (result.error) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Error',
+                    description: result.error,
+                })
+            }
         } finally {
             setIsRevoking(false)
         }
     }
 
+    function handleCopyId() {
+        navigator.clipboard.writeText(apiKey.id)
+        toast({
+            title: 'API Key ID Copied',
+            description: 'The API key ID has been copied to your clipboard.',
+        })
+    }
+
     return (
         <TableRow>
-            <TableCell>{apiKey.name}</TableCell>
+            <TableCell>
+                <div className="flex items-center gap-2">
+                    <KeyRound className="h-4 w-4 text-muted-foreground" />
+                    {apiKey.name}
+                </div>
+            </TableCell>
             <TableCell>{formatDate(apiKey.created_at)}</TableCell>
             <TableCell>
                 {apiKey.last_used_at
@@ -66,11 +88,16 @@ export function ApiKeyTableRow({ apiKey }: ApiKeyTableRowProps) {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={handleCopyId}>
+                            <Copy className="mr-2 h-4 w-4" />
+                            Copy Key ID
+                        </DropdownMenuItem>
                         <DropdownMenuItem
-                            className="text-destructive cursor-pointer"
+                            className="text-destructive"
                             disabled={isRevoking}
                             onClick={handleRevoke}
                         >
+                            <ShieldOff className="mr-2 h-4 w-4" />
                             {isRevoking ? 'Revoking...' : 'Revoke Key'}
                         </DropdownMenuItem>
                     </DropdownMenuContent>
