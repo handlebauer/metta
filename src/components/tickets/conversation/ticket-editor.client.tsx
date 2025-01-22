@@ -1,9 +1,9 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { Bold, Italic, Send, Strikethrough } from 'lucide-react'
+import { Bold, Italic, Strikethrough } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -11,14 +11,20 @@ import { cn } from '@/lib/utils'
 interface TicketEditorProps {
     onSend: (content: string) => Promise<void>
     isSending: boolean
+    disabled?: boolean
 }
 
-export function TicketEditor({ onSend, isSending }: TicketEditorProps) {
+export function TicketEditor({
+    onSend,
+    isSending,
+    disabled,
+}: TicketEditorProps) {
     const editor = useEditor({
         extensions: [StarterKit],
         content: '',
         autofocus: true,
         immediatelyRender: false,
+        editable: !disabled,
         editorProps: {
             attributes: {
                 class: 'w-full text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-y-auto min-h-[24px] max-h-[200px]',
@@ -36,6 +42,14 @@ export function TicketEditor({ onSend, isSending }: TicketEditorProps) {
         },
     })
 
+    // Update editor's editable state when disabled prop changes
+    useEffect(() => {
+        if (editor) {
+            editor.setEditable(!disabled)
+            editor.commands.focus()
+        }
+    }, [editor, disabled])
+
     // Class names
     const toolbarButtonClass = (isActive: boolean) =>
         cn(
@@ -48,15 +62,14 @@ export function TicketEditor({ onSend, isSending }: TicketEditorProps) {
         'transition-all duration-200 hover:bg-background',
         'focus-within:bg-background focus-within:border-zinc-400',
         'focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.2)]',
-        'group cursor-text h-[140px]',
+        'group h-[140px]',
+        disabled ? 'cursor-not-allowed opacity-50' : 'cursor-text',
     )
 
     const toolbarClass = cn('flex gap-1 px-[1px] py-1 bg-zinc-50/30')
     const editorContentClass = cn('flex-1 p-3')
     const actionsClass = cn('flex justify-end px-4 py-1 bg-zinc-50/30')
-    const sendButtonClass = cn(
-        'shrink-0 h-8 w-8 p-0 hover:bg-transparent text-muted-foreground disabled:opacity-30 hover:text-primary disabled:bg-transparent',
-    )
+    const hintTextClass = cn('text-xs text-muted-foreground')
 
     const handleSend = useCallback(async () => {
         if (!editor?.getText().trim()) return
@@ -113,17 +126,11 @@ export function TicketEditor({ onSend, isSending }: TicketEditorProps) {
                         <EditorContent editor={editor} />
                     </div>
 
-                    {/* Actions */}
+                    {/* Hint Text */}
                     <div className={actionsClass}>
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className={sendButtonClass}
-                            onClick={handleSend}
-                            disabled={isSending || !editor?.getText().trim()}
-                        >
-                            <Send className="w-4 h-4 text-gray-700" />
-                        </Button>
+                        <span className={hintTextClass}>
+                            Press Enter to Send
+                        </span>
                     </div>
                 </div>
             </div>

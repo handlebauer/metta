@@ -13,12 +13,14 @@ interface TicketConversationProps {
     ticketId: string
     user: { id: string; name: string; email: string; role?: string }
     initialMessages: MessageWithUser[]
+    status?: 'new' | 'open' | 'closed'
 }
 
 export function TicketConversation({
     ticketId,
     user,
     initialMessages,
+    status = 'new',
 }: TicketConversationProps) {
     const [isSending, setIsSending] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -91,6 +93,7 @@ export function TicketConversation({
             <TicketEditor
                 onSend={handleSend}
                 isSending={isSending || isPending}
+                disabled={status === 'new' || status === 'closed'}
             />
         </div>
     )

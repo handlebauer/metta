@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { formatConversationalDate } from '@/lib/utils/dates'
 
 import { EditablePriority } from './details/editable-priority.client'
+import { EditableStatus } from './details/editable-status.client'
 import { TicketInternalNotes } from './notes/ticket-internal-notes.client'
 
 import type {
@@ -61,97 +62,100 @@ export function TicketSidebar({
 
     return (
         <div className="w-[360px] border-l bg-muted/10 flex flex-col h-full">
-            <div className="flex flex-col flex-1">
-                <div className="px-6 py-4 space-y-4">
-                    {/* Customer Details Section */}
-                    <div className="border-b pb-4">
-                        <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                                <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                                    {initials}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className="space-y-1">
-                                <p className="font-medium text-sm">
-                                    {customerProfile.data?.full_name ||
-                                        'Unknown Customer'}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                    {customerUser.data?.email ||
-                                        'No email available'}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Ticket Details Section */}
-                    <div className="border-b pb-4">
-                        <h2 className="text-sm font-medium mb-3">Details</h2>
-                        <div className="space-y-1.5 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                    ID
-                                </span>
-                                <span className="font-medium">
-                                    #{ticket.id.slice(0, 8)}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                    Status
-                                </span>
-                                <span className="font-medium">
-                                    {ticket.status}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                    Priority
-                                </span>
-                                {isAgentOrAdmin ? (
-                                    <EditablePriority
-                                        ticketId={ticket.id}
-                                        initialPriority={ticket.priority}
-                                    />
-                                ) : (
-                                    <span className="font-medium">
-                                        {ticket.priority}
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                    Created
-                                </span>
-                                <span className="font-medium">
-                                    {displayDate}
-                                </span>
-                            </div>
+            {/* Fixed Header Section */}
+            <div className="px-6 py-4 space-y-4 flex-none">
+                {/* Customer Details Section */}
+                <div className="border-b pb-4">
+                    <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                            <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                                {initials}
+                            </AvatarFallback>
+                        </Avatar>
+                        <div className="space-y-1">
+                            <p className="font-medium text-sm">
+                                {customerProfile.data?.full_name ||
+                                    'Unknown Customer'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                {customerUser.data?.email ||
+                                    'No email available'}
+                            </p>
                         </div>
                     </div>
                 </div>
 
-                {/* Internal Notes Section (agents only) */}
-                {isAgentOrAdmin && (
-                    <div className="flex-1 flex flex-col min-h-0">
-                        <div className="px-6">
-                            <h2 className="text-sm font-medium mb-1">
-                                Internal Notes
-                            </h2>
-                            <p className="text-xs text-muted-foreground mb-3">
-                                Notes are only visible to agents
-                            </p>
+                {/* Ticket Details Section */}
+                <div className="border-b pb-4">
+                    <h2 className="text-sm font-medium mb-3">Details</h2>
+                    <div className="space-y-1.5 text-sm">
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">ID</span>
+                            <span className="font-medium">
+                                #{ticket.id.slice(0, 8)}
+                            </span>
                         </div>
-                        <div className="flex-1 min-h-0">
-                            <TicketInternalNotes
-                                ticketId={ticket.id}
-                                userId={user.id}
-                                initialNotes={notesResult.data || []}
-                            />
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">
+                                Status
+                            </span>
+                            <span className="font-medium">
+                                {ticket.status || 'new'}
+                            </span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">
+                                Priority
+                            </span>
+                            {isAgentOrAdmin ? (
+                                <EditablePriority
+                                    ticketId={ticket.id}
+                                    initialPriority={ticket.priority}
+                                />
+                            ) : (
+                                <span className="font-medium">
+                                    {ticket.priority}
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">
+                                Created
+                            </span>
+                            <span className="font-medium">{displayDate}</span>
                         </div>
                     </div>
-                )}
+                </div>
             </div>
+
+            {/* Scrollable Notes Section */}
+            {isAgentOrAdmin && (
+                <>
+                    <div className="px-6 flex-none">
+                        <h2 className="text-sm font-medium mb-1">
+                            Internal Notes
+                        </h2>
+                        <p className="text-xs text-muted-foreground mb-3">
+                            Notes are only visible to agents
+                        </p>
+                    </div>
+                    <div className="flex-1 overflow-y-auto min-h-0">
+                        <TicketInternalNotes
+                            ticketId={ticket.id}
+                            userId={user.id}
+                            initialNotes={notesResult.data || []}
+                        />
+                    </div>
+                    {/* Fixed Footer Section */}
+                    <div className="w-full px-6 py-4 border-t flex justify-center items-center flex-none">
+                        <EditableStatus
+                            ticketId={ticket.id}
+                            currentStatus={ticket.status || 'new'}
+                            userId={user.id}
+                        />
+                    </div>
+                </>
+            )}
         </div>
     )
 }

@@ -14,15 +14,16 @@ const eslintConfig = [
     {
         rules: {
             'import/no-anonymous-default-export': 'off',
+            '@typescript-eslint/no-require-imports': 'off',
             '@typescript-eslint/no-unused-vars': [
                 'error',
                 {
                     argsIgnorePattern: '^_',
                     varsIgnorePattern: '^_',
                     caughtErrorsIgnorePattern: '^_',
+                    ignoreRestSiblings: true,
                 },
             ],
-            '@typescript-eslint/no-require-imports': 'off',
         },
     },
 ]

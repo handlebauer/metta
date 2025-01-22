@@ -1,5 +1,7 @@
 import { Geist_Mono, Inter, Outfit } from 'next/font/google'
 
+import { Toaster } from '@/components/ui/toaster'
+
 import type { Metadata } from 'next'
 
 import './globals.css'
@@ -36,6 +38,7 @@ export default function RootLayout({
                 className={`${outfit.variable} ${geistMono.variable} ${inter.variable} font-inter antialiased`}
             >
                 {children}
+                <Toaster />
             </body>
         </html>
     )

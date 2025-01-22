@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { formatTimeAgo } from '@/lib/utils/dates'
 import { addInternalNote } from '@/actions/ticket.actions'
@@ -69,23 +68,20 @@ export function TicketInternalNotes({
     return (
         <div className="flex flex-col h-full">
             {/* Add new note */}
-            <div className="px-6 pb-2">
-                <Textarea
-                    placeholder="Add an internal note..."
-                    value={newNote}
-                    onChange={e => setNewNote(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="min-h-[60px] resize-none text-xs"
-                />
-                <div className="flex justify-end mt-1.5">
-                    <Button
-                        onClick={handleSubmit}
-                        disabled={isSubmitting || !newNote.trim()}
-                        size="sm"
-                        className="h-7 text-xs"
-                    >
-                        {isSubmitting ? 'Adding...' : 'Add Note'}
-                    </Button>
+            <div className="px-6 pb-2 pt-1">
+                <div className="relative">
+                    <Textarea
+                        placeholder="Add an internal note..."
+                        value={newNote}
+                        onChange={e => setNewNote(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        className="min-h-[60px] resize-none text-xs"
+                    />
+                    <div className="absolute bottom-0.5 right-2">
+                        <span className="text-[10px] text-muted-foreground">
+                            Press Enter
+                        </span>
+                    </div>
                 </div>
             </div>
 

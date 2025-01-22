@@ -46,6 +46,7 @@ export async function TicketView({ ticket, user }: TicketViewProps) {
                         ticketId={ticket.id}
                         user={user}
                         initialMessages={messagesResult.data || []}
+                        status={ticket.status || 'new'}
                     />
                 </div>
             </div>

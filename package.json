@@ -33,7 +33,7 @@
         "@radix-ui/react-slot": "^1.1.1",
         "@radix-ui/react-switch": "^1.1.2",
         "@radix-ui/react-tabs": "^1.1.2",
-        "@radix-ui/react-toast": "^1.2.4",
+        "@radix-ui/react-toast": "^1.2.5",
         "@sendgrid/mail": "^8.1.4",
         "@supabase/ssr": "^0.5.2",
         "@tabler/icons-react": "^3.28.1",
