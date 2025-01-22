@@ -62,7 +62,7 @@ test.describe('Ticket Management - Extended', () => {
 
     test('validates required fields', async ({ page }) => {
         // Navigate to new ticket form
-        await page.getByRole('link', { name: 'Create' }).click()
+        await page.getByLabel('Create new ticket').click()
         await expect(page).toHaveURL('/dashboard/tickets/new')
 
         // Try to submit without required fields
