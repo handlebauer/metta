@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import dotenv from 'dotenv'
 
+import { seedApiKeys } from './seed-data/api-keys'
 import { seedInternalNotes } from './seed-data/internal-notes'
 import { seedMessages } from './seed-data/messages'
 import { seedTickets } from './seed-data/tickets'
@@ -80,6 +81,7 @@ async function main() {
         await seedTickets(supabase)
         await seedInternalNotes(supabase)
         await seedMessages(supabase)
+        await seedApiKeys(supabase)
         console.log('✅ Seed data created successfully')
     } catch (error) {
         console.error('❌ Failed to seed database:', error)

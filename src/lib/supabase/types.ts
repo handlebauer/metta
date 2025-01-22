@@ -34,6 +34,42 @@ export type Database = {
     }
     public: {
         Tables: {
+            api_keys: {
+                Row: {
+                    created_at: string | null
+                    expires_at: string | null
+                    id: string
+                    key_id: string
+                    last_used_at: string | null
+                    name: string
+                    status: Database['public']['Enums']['api_key_status']
+                    updated_at: string | null
+                    user_id: string
+                }
+                Insert: {
+                    created_at?: string | null
+                    expires_at?: string | null
+                    id?: string
+                    key_id: string
+                    last_used_at?: string | null
+                    name: string
+                    status?: Database['public']['Enums']['api_key_status']
+                    updated_at?: string | null
+                    user_id: string
+                }
+                Update: {
+                    created_at?: string | null
+                    expires_at?: string | null
+                    id?: string
+                    key_id?: string
+                    last_used_at?: string | null
+                    name?: string
+                    status?: Database['public']['Enums']['api_key_status']
+                    updated_at?: string | null
+                    user_id?: string
+                }
+                Relationships: []
+            }
             messages: {
                 Row: {
                     content: string
@@ -248,15 +284,42 @@ export type Database = {
             }
         }
         Views: {
-            [_ in never]: never
+            decrypted_api_keys: {
+                Row: {
+                    created_at: string | null
+                    expires_at: string | null
+                    id: string | null
+                    key: string | null
+                    last_used_at: string | null
+                    name: string | null
+                    status: Database['public']['Enums']['api_key_status'] | null
+                    updated_at: string | null
+                    user_id: string | null
+                }
+                Relationships: []
+            }
         }
         Functions: {
             gen_ulid: {
                 Args: Record<PropertyKey, never>
                 Returns: string
             }
+            generate_api_key: {
+                Args: {
+                    key_name: string
+                    user_id: string
+                }
+                Returns: Json
+            }
+            revoke_api_key: {
+                Args: {
+                    api_key_id: string
+                }
+                Returns: undefined
+            }
         }
         Enums: {
+            api_key_status: 'active' | 'revoked' | 'expired'
             message_role: 'customer' | 'agent' | 'admin'
             ticket_priority: 'low' | 'medium' | 'high' | 'urgent'
             ticket_status: 'new' | 'open' | 'closed'
