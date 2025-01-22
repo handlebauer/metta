@@ -28,7 +28,7 @@ export class EmailService {
             const { data, error } = await resend.emails.send({
                 from,
                 to,
-                subject: `New Ticket Assigned: ${ticket.subject}`,
+                subject: `Ticket #${ticket.id} [Metta Support] - ${ticket.subject}`,
                 react: await NewAgentTicketNotification({ ticket }),
             })
 

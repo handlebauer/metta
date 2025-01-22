@@ -10,8 +10,7 @@ export const NewAgentTicketNotification: React.FC<
     Readonly<NewAgentTicketNotificationProps>
 > = ({ ticket }) => (
     <div>
-        <h2>Ticket #{ticket.id} - New Support Ticket Assigned</h2>
-        <p>A new ticket has been assigned to you:</p>
+        <h2>A new ticket has been assigned to you:</h2>
         <ul>
             <li>
                 <strong>Ticket ID:</strong> {ticket.id}
