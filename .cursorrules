@@ -38,6 +38,12 @@ Metta is an AI-powered Customer Relationship Management system designed to minim
 1. After any migration file is changed/added, run `bun run supabase:init:local` to migrate and generate types.
 2. If there is a mismatch between our schema and the generated types, you must run `bun run supabase:init:local`
 
+## Package Commands
+
+2. `bun run supabase:init:local` - Reset local DB, generate types, and seed data
+3. `bun run shadcn:add <component>` - Add a new shadcn/ui component
+4. `bun run test` - Run E2E tests with Playwright
+
 ## UI
 
 1. Check for shadcn/ui components in the `components/ui` directory

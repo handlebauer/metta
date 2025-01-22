@@ -7,10 +7,6 @@
 import path from 'path'
 import { expect, test } from '@playwright/test'
 
-// Use auth state across all tests
-const authFile = path.join(__dirname, '.auth/state.json')
-test.use({ storageState: authFile })
-
 test.describe('Task Management', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto('/tasks')
