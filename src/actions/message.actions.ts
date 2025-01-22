@@ -27,21 +27,24 @@ export async function getTicketMessages(ticketId: string) {
 
 export async function createMessage(ticketId: string, content: string) {
     try {
-        const db = await createClient()
-        const session = await db.auth.getSession()
-        if (!session.data.session) {
-            throw new Error('Not authenticated')
+        const supabase = await createClient()
+        const {
+            data: { user },
+        } = await supabase.auth.getUser()
+
+        if (!user) {
+            throw new Error('User not found')
         }
 
-        const userId = session.data.session.user.id
-        const profile = await profileService.findByUserId(userId)
+        const profile = await profileService.findByUserId(user.id)
+
         if (!profile) {
             throw new Error('Profile not found')
         }
 
         const message = await messageService.create({
             ticket_id: ticketId,
-            user_id: userId,
+            user_id: user.id,
             role: profile.role,
             content,
             html_content: content, // For now, just store the plain text
