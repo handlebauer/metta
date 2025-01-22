@@ -16,8 +16,13 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import { CreateApiKeyDialog } from '@/components/developer/create-api-key-dialog.client'
+import { ApiKeyTableRow } from '@/components/developer/key-table-row.client'
+import { listApiKeysAction } from '@/actions/api-key.actions'
 
-export default function DeveloperSettingsPage() {
+export default async function DeveloperSettingsPage() {
+    const { data: apiKeys, error } = await listApiKeysAction()
+
     return (
         <div className="container mx-auto py-6 space-y-8">
             <div>
@@ -38,37 +43,51 @@ export default function DeveloperSettingsPage() {
                                 Manage your API keys for webhook integrations
                             </CardDescription>
                         </div>
-                        <Button disabled>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Generate New Key
-                        </Button>
+                        <CreateApiKeyDialog>
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Generate New Key
+                            </Button>
+                        </CreateApiKeyDialog>
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Key Name</TableHead>
-                                <TableHead>Created</TableHead>
-                                <TableHead>Last Used</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">
-                                    Actions
-                                </TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            <TableRow>
-                                <TableCell className="text-muted-foreground italic">
-                                    No API keys generated yet
-                                </TableCell>
-                                <TableCell />
-                                <TableCell />
-                                <TableCell />
-                                <TableCell />
-                            </TableRow>
-                        </TableBody>
-                    </Table>
+                    {error ? (
+                        <p className="text-sm text-destructive">{error}</p>
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Key Name</TableHead>
+                                    <TableHead>Created</TableHead>
+                                    <TableHead>Last Used</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">
+                                        Actions
+                                    </TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {!apiKeys?.length ? (
+                                    <TableRow>
+                                        <TableCell
+                                            colSpan={5}
+                                            className="text-muted-foreground italic text-center"
+                                        >
+                                            No API keys generated yet
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    apiKeys.map(key => (
+                                        <ApiKeyTableRow
+                                            key={key.id}
+                                            apiKey={key}
+                                        />
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    )}
                 </CardContent>
             </Card>
 

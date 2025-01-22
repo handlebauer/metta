@@ -72,6 +72,7 @@ async function main() {
             .throwOnError()
         await supabase.from('messages').delete().neq('id', '0').throwOnError()
         await supabase.from('tickets').delete().neq('id', '0').throwOnError()
+        await supabase.from('api_keys').delete().neq('id', '0').throwOnError()
         await supabase.from('profiles').delete().neq('id', '0').throwOnError()
         await supabase.from('users').delete().neq('id', '0').throwOnError()
         console.log('✅ Database cleaned')
