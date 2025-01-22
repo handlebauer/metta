@@ -3,11 +3,19 @@ import { z } from 'zod'
 import { DatabaseError } from '@/lib/errors'
 import {
     messageInsertSchema,
+    messageSchema,
     messageUpdateSchema,
 } from '@/lib/schemas/message.schemas'
 import { createClient } from '@/lib/supabase/server'
 
+import { EmailService } from './email.services'
+import { TicketService } from './ticket.services'
+import { UserService } from './user.services'
+
 import type { MessageRow, MessageWithUser } from '@/lib/schemas/message.schemas'
+
+const ticketService = new TicketService()
+const userService = new UserService()
 
 export class MessageService {
     async findByTicketId(ticketId: string): Promise<MessageWithUser[]> {
@@ -77,11 +85,24 @@ export class MessageService {
             if (error) throw new DatabaseError(error.message)
             if (!data) throw new DatabaseError('Failed to create message')
 
-            return {
-                ...data,
-                created_at: new Date(data.created_at!).toISOString(),
-                updated_at: new Date(data.updated_at!).toISOString(),
+            const message = messageSchema.parse(data)
+
+            // If this is an agent message, send email notification to customer
+            if (message.role === 'agent') {
+                const ticket = await ticketService.findById(message.ticket_id)
+                if (!ticket) throw new DatabaseError('Ticket not found')
+
+                const customer = await userService.findById(ticket.customer_id)
+                if (customer) {
+                    await EmailService.sendAgentReplyNotification(
+                        ticket,
+                        customer,
+                        message.content,
+                    )
+                }
             }
+
+            return message
         } catch (error) {
             console.error('[MessageService.create]', error)
             throw error
