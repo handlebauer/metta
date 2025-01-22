@@ -6,4 +6,5 @@ bunx lint-staged --allow-empty
 if [ -z "$SKIP_TESTS" ]; then
     echo "Running critical path tests..."
     bun run test:critical || exit 1
+    bun run supabase:seed:local
 fi
