@@ -1,4 +1,4 @@
-import { NewTicketNotification } from '@/components/emails/new-ticket-notification'
+import { NewAgentTicketNotification } from '@/components/emails/new-agent-ticket-notification'
 import { resend } from '@/lib/resend'
 
 import type { TicketRow } from '@/lib/schemas/ticket.schemas'
@@ -29,7 +29,7 @@ export class EmailService {
                 from,
                 to,
                 subject: `New Ticket Assigned: ${ticket.subject}`,
-                react: await NewTicketNotification({ ticket }),
+                react: await NewAgentTicketNotification({ ticket }),
             })
 
             if (error) {

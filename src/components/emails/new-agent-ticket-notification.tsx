@@ -2,15 +2,15 @@ import * as React from 'react'
 
 import type { TicketRow } from '@/lib/schemas/ticket.schemas'
 
-interface NewTicketNotificationProps {
+interface NewAgentTicketNotificationProps {
     ticket: TicketRow
 }
 
-export const NewTicketNotification: React.FC<
-    Readonly<NewTicketNotificationProps>
+export const NewAgentTicketNotification: React.FC<
+    Readonly<NewAgentTicketNotificationProps>
 > = ({ ticket }) => (
     <div>
-        <h2>New Support Ticket Assigned</h2>
+        <h2>Ticket #{ticket.id} - New Support Ticket Assigned</h2>
         <p>A new ticket has been assigned to you:</p>
         <ul>
             <li>
@@ -44,6 +44,10 @@ export const NewTicketNotification: React.FC<
             >
                 View Ticket
             </a>
+        </p>
+        <p style={{ fontSize: '12px', color: '#666' }}>
+            Please keep the ticket ID (#{ticket.id}) in the subject line when
+            replying to this email.
         </p>
     </div>
 )
