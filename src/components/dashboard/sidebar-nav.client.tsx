@@ -72,7 +72,7 @@ export function SidebarNav({ userRole }: SidebarNavProps) {
             >
                 <Link href="/dashboard/tickets/new" prefetch={true}>
                     <Plus className="mr-2 h-3.5 w-3.5" />
-                    New
+                    Create
                 </Link>
             </Button>
 

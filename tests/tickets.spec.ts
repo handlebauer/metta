@@ -9,7 +9,7 @@ test.describe('Ticket Management - Core @smoke', () => {
 
     test('admin can create a new ticket @critical', async ({ page }) => {
         // Click create ticket button (from the tickets page)
-        await page.getByRole('link', { name: 'Create' }).click()
+        await page.getByLabel('Create new ticket').click()
 
         // Wait for navigation to new ticket page
         await expect(page).toHaveURL('/dashboard/tickets/new')
