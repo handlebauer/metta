@@ -17,6 +17,8 @@
         "supabase:seed:prod": "NODE_ENV=production bun run scripts/db/seed.ts",
         "shadcn:add": "bunx --bun shadcn@latest add",
         "test": "playwright test --config=playwright.config.ts",
+        "test:smoke": "playwright test --config=playwright.config.ts --grep @smoke",
+        "test:critical": "playwright test --config=playwright.config.ts --grep @critical",
         "email:test": "bun run scripts/email/test.ts"
     },
     "dependencies": {

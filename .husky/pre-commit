@@ -1,2 +1,9 @@
+# Run linting
 bun run lint
 bunx lint-staged --allow-empty
+
+# Run critical path tests (can be skipped with SKIP_TESTS=1)
+if [ -z "$SKIP_TESTS" ]; then
+    echo "Running critical path tests..."
+    bun run test:critical || exit 1
+fi
