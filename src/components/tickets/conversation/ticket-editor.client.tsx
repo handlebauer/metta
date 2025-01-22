@@ -126,11 +126,13 @@ export function TicketEditor({
                         <EditorContent editor={editor} />
                     </div>
 
-                    {/* Hint Text */}
+                    {/* Hint Text - Only show when editor is focused */}
                     <div className={actionsClass}>
-                        <span className={hintTextClass}>
-                            Press Enter to Send
-                        </span>
+                        {editor?.isFocused && (
+                            <span className={hintTextClass}>
+                                Press Enter to Send
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>

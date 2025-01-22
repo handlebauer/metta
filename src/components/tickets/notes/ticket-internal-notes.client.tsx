@@ -26,6 +26,7 @@ export function TicketInternalNotes({
     const [notes, setNotes] = useState(initialNotes)
     const [newNote, setNewNote] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isFocused, setIsFocused] = useState(false)
 
     async function handleSubmit() {
         if (!newNote.trim()) return
@@ -75,13 +76,17 @@ export function TicketInternalNotes({
                         value={newNote}
                         onChange={e => setNewNote(e.target.value)}
                         onKeyDown={handleKeyDown}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
                         className="min-h-[60px] resize-none text-xs"
                     />
-                    <div className="absolute bottom-0.5 right-2">
-                        <span className="text-[10px] text-muted-foreground">
-                            Press Enter
-                        </span>
-                    </div>
+                    {isFocused && (
+                        <div className="absolute bottom-0.5 right-2">
+                            <span className="text-[10px] text-muted-foreground">
+                                Press Enter
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
 
