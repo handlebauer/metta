@@ -50,11 +50,11 @@ export const ticketSchema = z.object({
     id: z.string(),
     created_at: z.string().nullable(),
     updated_at: z.string().nullable(),
-    subject: z.string().min(1),
-    description: z.string(),
+    subject: z.string().min(1, 'Please enter a subject'),
+    description: z.string().min(1, 'Please provide a description'),
     status: z.enum(['new', 'open', 'closed']),
     priority: ticketPriorityEnum,
-    customer_id: z.string(),
+    customer_id: z.string().min(1, 'Please select a requester'),
     agent_id: z.string().nullable(),
 }) satisfies z.ZodType<TicketRow>
 
