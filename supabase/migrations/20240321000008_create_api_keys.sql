@@ -54,6 +54,12 @@ begin
     -- Generate a random API key
     new_key := encode(gen_random_bytes(32), 'base64');
 
+    -- Make URL safe (optional)
+    new_key := replace(replace(new_key, '/', '_'), '+', '-');
+
+    -- Add prefix (optional)
+    new_key := 'metta-' || new_key;
+
     -- Store the key in vault
     secret_id := vault.create_secret(
         new_key,
