@@ -2,7 +2,18 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { Crown, Headphones, Inbox, List, Plus, User, Users } from 'lucide-react'
+import {
+    Code,
+    Crown,
+    Headphones,
+    Inbox,
+    List,
+    Plus,
+    Settings,
+    Sliders,
+    User,
+    Users,
+} from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -130,6 +141,54 @@ export function SidebarNav({ userRole }: SidebarNavProps) {
                         <Link href="/dashboard/users?type=customer">
                             <User className="mr-2 h-3.5 w-3.5" />
                             Customers
+                        </Link>
+                    </Button>
+
+                    <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className={cn(
+                            'w-full justify-start font-medium mt-4',
+                            pathname?.startsWith('/dashboard/settings') &&
+                                'bg-muted/50',
+                        )}
+                    >
+                        <Link href="/dashboard/settings">
+                            <div className="flex items-center">
+                                <Settings className="mr-2 h-3.5 w-3.5" />
+                                Settings
+                            </div>
+                        </Link>
+                    </Button>
+                    <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className={cn(
+                            'w-full justify-start pl-7',
+                            pathname === '/dashboard/settings/preferences' &&
+                                'bg-muted',
+                        )}
+                    >
+                        <Link href="/dashboard/settings/preferences">
+                            <Sliders className="mr-2 h-3.5 w-3.5" />
+                            General
+                        </Link>
+                    </Button>
+                    <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className={cn(
+                            'w-full justify-start pl-7',
+                            pathname === '/dashboard/settings/developer' &&
+                                'bg-muted',
+                        )}
+                    >
+                        <Link href="/dashboard/settings/developer">
+                            <Code className="mr-2 h-3.5 w-3.5" />
+                            Developer
                         </Link>
                     </Button>
                 </>
