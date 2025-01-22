@@ -17,15 +17,21 @@ test.describe('Authentication and Dashboard', () => {
                 // Verify navigation is present
                 await expect(page.getByRole('navigation')).toBeVisible()
 
-                // Verify user menu is present (it should show demo@example.com)
+                // Click the avatar to open the dropdown
+                await page
+                    .locator('span.bg-zinc-700')
+                    .filter({ hasText: 'DE' })
+                    .click()
+
+                // Verify user menu shows the email
                 await expect(
                     page.getByText('demo@example.com', { exact: true }),
                 ).toBeVisible()
 
-                // Verify sign out button is present
+                // Verify sign out menu item is present
                 await expect(
-                    page.getByRole('button', { name: /sign out/i }),
-                ).toBeEnabled()
+                    page.getByRole('menuitem', { name: /sign out/i }),
+                ).toBeVisible()
             })
         })
     })
