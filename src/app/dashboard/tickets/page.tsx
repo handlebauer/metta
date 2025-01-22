@@ -35,8 +35,6 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
         getTickets({ status }),
     ])
 
-    console.log('status', status)
-
     const stats = statsResult.data || { total: 0, open: 0, closedToday: 0 }
 
     return (
