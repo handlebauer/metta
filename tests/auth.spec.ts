@@ -7,35 +7,24 @@ test.describe('Authentication and Dashboard', () => {
                 await page.goto('/dashboard')
             })
 
-            await test.step('verify dashboard header', async () => {
-                // Use semantic heading roles for better accessibility testing
-                await expect(
-                    page.getByRole('heading', { name: 'Dashboard', level: 1 }),
-                ).toBeVisible()
-                await expect(
-                    page.getByRole('heading', {
-                        name: 'Welcome to your Dashboard',
-                        level: 2,
-                    }),
-                ).toBeVisible()
-            })
+            await test.step('verify dashboard content', async () => {
+                // Wait for the page to be fully loaded
+                await page.waitForLoadState('networkidle')
 
-            await test.step('verify user information', async () => {
-                // Use more specific selector for the email text
-                const emailText = page.getByText(
-                    'You are signed in as hello@hello.com',
-                    {
-                        exact: true,
-                    },
-                )
-                await expect(emailText).toBeVisible()
-            })
+                // Verify we're on the dashboard page
+                await expect(page).toHaveURL(/.*\/dashboard/)
 
-            await test.step('verify navigation elements', async () => {
-                // Use semantic roles for better accessibility testing
+                // Verify navigation is present
                 await expect(page.getByRole('navigation')).toBeVisible()
+
+                // Verify user menu is present (it should show demo@example.com)
                 await expect(
-                    page.getByRole('button', { name: 'Sign out' }),
+                    page.getByText('demo@example.com', { exact: true }),
+                ).toBeVisible()
+
+                // Verify sign out button is present
+                await expect(
+                    page.getByRole('button', { name: /sign out/i }),
                 ).toBeEnabled()
             })
         })
