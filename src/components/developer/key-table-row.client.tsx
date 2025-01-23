@@ -63,12 +63,6 @@ export function ApiKeyTableRow({ apiKey, decryptedKey }: ApiKeyTableRowProps) {
 
     function handleRevealKey() {
         setIsRevealed(!isRevealed)
-        if (!isRevealed) {
-            toast({
-                title: 'API Key Revealed',
-                description: 'The API key is now visible. Copy it if needed.',
-            })
-        }
     }
 
     function handleCopyKey() {
