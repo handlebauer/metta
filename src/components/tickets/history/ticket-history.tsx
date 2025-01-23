@@ -1,6 +1,6 @@
 import { CheckCircle2, Clock4, UserPlus2 } from 'lucide-react'
 
-import { getTicketHistory } from '@/actions/ticket.actions'
+import type { TicketStatusHistoryRow } from '@/lib/schemas/ticket.schemas'
 
 function CompactStatusBadge({ status }: { status: 'new' | 'open' | 'closed' }) {
     const className = (() => {
@@ -27,23 +27,11 @@ function CompactStatusBadge({ status }: { status: 'new' | 'open' | 'closed' }) {
 
 interface TicketHistoryProps {
     ticketId: string
+    history: TicketStatusHistoryRow[]
 }
 
-export async function TicketHistory({ ticketId }: TicketHistoryProps) {
-    const { data: history, error } = await getTicketHistory(ticketId)
-
-    if (error) {
-        console.error('Failed to load history:', error)
-        return (
-            <div className="px-4 py-2">
-                <p className="text-[11px] text-muted-foreground">
-                    Failed to load history
-                </p>
-            </div>
-        )
-    }
-
-    if (!history || history.length === 0) {
+export function TicketHistory({ history }: TicketHistoryProps) {
+    if (history.length === 0) {
         return (
             <div className="px-4 py-2">
                 <p className="text-[11px] text-muted-foreground">

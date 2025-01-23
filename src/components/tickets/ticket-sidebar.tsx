@@ -1,9 +1,8 @@
-import { useMemo } from 'react'
-
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatConversationalDate } from '@/lib/utils/dates'
+import { getTicketHistory } from '@/actions/ticket.actions'
 
+import { Avatar, AvatarFallback } from '../ui/avatar'
 import { EditablePriority } from './details/editable-priority.client'
 import { EditableStatus } from './details/editable-status.client'
 import { TicketHistory } from './history/ticket-history'
@@ -35,32 +34,24 @@ interface TicketSidebarProps {
     }
 }
 
-export function TicketSidebar({
+export async function TicketSidebar({
     ticket,
     customerProfile,
     customerUser,
     user,
     notesResult,
 }: TicketSidebarProps) {
-    // Get customer initials for avatar fallback
-    const customerName = customerProfile.data?.full_name || 'Unknown'
-    const initials = useMemo(
-        () =>
-            customerName
-                .split(' ')
-                .map(n => n[0])
-                .join('')
-                .toUpperCase()
-                .slice(0, 2),
-        [customerName],
-    )
+    const { data: history } = await getTicketHistory(ticket.id)
 
     const isAgentOrAdmin = user.role === 'agent' || user.role === 'admin'
 
-    const displayDate = useMemo(
-        () => formatConversationalDate(ticket.created_at),
-        [ticket.created_at],
-    )
+    const customerName = customerProfile.data?.full_name || 'Unknown'
+    const initials = customerName
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
 
     return (
         <div className="w-[360px] border-l bg-muted/10 flex flex-col h-full">
@@ -86,7 +77,6 @@ export function TicketSidebar({
                         </div>
                     </div>
                 </div>
-
                 {/* Ticket Details Section */}
                 <div className="border-b pb-4">
                     <h2 className="text-sm font-medium mb-3">Details</h2>
@@ -124,7 +114,9 @@ export function TicketSidebar({
                             <span className="text-muted-foreground">
                                 Created
                             </span>
-                            <span className="font-medium">{displayDate}</span>
+                            <span className="font-medium">
+                                {formatConversationalDate(ticket.created_at)}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -144,13 +136,19 @@ export function TicketSidebar({
                                         value="notes"
                                         className="border data-[state=active]:border-primary/50 data-[state=active]:text-primary data-[state=active]:shadow-none px-3 h-8"
                                     >
-                                        Internal Notes
+                                        Notes
+                                        <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] text-primary">
+                                            {notesResult.data?.length || 0}
+                                        </span>
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="history"
                                         className="border data-[state=active]:border-primary/50 data-[state=active]:text-primary data-[state=active]:shadow-none px-3 h-8"
                                     >
                                         History
+                                        <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] text-primary">
+                                            {history?.length || 0}
+                                        </span>
                                     </TabsTrigger>
                                 </TabsList>
                             </div>
@@ -170,7 +168,10 @@ export function TicketSidebar({
                                 className="flex-1 mt-0"
                             >
                                 <div className="px-8">
-                                    <TicketHistory ticketId={ticket.id} />
+                                    <TicketHistory
+                                        ticketId={ticket.id}
+                                        history={history || []}
+                                    />
                                 </div>
                             </TabsContent>
                         </Tabs>
