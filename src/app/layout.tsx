@@ -36,12 +36,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <head>
-                <link
-                    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap"
-                    rel="stylesheet"
-                />
-            </head>
+            <head />
             <body
                 className={cn(
                     'min-h-screen bg-background font-outfit antialiased',
