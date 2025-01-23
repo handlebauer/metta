@@ -3,7 +3,7 @@
 ## Quick Start
 
 ```typescript
-// @/services/tasks.ts
+// @/services/task.services.ts
 import { z } from 'zod'
 
 import { DatabaseError } from '@/lib/errors'

@@ -7,7 +7,7 @@ const config = {
         '<THIRD_PARTY_MODULES>',
         '',
         '^@/components/ui/(.*)$',
-        '^@/components/(.*)$',
+        '^@/components/.+/(.*)$',
         '^@/lib/(.*)$',
         '^@/services/(.*)$',
         '^@/actions/(.*)$',
