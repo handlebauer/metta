@@ -4,6 +4,7 @@ import { render } from '@react-email/render'
 import { AgentReplyNotification } from '@/components/emails/agent-reply-notification'
 import { CustomerReplyNotification } from '@/components/emails/customer-reply-notification'
 import { NewAgentTicketNotification } from '@/components/emails/new-agent-ticket-notification'
+import { TicketResolutionNotification } from '@/components/emails/ticket-resolution-notification'
 import { sendgrid } from '@/lib/sendgrid'
 import { createServiceClient } from '@/lib/supabase/service'
 
@@ -146,6 +147,27 @@ export class EmailService {
             subject: `Re: [Metta] ${ticket.subject} (#${ticket.id})`,
             html,
             role: 'agent',
+        })
+    }
+
+    static async sendTicketResolutionNotification(
+        ticket: TicketRow,
+        customer: UserRow,
+    ) {
+        if (!customer.email) {
+            console.error('Customer email not found')
+            throw new Error('Customer email not found')
+        }
+
+        const html = await render(
+            createElement(TicketResolutionNotification, { ticket }),
+        )
+
+        return this.sendEmail({
+            to: customer.email,
+            subject: `[Metta] Ticket resolved: ${ticket.subject} (#${ticket.id})`,
+            html,
+            role: 'customer',
         })
     }
 }

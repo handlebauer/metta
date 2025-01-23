@@ -12,6 +12,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 
 import { EmailService } from './email.services'
+import { UserWithProfileService } from './user-with-profile.services'
 
 import type {
     TicketInternalNoteRow,
@@ -239,7 +240,24 @@ export class TicketService {
             if (error) throw new DatabaseError(error.message)
             if (!data) throw new DatabaseError('Ticket not found')
 
-            return ticketSchema.parse(data)
+            const ticket = ticketSchema.parse(data)
+
+            // Send resolution notification if ticket is being marked as closed
+            const userService = new UserWithProfileService()
+            if (validated.status === 'closed') {
+                const customer = await userService.findById(ticket.customer_id)
+
+                if (customer) {
+                    await EmailService.sendTicketResolutionNotification(
+                        ticket,
+                        customer,
+                    )
+                } else {
+                    console.error('Customer not found')
+                }
+            }
+
+            return ticket
         } catch (error) {
             console.error('[TicketService.update]', error)
             throw error
