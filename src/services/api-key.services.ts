@@ -148,3 +148,16 @@ export async function updateApiKeyUsage(
         console.error(`Failed to update API key usage: ${error.message}`)
     }
 }
+
+/**
+ * Delete an API key permanently
+ */
+export async function deleteApiKey(id: string): Promise<void> {
+    const supabase = await createClient()
+
+    const { error } = await supabase.from('api_keys').delete().eq('id', id)
+
+    if (error) {
+        throw new Error(`Failed to delete API key: ${error.message}`)
+    }
+}

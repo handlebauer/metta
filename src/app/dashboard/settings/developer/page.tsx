@@ -18,10 +18,28 @@ import {
 } from '@/components/ui/table'
 import { CreateApiKeyDialog } from '@/components/developer/create-api-key-dialog.client'
 import { ApiKeyTableRow } from '@/components/developer/key-table-row.client'
-import { listApiKeysAction } from '@/actions/api-key.actions'
+import {
+    getDecryptedApiKeyAction,
+    listApiKeysAction,
+} from '@/actions/api-key.actions'
 
 export default async function DeveloperSettingsPage() {
     const { data: apiKeys, error } = await listApiKeysAction()
+
+    // Pre-fetch decrypted keys for active keys
+    const decryptedKeys = new Map<string, string>()
+    if (apiKeys) {
+        await Promise.all(
+            apiKeys
+                .filter(key => key.status === 'active')
+                .map(async key => {
+                    const result = await getDecryptedApiKeyAction(key.id)
+                    if (result.data?.key) {
+                        decryptedKeys.set(key.id, result.data.key)
+                    }
+                }),
+        )
+    }
 
     return (
         <div className="container mx-auto py-6 space-y-8">
@@ -58,12 +76,11 @@ export default async function DeveloperSettingsPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Key Name</TableHead>
-                                    <TableHead>Created</TableHead>
-                                    <TableHead>Last Used</TableHead>
-                                    <TableHead>Status</TableHead>
+                                    <TableHead>NAME</TableHead>
+                                    <TableHead>USAGE</TableHead>
+                                    <TableHead>KEY</TableHead>
                                     <TableHead className="text-right">
-                                        Actions
+                                        OPTIONS
                                     </TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -71,7 +88,7 @@ export default async function DeveloperSettingsPage() {
                                 {!apiKeys?.length ? (
                                     <TableRow>
                                         <TableCell
-                                            colSpan={5}
+                                            colSpan={4}
                                             className="text-muted-foreground italic text-center"
                                         >
                                             No API keys generated yet
@@ -82,6 +99,9 @@ export default async function DeveloperSettingsPage() {
                                         <ApiKeyTableRow
                                             key={key.id}
                                             apiKey={key}
+                                            decryptedKey={decryptedKeys.get(
+                                                key.id,
+                                            )}
                                         />
                                     ))
                                 )}

@@ -68,7 +68,15 @@ export type Database = {
                     updated_at?: string | null
                     user_id?: string
                 }
-                Relationships: []
+                Relationships: [
+                    {
+                        foreignKeyName: 'api_keys_key_id_fkey'
+                        columns: ['key_id']
+                        isOneToOne: false
+                        referencedRelation: 'decrypted_api_keys'
+                        referencedColumns: ['secret_id']
+                    },
+                ]
             }
             messages: {
                 Row: {
@@ -338,13 +346,24 @@ export type Database = {
                     expires_at: string | null
                     id: string | null
                     key: string | null
+                    key_id: string | null
                     last_used_at: string | null
                     name: string | null
+                    secret_id: string | null
+                    secret_name: string | null
                     status: Database['public']['Enums']['api_key_status'] | null
                     updated_at: string | null
                     user_id: string | null
                 }
-                Relationships: []
+                Relationships: [
+                    {
+                        foreignKeyName: 'api_keys_key_id_fkey'
+                        columns: ['key_id']
+                        isOneToOne: false
+                        referencedRelation: 'decrypted_api_keys'
+                        referencedColumns: ['secret_id']
+                    },
+                ]
             }
         }
         Functions: {

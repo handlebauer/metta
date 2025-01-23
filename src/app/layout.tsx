@@ -1,10 +1,11 @@
-import { Geist_Mono, Inter, Outfit } from 'next/font/google'
+import { IBM_Plex_Mono, Inter, Outfit } from 'next/font/google'
 
 import { Toaster } from '@/components/ui/toaster'
-
-import type { Metadata } from 'next'
+import { cn } from '@/lib/utils'
 
 import './globals.css'
+
+import type { Metadata } from 'next'
 
 const outfit = Outfit({
     subsets: ['latin'],
@@ -16,9 +17,10 @@ const inter = Inter({
     variable: '--font-inter',
 })
 
-const geistMono = Geist_Mono({
-    variable: '--font-geist-mono',
+const ibmPlexMono = IBM_Plex_Mono({
     subsets: ['latin'],
+    weight: ['400', '500'],
+    variable: '--font-ibm-plex-mono',
 })
 
 export const metadata: Metadata = {
@@ -29,13 +31,24 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
     children,
-}: Readonly<{
+}: {
     children: React.ReactNode
-}>) {
+}) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
+            <head>
+                <link
+                    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap"
+                    rel="stylesheet"
+                />
+            </head>
             <body
-                className={`${outfit.variable} ${geistMono.variable} ${inter.variable} font-inter antialiased`}
+                className={cn(
+                    'min-h-screen bg-background font-outfit antialiased',
+                    outfit.variable,
+                    inter.variable,
+                    ibmPlexMono.variable,
+                )}
             >
                 {children}
                 <Toaster />

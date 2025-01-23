@@ -21,7 +21,7 @@ const config = {
         extend: {
             fontFamily: {
                 outfit: ['var(--font-outfit)'],
-                mono: ['var(--font-geist-mono)'],
+                mono: ['IBM Plex Mono', 'monospace'],
                 inter: ['var(--font-inter)'],
             },
             colors: {

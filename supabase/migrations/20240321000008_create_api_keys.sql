@@ -1,6 +1,14 @@
 -- Enable the vault extension if not already enabled
 create extension if not exists supabase_vault with schema vault;
 
+-- Grant usage on the vault schema and pgsodium
+grant usage on schema vault to authenticated;
+grant usage on schema pgsodium to authenticated;
+
+-- Grant execute on the vault functions
+grant execute on all functions in schema vault to authenticated;
+grant execute on all functions in schema pgsodium to authenticated;
+
 -- Create API keys table
 create type api_key_status as enum ('active', 'revoked', 'expired');
 
@@ -87,15 +95,19 @@ create view decrypted_api_keys as
 select
     k.id,
     k.name,
+    k.key_id,
     k.user_id,
     k.status,
     k.last_used_at,
     k.expires_at,
     k.created_at,
     k.updated_at,
-    s.decrypted_secret as key
+    s.decrypted_secret as key,
+    s.id as secret_id,
+    s.name as secret_name
 from api_keys k
-join vault.decrypted_secrets s on s.id = k.key_id;
+join vault.decrypted_secrets s on s.id = k.key_id
+where k.status = 'active';
 
 -- Protect the view
 grant select on decrypted_api_keys to authenticated;

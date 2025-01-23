@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import {
     createApiKey,
+    deleteApiKey,
     getDecryptedApiKey,
     listApiKeys,
     revokeApiKey,
@@ -95,6 +96,26 @@ export async function revokeApiKeyAction(
                 error instanceof Error
                     ? error.message
                     : 'Failed to revoke API key',
+        }
+    }
+}
+
+/**
+ * Delete an API key
+ */
+export async function deleteApiKeyAction(
+    id: string,
+): Promise<{ error: string | null }> {
+    try {
+        await deleteApiKey(id)
+        revalidatePath('/dashboard/settings/developer')
+        return { error: null }
+    } catch (error) {
+        return {
+            error:
+                error instanceof Error
+                    ? error.message
+                    : 'Failed to delete API key',
         }
     }
 }
