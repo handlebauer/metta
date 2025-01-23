@@ -82,7 +82,7 @@ export function TicketHistory({ history }: TicketHistoryProps) {
                                     </time>
                                 </div>
 
-                                <p className="text-[11px] font-medium mt-0.5">
+                                <p className="text-[11px] text-muted-foreground mt-0.5">
                                     {event.changed_by_name}
                                 </p>
                             </div>
