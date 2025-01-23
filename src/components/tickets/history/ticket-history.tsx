@@ -34,7 +34,7 @@ export function TicketHistory({ history }: TicketHistoryProps) {
     if (history.length === 0) {
         return (
             <div className="px-4 py-2">
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-sm text-muted-foreground -mx-2 mt-1">
                     No status changes yet
                 </p>
             </div>
