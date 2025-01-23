@@ -4,7 +4,6 @@ import { CheckCircle2, Clock, Inbox, PlusCircle } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { TicketList } from '@/components/tickets/list/ticket-list.client'
-import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
 import { getTickets, getTicketStats } from '@/actions/ticket.actions'
 
@@ -15,15 +14,6 @@ interface TicketsPageProps {
 }
 
 export default async function TicketsPage({ searchParams }: TicketsPageProps) {
-    const supabase = await createClient()
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-        redirect('/login')
-    }
-
     const status = (await searchParams).status as TicketStatus | undefined
     if (status && !['new', 'open', 'closed'].includes(status)) {
         redirect('/dashboard/tickets')

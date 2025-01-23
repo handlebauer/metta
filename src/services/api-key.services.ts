@@ -7,6 +7,7 @@ import {
     DecryptedApiKeySchema,
 } from '@/lib/schemas/api-key.schemas'
 import { createClient } from '@/lib/supabase/server'
+import { UserWithProfileService } from '@/services/user-with-profile.services'
 
 import type { Database } from '@/lib/supabase/types'
 
@@ -65,17 +66,14 @@ export async function listApiKeys(filter?: ApiKeysFilter): Promise<ApiKey[]> {
 export async function createApiKey(
     data: CreateApiKeySchema,
 ): Promise<{ api_key_id: string; api_key: string }> {
-    const supabase = await createClient()
+    const userService = new UserWithProfileService()
+    const user = await userService.getAuthenticatedUser()
 
-    const {
-        data: { user },
-        error: userError,
-    } = await supabase.auth.getUser()
-
-    if (userError || !user) {
+    if (!user) {
         throw new Error('Unauthorized')
     }
 
+    const supabase = await createClient()
     const { data: response, error } = await supabase.rpc('generate_api_key', {
         key_name: data.name,
         user_id: user.id,

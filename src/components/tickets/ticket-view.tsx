@@ -1,31 +1,33 @@
 import { getTicketMessages } from '@/actions/message.actions'
-import { getProfileByUserId } from '@/actions/profile.actions'
 import { getTicketInternalNotes } from '@/actions/ticket.actions'
-import { getUser } from '@/actions/user.actions'
+import { getUserWithProfile } from '@/actions/user-with-profile.actions'
 
 import { TicketConversation } from './conversation/ticket-conversation.client'
 import { TicketStatusBadge } from './list/ticket-status-badge'
 import { TicketSidebar } from './ticket-sidebar'
 
 import type { TicketRow } from '@/lib/schemas/ticket.schemas'
+import type { UserWithProfile } from '@/lib/schemas/user-with-profile.schemas'
 
 interface TicketViewProps {
     ticket: TicketRow
-    user: { id: string; name: string; email: string; role?: string }
+    user: UserWithProfile
 }
 
 export async function TicketView({ ticket, user }: TicketViewProps) {
     // Fetch initial messages, notes, and customer data
-    const [messagesResult, notesResult, customerProfile, customerUser] =
-        await Promise.all([
-            getTicketMessages(ticket.id),
-            getTicketInternalNotes(ticket.id),
-            getProfileByUserId(ticket.customer_id),
-            getUser(ticket.customer_id),
-        ])
+    const [messagesResult, notesResult, customerResult] = await Promise.all([
+        getTicketMessages(ticket.id),
+        getTicketInternalNotes(ticket.id),
+        getUserWithProfile(ticket.customer_id),
+    ])
 
     if (messagesResult.error) {
         throw new Error(messagesResult.error)
+    }
+
+    if (customerResult.error) {
+        throw new Error(customerResult.error)
     }
 
     return (
@@ -54,9 +56,25 @@ export async function TicketView({ ticket, user }: TicketViewProps) {
             {/* Sidebar */}
             <TicketSidebar
                 ticket={ticket}
-                customerProfile={customerProfile}
-                customerUser={customerUser}
-                user={user}
+                customerProfile={{
+                    data: customerResult.data?.profile
+                        ? {
+                              ...customerResult.data.profile,
+                              user_id: customerResult.data.id,
+                          }
+                        : null,
+                    error: null,
+                }}
+                customerUser={{
+                    data: customerResult.data
+                        ? { email: customerResult.data.email }
+                        : null,
+                    error: null,
+                }}
+                user={{
+                    id: user.id,
+                    role: user.profile.role,
+                }}
                 notesResult={notesResult}
             />
         </div>

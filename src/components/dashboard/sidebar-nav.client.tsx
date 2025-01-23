@@ -18,8 +18,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
+import type { UserWithProfile } from '@/lib/schemas/user-with-profile.schemas'
+
 interface SidebarNavProps {
-    userRole: 'customer' | 'agent' | 'admin'
+    user: UserWithProfile
 }
 
 interface UserType {
@@ -82,7 +84,7 @@ function UserTypeButton({
     )
 }
 
-export function SidebarNav({ userRole }: SidebarNavProps) {
+export function SidebarNav({ user }: SidebarNavProps) {
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const isTicketsSection = pathname?.startsWith('/dashboard/tickets')
@@ -141,7 +143,7 @@ export function SidebarNav({ userRole }: SidebarNavProps) {
             </Button>
 
             {/* Users section - only visible to admins */}
-            {userRole === 'admin' && (
+            {user.profile.role === 'admin' && (
                 <>
                     <Button
                         asChild

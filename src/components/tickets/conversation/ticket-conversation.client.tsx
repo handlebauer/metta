@@ -8,10 +8,11 @@ import { MessageList } from './message-list'
 import { TicketEditor } from './ticket-editor.client'
 
 import type { MessageWithUser } from '@/lib/schemas/message.schemas'
+import type { UserWithProfile } from '@/lib/schemas/user-with-profile.schemas'
 
 interface TicketConversationProps {
     ticketId: string
-    user: { id: string; name: string; email: string; role?: string }
+    user: UserWithProfile
     initialMessages: MessageWithUser[]
     status?: 'new' | 'open' | 'closed'
 }
@@ -38,13 +39,13 @@ export function TicketConversation({
             updated_at: new Date().toISOString(),
             ticket_id: ticketId,
             user_id: user.id,
-            role: user.role || 'customer',
+            role: user.profile.role,
             html_content: content,
             user: {
                 email: user.email,
                 profile: {
-                    full_name: user.name,
-                    avatar_url: null,
+                    full_name: user.profile.full_name,
+                    avatar_url: user.profile.avatar_url,
                 },
             },
         } as MessageWithUser,

@@ -5,7 +5,7 @@ import { PlusCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { UsersTable } from '@/components/users/users-table.client'
 import { createClient } from '@/lib/supabase/server'
-import { getProfile } from '@/actions/user.actions'
+import { getAuthenticatedUserWithProfile } from '@/actions/user-with-profile.actions'
 
 import type { UserWithProfile } from '@/components/users/users-table.client'
 
@@ -14,28 +14,19 @@ interface PageProps {
 }
 
 export default async function UsersPage({ searchParams }: PageProps) {
-    const supabase = await createClient()
+    // Get authenticated user with profile
+    const { data: user, error } = await getAuthenticatedUserWithProfile()
 
-    // Get current user
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
+    if (error || !user) {
         redirect('/login')
     }
 
-    // Get user profile to check role
-    const { data: profile, error: profileError } = await getProfile(user.id)
-
-    if (profileError || !profile) {
-        throw new Error('Failed to load user profile')
-    }
-
     // Only admins can access this page
-    if (profile.role !== 'admin') {
+    if (user.profile.role !== 'admin') {
         redirect('/dashboard')
     }
+
+    const supabase = await createClient()
 
     // Build query based on type filter
     let query = supabase.from('users').select(

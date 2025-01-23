@@ -8,48 +8,23 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { NewTicketForm } from '@/components/tickets/form/new-ticket-form.client'
-import { createClient } from '@/lib/supabase/server'
-import {
-    getAllActiveUsersExcept,
-    getProfile,
-    getUser,
-} from '@/actions/user.actions'
+import { UserWithProfileService } from '@/services/user-with-profile.services'
+import { getAuthenticatedUserWithProfile } from '@/actions/user-with-profile.actions'
 
 export default async function NewTicketPage() {
-    const supabase = await createClient()
-    const {
-        data: { user: authUser },
-    } = await supabase.auth.getUser()
+    // Get authenticated user with profile
+    const { data: user, error } = await getAuthenticatedUserWithProfile()
 
-    if (!authUser) {
+    if (error || !user) {
         redirect('/login')
     }
 
-    // Get app-level user data and profile
-    const [userResult, profileResult] = await Promise.all([
-        getUser(authUser.id),
-        getProfile(authUser.id),
-    ])
-
-    if (!userResult.data || !profileResult.data) {
-        throw new Error('User or profile not found')
-    }
-
-    const user = {
-        ...userResult.data,
-        profile: profileResult.data,
-    }
-
     // Get all users if agent or admin
-    const { data: users = [], error } =
-        profileResult.data.role === 'agent' ||
-        profileResult.data.role === 'admin'
-            ? await getAllActiveUsersExcept(user.id)
-            : { data: [], error: null }
-
-    if (error) {
-        console.error('Failed to load users:', error)
-    }
+    const userService = new UserWithProfileService()
+    const users =
+        user.profile.role === 'agent' || user.profile.role === 'admin'
+            ? await userService.findAllActiveExcept(user.id)
+            : []
 
     return (
         <div className="flex-1 space-y-4 p-8">

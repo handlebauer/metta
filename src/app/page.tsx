@@ -2,13 +2,10 @@ import { Brand } from '@/components/ui/brand'
 import { FeaturesSection } from '@/components/dashboard/feature-section'
 import { HeroSection } from '@/components/dashboard/hero-section'
 import { UserNav } from '@/components/dashboard/user-nav'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUserWithProfile } from '@/actions/user-with-profile.actions'
 
 export default async function HomePage() {
-    const supabase = await createClient()
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
+    const { data: user } = await getAuthenticatedUserWithProfile()
 
     return (
         <div className="h-screen flex flex-col">

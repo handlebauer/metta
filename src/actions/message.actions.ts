@@ -2,12 +2,11 @@
 
 import { revalidatePath } from 'next/cache'
 
-import { createClient } from '@/lib/supabase/server'
 import { MessageService } from '@/services/message.services'
-import { ProfileService } from '@/services/profile.services'
+import { UserWithProfileService } from '@/services/user-with-profile.services'
 
 const messageService = new MessageService()
-const profileService = new ProfileService()
+const userService = new UserWithProfileService()
 
 export async function getTicketMessages(ticketId: string) {
     try {
@@ -27,25 +26,16 @@ export async function getTicketMessages(ticketId: string) {
 
 export async function createMessage(ticketId: string, content: string) {
     try {
-        const supabase = await createClient()
-        const {
-            data: { user },
-        } = await supabase.auth.getUser()
+        const currentUser = await userService.getAuthenticatedUser()
 
-        if (!user) {
+        if (!currentUser) {
             throw new Error('User not found')
-        }
-
-        const profile = await profileService.findByUserId(user.id)
-
-        if (!profile) {
-            throw new Error('Profile not found')
         }
 
         const message = await messageService.create({
             ticket_id: ticketId,
-            user_id: user.id,
-            role: profile.role,
+            user_id: currentUser.id,
+            role: currentUser.profile.role,
             content,
             html_content: content, // For now, just store the plain text
         })

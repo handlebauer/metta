@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, ShieldAlert, ShieldCheck, User } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -19,6 +18,13 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { userWithProfileInsertSchema } from '@/lib/schemas/user-with-profile.schemas'
+import { createUserWithProfile } from '@/actions/user-with-profile.actions'
+
+import type {
+    UserWithProfile,
+    UserWithProfileInsert,
+} from '@/lib/schemas/user-with-profile.schemas'
 
 const ROLE_ICONS = {
     admin: ShieldAlert,
@@ -26,27 +32,14 @@ const ROLE_ICONS = {
     customer: User,
 } as const
 
-// Combine user and profile schemas for the form
-const newUserSchema = z.object({
-    // User fields
-    email: z.string().email('Please enter a valid email'),
-    is_active: z.boolean().default(true),
-    // Profile fields
-    full_name: z.string().min(1, 'Please enter a full name'),
-    bio: z.string().optional(),
-    role: z.enum(['customer', 'agent', 'admin']),
-})
-
-type FormData = z.infer<typeof newUserSchema>
-
 interface NewUserFormProps {
     /**
-     * The role of the current user (should be admin)
+     * The current user (should be admin)
      */
-    currentUserRole: 'admin'
+    currentUser: UserWithProfile
 }
 
-export function NewUserForm({ currentUserRole }: NewUserFormProps) {
+export function NewUserForm({ currentUser }: NewUserFormProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -54,19 +47,21 @@ export function NewUserForm({ currentUserRole }: NewUserFormProps) {
     // Get the user type from the URL
     const userType = searchParams.get('type') as 'admin' | 'agent' | 'customer'
 
-    const form = useForm<FormData>({
-        resolver: zodResolver(newUserSchema),
+    const form = useForm<UserWithProfileInsert>({
+        resolver: zodResolver(userWithProfileInsertSchema),
         defaultValues: {
             email: '',
             is_active: true,
-            full_name: '',
-            bio: '',
-            role: userType || 'customer',
+            profile: {
+                full_name: '',
+                bio: '',
+                role: userType || 'customer',
+            },
         },
     })
 
     // Redirect if not admin
-    if (currentUserRole !== 'admin') {
+    if (currentUser.profile.role !== 'admin') {
         router.push('/dashboard')
         return null
     }
@@ -77,19 +72,18 @@ export function NewUserForm({ currentUserRole }: NewUserFormProps) {
         customer: 'Add Customer Account',
     } as const
 
-    async function onSubmit(data: FormData) {
+    async function onSubmit(data: UserWithProfileInsert) {
         try {
             setIsSubmitting(true)
-            // TODO: Implement user creation action
-            // const result = await createUser(data)
+            const result = await createUserWithProfile(data)
 
-            // if (result.error) {
-            //     toast.error(result.error)
-            //     return
-            // }
+            if (result.error) {
+                toast.error(result.error)
+                return
+            }
 
             toast.success('User created successfully')
-            router.push('/dashboard/users?type=' + data.role)
+            router.push('/dashboard/users?type=' + data.profile.role)
         } catch (error) {
             toast.error('Something went wrong')
             console.error(error)
@@ -99,7 +93,6 @@ export function NewUserForm({ currentUserRole }: NewUserFormProps) {
     }
 
     const title = userType ? ROLE_DESCRIPTIONS[userType] : 'Add New User'
-
     const RoleIcon = userType ? ROLE_ICONS[userType] : User
 
     return (
@@ -154,12 +147,16 @@ export function NewUserForm({ currentUserRole }: NewUserFormProps) {
 
                     <FormField
                         control={form.control}
-                        name="full_name"
+                        name="profile.full_name"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Full Name</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="John Doe" {...field} />
+                                    <Input
+                                        placeholder="John Doe"
+                                        {...field}
+                                        value={field.value || ''}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -168,7 +165,7 @@ export function NewUserForm({ currentUserRole }: NewUserFormProps) {
 
                     <FormField
                         control={form.control}
-                        name="bio"
+                        name="profile.bio"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Bio</FormLabel>
@@ -177,6 +174,7 @@ export function NewUserForm({ currentUserRole }: NewUserFormProps) {
                                         placeholder="A brief description about the user"
                                         className="resize-none"
                                         {...field}
+                                        value={field.value || ''}
                                     />
                                 </FormControl>
                                 <FormMessage />

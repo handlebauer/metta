@@ -1,5 +1,3 @@
-import { User } from '@supabase/supabase-js'
-
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
     DropdownMenu,
@@ -8,11 +6,12 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { UserWithProfile } from '@/lib/schemas/user-with-profile.schemas'
 
 import { DashboardButton } from './dashboard-button.client'
 import { SignOutItem } from './sign-out-item.client'
 
-export function UserNav({ user }: { user: User }) {
+export function UserNav({ user }: { user: UserWithProfile }) {
     // Get initials from email
     const initials = user.email?.split('@')[0].slice(0, 2).toUpperCase() || '??'
 
@@ -34,7 +33,7 @@ export function UserNav({ user }: { user: User }) {
                                 {user.email}
                             </p>
                             <p className="text-xs leading-none text-muted-foreground">
-                                Account
+                                {user.profile.role}
                             </p>
                         </div>
                     </DropdownMenuLabel>

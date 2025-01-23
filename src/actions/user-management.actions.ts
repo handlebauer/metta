@@ -3,17 +3,15 @@
 import { revalidatePath } from 'next/cache'
 
 import { DatabaseError } from '@/lib/errors'
-import { ProfileService } from '@/services/profile.services'
-import { UserService } from '@/services/user.services'
+import { UserWithProfileService } from '@/services/user-with-profile.services'
 
-import type { ProfileRow } from '@/lib/schemas/profile.schemas'
-
-const userService = new UserService()
-const profileService = new ProfileService()
+const userWithProfile = new UserWithProfileService()
 
 export async function toggleUserActive(userId: string, isActive: boolean) {
     try {
-        const data = await userService.update(userId, { is_active: isActive })
+        const data = await userWithProfile.update(userId, {
+            is_active: isActive,
+        })
         revalidatePath('/dashboard/users')
         return { data, error: null }
     } catch (error) {
@@ -28,14 +26,21 @@ export async function toggleUserActive(userId: string, isActive: boolean) {
     }
 }
 
-export async function updateUserRole(userId: string, role: ProfileRow['role']) {
+export async function updateUserRole(
+    userId: string,
+    role: 'customer' | 'agent' | 'admin',
+) {
     try {
-        const profile = await profileService.findByUserId(userId)
-        if (!profile) {
-            throw new Error('Profile not found')
-        }
+        // Get the current user to preserve other profile fields
+        const user = await userWithProfile.findById(userId)
+        if (!user) throw new Error('User not found')
 
-        const data = await profileService.update(profile.id, { role })
+        const data = await userWithProfile.update(userId, {
+            profile: {
+                ...user.profile,
+                role,
+            },
+        })
         revalidatePath('/dashboard/users')
         return { data, error: null }
     } catch (error) {
@@ -52,8 +57,7 @@ export async function updateUserRole(userId: string, role: ProfileRow['role']) {
 
 export async function deleteUser(userId: string) {
     try {
-        // Note: This will cascade delete the profile due to foreign key constraints
-        await userService.delete(userId)
+        await userWithProfile.delete(userId)
         revalidatePath('/dashboard/users')
         return { error: null }
     } catch (error) {

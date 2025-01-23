@@ -3,28 +3,17 @@ import { redirect } from 'next/navigation'
 import { Brand } from '@/components/ui/brand'
 import { SidebarNav } from '@/components/dashboard/sidebar-nav.client'
 import { UserNav } from '@/components/dashboard/user-nav'
-import { createClient } from '@/lib/supabase/server'
-import { getProfile } from '@/actions/user.actions'
+import { getAuthenticatedUserWithProfile } from '@/actions/user-with-profile.actions'
 
 export default async function DashboardLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
-    const supabase = await createClient()
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
+    const { data: user, error } = await getAuthenticatedUserWithProfile()
 
-    if (!user) {
+    if (error || !user) {
         redirect('/login')
-    }
-
-    // Get user profile to check role
-    const { data: profile } = await getProfile(user.id)
-
-    if (!profile) {
-        throw new Error('User profile not found')
     }
 
     return (
@@ -43,7 +32,7 @@ export default async function DashboardLayout({
                 {/* Sidebar Navigation */}
                 <aside className="w-64 border-r bg-muted/30 flex-none">
                     <nav className="flex flex-col gap-2 p-4">
-                        <SidebarNav userRole={profile.role} />
+                        <SidebarNav user={user} />
                     </nav>
                 </aside>
 
