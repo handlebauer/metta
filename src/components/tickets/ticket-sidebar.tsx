@@ -177,7 +177,7 @@ export async function TicketSidebar({
                         </Tabs>
                     </div>
                     {/* Fixed Footer Section */}
-                    <div className="w-full px-6 py-4 border-t flex justify-center items-center flex-none">
+                    <div className="w-full h-[140px] px-6 py-4 flex justify-center items-center flex-none">
                         <EditableStatus
                             ticketId={ticket.id}
                             currentStatus={ticket.status || 'new'}

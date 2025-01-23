@@ -1,5 +1,8 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { PlusCircle } from 'lucide-react'
 
+import { Button } from '@/components/ui/button'
 import { UsersTable } from '@/components/users/users-table.client'
 import { createClient } from '@/lib/supabase/server'
 import { getProfile } from '@/actions/user.actions'
@@ -93,13 +96,28 @@ export default async function UsersPage({ searchParams }: PageProps) {
     return (
         <div className="flex-1 space-y-4 p-8">
             <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold tracking-tight">
+                <div className="flex items-center">
+                    <h2 className="text-2xl font-bold tracking-tight flex items-center">
                         {title}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            asChild
+                            className="ml-2 h-8 hover:bg-transparent group"
+                            aria-label="Create new user"
+                        >
+                            <Link
+                                href="/dashboard/users/new"
+                                prefetch={true}
+                                className="flex items-center gap-1"
+                            >
+                                <PlusCircle className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                                <span className="text-sm font-normal text-semi-muted-foreground group-hover:text-foreground transition-colors">
+                                    Create
+                                </span>
+                            </Link>
+                        </Button>
                     </h2>
-                    <p className="text-muted-foreground">
-                        Manage user accounts and roles
-                    </p>
                 </div>
             </div>
 

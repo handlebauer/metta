@@ -22,12 +22,76 @@ interface SidebarNavProps {
     userRole: 'customer' | 'agent' | 'admin'
 }
 
+interface UserType {
+    type: 'admin' | 'agent' | 'customer'
+    label: string
+    icon: typeof Crown | typeof Headphones | typeof User
+}
+
+const USER_TYPES: UserType[] = [
+    { type: 'admin', label: 'Admins', icon: Crown },
+    { type: 'agent', label: 'Agents', icon: Headphones },
+    { type: 'customer', label: 'Customers', icon: User },
+]
+
+function UserTypeButton({
+    type,
+    label,
+    icon: Icon,
+    isActive,
+    showAdd,
+}: UserType & { isActive: boolean; showAdd: boolean }) {
+    const pathname = usePathname()
+
+    return (
+        <>
+            <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className={cn(
+                    'w-full justify-start pl-7',
+                    isActive && 'bg-muted',
+                )}
+            >
+                <Link href={`/dashboard/users?type=${type}`}>
+                    <Icon className="mr-2 h-3.5 w-3.5" />
+                    {label}
+                </Link>
+            </Button>
+            {showAdd && (
+                <Button
+                    asChild
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                        'w-full justify-start pl-10',
+                        pathname === '/dashboard/users/new' && 'bg-muted',
+                    )}
+                >
+                    <Link
+                        href={`/dashboard/users/new?type=${type}`}
+                        prefetch={true}
+                    >
+                        <Plus className="mr-2 h-3.5 w-3.5" />
+                        Add
+                    </Link>
+                </Button>
+            )}
+        </>
+    )
+}
+
 export function SidebarNav({ userRole }: SidebarNavProps) {
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const isTicketsSection = pathname?.startsWith('/dashboard/tickets')
     const isUsersSection = pathname?.startsWith('/dashboard/users')
-    const userType = searchParams.get('type')
+    const userType = searchParams.get('type') as
+        | 'admin'
+        | 'agent'
+        | 'customer'
+        | null
 
     return (
         <div className="space-y-0.5 select-none">
@@ -95,54 +159,16 @@ export function SidebarNav({ userRole }: SidebarNavProps) {
                             </div>
                         </Link>
                     </Button>
-                    <Button
-                        asChild
-                        variant="ghost"
-                        size="sm"
-                        className={cn(
-                            'w-full justify-start pl-7',
-                            isUsersSection &&
-                                userType === 'admin' &&
-                                'bg-muted',
-                        )}
-                    >
-                        <Link href="/dashboard/users?type=admin">
-                            <Crown className="mr-2 h-3.5 w-3.5" />
-                            Admins
-                        </Link>
-                    </Button>
-                    <Button
-                        asChild
-                        variant="ghost"
-                        size="sm"
-                        className={cn(
-                            'w-full justify-start pl-7',
-                            isUsersSection &&
-                                userType === 'agent' &&
-                                'bg-muted',
-                        )}
-                    >
-                        <Link href="/dashboard/users?type=agent">
-                            <Headphones className="mr-2 h-3.5 w-3.5" />
-                            Agents
-                        </Link>
-                    </Button>
-                    <Button
-                        asChild
-                        variant="ghost"
-                        size="sm"
-                        className={cn(
-                            'w-full justify-start pl-7',
-                            isUsersSection &&
-                                userType === 'customer' &&
-                                'bg-muted',
-                        )}
-                    >
-                        <Link href="/dashboard/users?type=customer">
-                            <User className="mr-2 h-3.5 w-3.5" />
-                            Customers
-                        </Link>
-                    </Button>
+                    {USER_TYPES.map(userTypeData => (
+                        <UserTypeButton
+                            key={userTypeData.type}
+                            {...userTypeData}
+                            isActive={
+                                isUsersSection && userType === userTypeData.type
+                            }
+                            showAdd={userType === userTypeData.type}
+                        />
+                    ))}
 
                     <Button
                         asChild
