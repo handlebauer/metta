@@ -225,6 +225,7 @@ export async function createTicket(
 export async function updateTicket(
     id: string,
     input: FormData | Omit<z.infer<typeof ticketUpdateSchema>, 'id'>,
+    reason?: string,
 ): Promise<{
     data: TicketRow | null
     error: string | null
@@ -254,6 +255,7 @@ export async function updateTicket(
         const data = await service.update(
             id,
             ticketUpdateSchema.parse(ticketData),
+            reason,
         )
 
         // Revalidate relevant paths

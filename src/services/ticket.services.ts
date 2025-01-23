@@ -226,10 +226,22 @@ export class TicketService {
     async update(
         id: string,
         input: z.infer<typeof ticketUpdateSchema>,
+        reopenReason?: string,
     ): Promise<TicketRow> {
         try {
             const validated = ticketUpdateSchema.parse(input)
             const db = await createClient()
+
+            // Get the current ticket to check its status
+            const { data: currentTicket } = await db
+                .from('tickets')
+                .select()
+                .eq('id', id)
+                .single()
+
+            if (!currentTicket) throw new DatabaseError('Ticket not found')
+
+            // Update the ticket
             const { data, error } = await db
                 .from('tickets')
                 .update(validated)
@@ -241,16 +253,30 @@ export class TicketService {
             if (!data) throw new DatabaseError('Ticket not found')
 
             const ticket = ticketSchema.parse(data)
-
-            // Send resolution notification if ticket is being marked as closed
             const userService = new UserWithProfileService()
+
+            // Send appropriate notification based on status change
             if (validated.status === 'closed') {
                 const customer = await userService.findById(ticket.customer_id)
-
                 if (customer) {
                     await EmailService.sendTicketResolutionNotification(
                         ticket,
                         customer,
+                    )
+                } else {
+                    console.error('Customer not found')
+                }
+            } else if (
+                currentTicket.status === 'closed' &&
+                validated.status === 'open'
+            ) {
+                // Ticket is being reopened
+                const customer = await userService.findById(ticket.customer_id)
+                if (customer) {
+                    await EmailService.sendTicketReopenedNotification(
+                        ticket,
+                        customer,
+                        reopenReason || 'No reason provided',
                     )
                 } else {
                     console.error('Customer not found')

@@ -4,6 +4,7 @@ import { render } from '@react-email/render'
 import { AgentReplyNotification } from '@/components/emails/agent-reply-notification'
 import { CustomerReplyNotification } from '@/components/emails/customer-reply-notification'
 import { NewAgentTicketNotification } from '@/components/emails/new-agent-ticket-notification'
+import { TicketReopenedNotification } from '@/components/emails/ticket-reopened-notification'
 import { TicketResolutionNotification } from '@/components/emails/ticket-resolution-notification'
 import { sendgrid } from '@/lib/sendgrid'
 import { createServiceClient } from '@/lib/supabase/service'
@@ -166,6 +167,28 @@ export class EmailService {
         return this.sendEmail({
             to: customer.email,
             subject: `[Metta] Ticket resolved: ${ticket.subject} (#${ticket.id})`,
+            html,
+            role: 'customer',
+        })
+    }
+
+    static async sendTicketReopenedNotification(
+        ticket: TicketRow,
+        customer: UserRow,
+        reopenReason: string,
+    ) {
+        if (!customer.email) {
+            console.error('Customer email not found')
+            throw new Error('Customer email not found')
+        }
+
+        const html = await render(
+            createElement(TicketReopenedNotification, { ticket, reopenReason }),
+        )
+
+        return this.sendEmail({
+            to: customer.email,
+            subject: `[Metta] Ticket reopened: ${ticket.subject} (#${ticket.id})`,
             html,
             role: 'customer',
         })
