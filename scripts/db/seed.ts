@@ -5,6 +5,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { seedApiKeys } from './seed-data/api-keys'
 import { seedInternalNotes } from './seed-data/internal-notes'
 import { seedMessages } from './seed-data/messages'
+import { seedStatusHistory } from './seed-data/status-history'
 import { seedTickets } from './seed-data/tickets'
 import { seedUsers } from './seed-data/users'
 
@@ -38,6 +39,11 @@ async function main() {
 
         console.log('🧹 Cleaning existing data...')
         await supabase
+            .from('ticket_status_history')
+            .delete()
+            .neq('id', '0')
+            .throwOnError()
+        await supabase
             .from('ticket_internal_notes')
             .delete()
             .neq('id', '0')
@@ -50,11 +56,12 @@ async function main() {
         console.log('✅ Database cleaned')
 
         console.log('🌱 Creating application data...')
-        await seedUsers(supabase)
-        await seedTickets(supabase)
+        const { agentMap } = await seedUsers(supabase)
+        const ticketMap = await seedTickets(supabase)
         await seedInternalNotes(supabase)
         await seedMessages(supabase)
         await seedApiKeys(supabase)
+        await seedStatusHistory(supabase, ticketMap, agentMap)
         console.log('✅ Seed data created successfully')
     } catch (error) {
         console.error('❌ Failed to seed database:', error)

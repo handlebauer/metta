@@ -69,7 +69,7 @@ export function TicketInternalNotes({
     return (
         <div className="flex flex-col h-full">
             {/* Add new note */}
-            <div className="px-6 pb-2 pt-1">
+            <div className="pb-2 pt-1">
                 <div className="relative">
                     <Textarea
                         placeholder="Add an internal note..."

@@ -81,3 +81,22 @@ export const ticketUpdateSchema = ticketSchema
     })
     .partial()
     .required({ id: true }) satisfies z.ZodType<TicketUpdate>
+
+// Ticket Status History schema
+export const ticketStatusHistorySchema = z.object({
+    id: z.string(),
+    created_at: z.string().nullable(),
+    ticket_id: z.string(),
+    old_status: z.enum(['new', 'open', 'closed']).nullable(),
+    new_status: z.enum(['new', 'open', 'closed']),
+    changed_by: z.string(),
+    changed_by_email: z.string(),
+    changed_by_name: z.string(),
+}) satisfies z.ZodType<
+    Tables<'ticket_status_history'> & {
+        changed_by_email: string
+        changed_by_name: string
+    }
+>
+
+export type TicketStatusHistoryRow = z.infer<typeof ticketStatusHistorySchema>

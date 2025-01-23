@@ -1,10 +1,12 @@
 import { useMemo } from 'react'
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatConversationalDate } from '@/lib/utils/dates'
 
 import { EditablePriority } from './details/editable-priority.client'
 import { EditableStatus } from './details/editable-status.client'
+import { TicketHistory } from './history/ticket-history'
 import { TicketInternalNotes } from './notes/ticket-internal-notes.client'
 
 import type {
@@ -131,20 +133,47 @@ export function TicketSidebar({
             {/* Scrollable Notes Section */}
             {isAgentOrAdmin && (
                 <>
-                    <div className="px-6 flex-none">
-                        <h2 className="text-sm font-medium mb-1">
-                            Internal Notes
-                        </h2>
-                        <p className="text-xs text-muted-foreground mb-3">
-                            Notes are only visible to agents
-                        </p>
-                    </div>
                     <div className="flex-1 overflow-y-auto min-h-0">
-                        <TicketInternalNotes
-                            ticketId={ticket.id}
-                            userId={user.id}
-                            initialNotes={notesResult.data || []}
-                        />
+                        <Tabs
+                            defaultValue="notes"
+                            className="w-full h-full flex flex-col"
+                        >
+                            <div className="px-6 bg-muted/5 pb-2">
+                                <TabsList className="w-full grid grid-cols-2 bg-transparent p-0 h-auto gap-4">
+                                    <TabsTrigger
+                                        value="notes"
+                                        className="border data-[state=active]:border-primary/50 data-[state=active]:text-primary data-[state=active]:shadow-none px-3 h-8"
+                                    >
+                                        Internal Notes
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="history"
+                                        className="border data-[state=active]:border-primary/50 data-[state=active]:text-primary data-[state=active]:shadow-none px-3 h-8"
+                                    >
+                                        History
+                                    </TabsTrigger>
+                                </TabsList>
+                            </div>
+
+                            <TabsContent value="notes" className="flex-1 mt-0">
+                                <div className="h-full px-6 overflow-y-auto">
+                                    <TicketInternalNotes
+                                        ticketId={ticket.id}
+                                        userId={user.id}
+                                        initialNotes={notesResult.data || []}
+                                    />
+                                </div>
+                            </TabsContent>
+
+                            <TabsContent
+                                value="history"
+                                className="flex-1 mt-0"
+                            >
+                                <div className="px-8">
+                                    <TicketHistory ticketId={ticket.id} />
+                                </div>
+                            </TabsContent>
+                        </Tabs>
                     </div>
                     {/* Fixed Footer Section */}
                     <div className="w-full px-6 py-4 border-t flex justify-center items-center flex-none">

@@ -83,8 +83,11 @@ export async function seedUsers(
     const { data: existingUsers } = await supabase.auth.admin.listUsers()
     const createdUsers = []
 
+    const userMap: Record<number, string> = {}
+    const agentMap: Record<number, string> = {}
+
     const allUsers = [DEMO_USER, ...TEST_USERS]
-    for (const userData of allUsers) {
+    for (const [_index, userData] of allUsers.entries()) {
         const existingUser = existingUsers?.users.find(
             u => u.email === userData.email,
         )
@@ -123,6 +126,38 @@ export async function seedUsers(
 
         if (userError) throw userError
 
+        // Store the user ID in the appropriate map
+        if (
+            userData.profile.role === 'agent' ||
+            userData.profile.role === 'admin'
+        ) {
+            // Map agent/admin emails to their indices
+            switch (userData.email) {
+                case 'demo@example.com':
+                    agentMap[-1] = user.id // Demo admin is -1
+                    break
+                case 'agent1@example.com':
+                    agentMap[2] = user.id // First regular agent is 2
+                    break
+                case 'agent2@example.com':
+                    agentMap[3] = user.id // Second regular agent is 3
+                    break
+            }
+        } else if (userData.profile.role === 'customer') {
+            // Map customer emails to their indices
+            switch (userData.email) {
+                case 'testcustomer@example.com':
+                    userMap[-2] = user.id // Test customer is -2
+                    break
+                case 'customer1@example.com':
+                    userMap[0] = user.id // First regular customer is 0
+                    break
+                case 'customer2@example.com':
+                    userMap[1] = user.id // Second regular customer is 1
+                    break
+            }
+        }
+
         // Prepare profile insert data
         const profileInsert: ProfileInsert = {
             user_id: user.id,
@@ -138,5 +173,6 @@ export async function seedUsers(
         createdUsers.push(user)
     }
 
-    return createdUsers
+    console.log('✅ Users created')
+    return { userMap, agentMap }
 }

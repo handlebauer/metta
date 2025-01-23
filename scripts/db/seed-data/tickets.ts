@@ -1,7 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
+import { type SupabaseClient } from '@supabase/supabase-js'
 
-import type { TicketInsert, TicketPriority } from '@/lib/schemas/ticket.schemas'
-import type { Database } from '@/lib/supabase/types'
+import type { TicketPriority } from '@/lib/schemas/ticket.schemas'
 
 export interface SeedTicket {
     subject: string
@@ -121,57 +120,63 @@ export const SEED_TICKETS: SeedTicket[] = [
     },
 ]
 
-export async function seedTickets(
-    supabase: ReturnType<typeof createClient<Database>>,
-) {
-    console.log('🎫 Creating seed tickets...')
+export async function seedTickets(supabase: SupabaseClient) {
+    console.log('🎫 Creating tickets...')
 
-    // Get all required users
-    const { data: testCustomer } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', 'testcustomer@example.com')
-        .single()
+    const ticketMap: Record<number, string> = {}
 
-    const { data: demoAgent } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', 'demo@example.com')
-        .single()
+    // Create tickets
+    for (const [index, ticket] of SEED_TICKETS.entries()) {
+        const { data: users } = await supabase
+            .from('users')
+            .select('id, profiles(role)')
+            .eq('profiles.role', 'customer')
+            .limit(1)
+            .throwOnError()
 
-    const { data: customers } = await supabase
-        .from('users')
-        .select('id')
-        .in('email', ['customer1@example.com', 'customer2@example.com'])
+        if (!users?.length) {
+            console.warn('⚠️ No customers found for ticket creation')
+            continue
+        }
 
-    const { data: agents } = await supabase
-        .from('users')
-        .select('id')
-        .in('email', ['agent1@example.com', 'agent2@example.com'])
+        const customerId = users[0].id
 
-    if (!testCustomer || !demoAgent || !customers || !agents) {
-        throw new Error('Failed to find seed users')
+        // Get agent if needed
+        let agentId = null
+        if (ticket.agent_index !== undefined) {
+            const { data: agents } = await supabase
+                .from('users')
+                .select('id, profiles(role)')
+                .eq('profiles.role', 'agent')
+                .limit(1)
+                .throwOnError()
+
+            if (agents?.length) {
+                agentId = agents[0].id
+            }
+        }
+
+        const { data, error } = await supabase
+            .from('tickets')
+            .insert({
+                subject: ticket.subject,
+                description: ticket.description,
+                status: ticket.status,
+                priority: ticket.priority,
+                customer_id: customerId,
+                agent_id: agentId,
+            })
+            .select()
+            .single()
+
+        if (error) {
+            console.error(`Failed to create ticket ${ticket.subject}:`, error)
+            continue
+        }
+
+        ticketMap[index] = data.id
     }
 
-    const tickets: TicketInsert[] = SEED_TICKETS.map(ticket => ({
-        subject: ticket.subject,
-        description: ticket.description,
-        status: ticket.status,
-        priority: ticket.priority,
-        customer_id:
-            ticket.customer_index === -2
-                ? testCustomer.id
-                : customers[ticket.customer_index].id,
-        agent_id:
-            ticket.agent_index === -1
-                ? demoAgent.id
-                : ticket.agent_index !== undefined
-                  ? agents[ticket.agent_index - 2].id
-                  : null,
-    }))
-
-    const { error } = await supabase.from('tickets').insert(tickets)
-
-    if (error) throw error
-    console.log('✅ Seed tickets created successfully')
+    console.log('✅ Tickets created')
+    return ticketMap
 }

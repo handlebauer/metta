@@ -6,6 +6,7 @@ import {
     ticketInternalNoteInsertSchema,
     ticketInternalNoteSchema,
     ticketSchema,
+    ticketStatusHistorySchema,
     ticketUpdateSchema,
 } from '@/lib/schemas/ticket.schemas'
 import { createClient } from '@/lib/supabase/server'
@@ -320,6 +321,42 @@ export class TicketService {
             }
         } catch (error) {
             console.error('[TicketService.getStats]', error)
+            throw error
+        }
+    }
+
+    async findStatusHistory(ticketId: string) {
+        try {
+            const db = await createClient()
+            const { data, error } = await db
+                .from('ticket_status_history')
+                .select(
+                    `
+                    *,
+                    users!changed_by (
+                        email,
+                        profiles (
+                            full_name
+                        )
+                    )
+                `,
+                )
+                .eq('ticket_id', ticketId)
+                .order('created_at', { ascending: false })
+
+            if (error) throw new DatabaseError(error.message)
+
+            // Transform the data to include user details
+            const history =
+                data?.map(({ users, ...event }) => ({
+                    ...event,
+                    changed_by_email: users.email,
+                    changed_by_name: users.profiles?.full_name || users.email,
+                })) || []
+
+            return z.array(ticketStatusHistorySchema).parse(history)
+        } catch (error) {
+            console.error('[TicketService.findStatusHistory]', error)
             throw error
         }
     }

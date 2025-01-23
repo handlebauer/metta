@@ -15,6 +15,7 @@ import type {
     TicketInternalNoteRow,
     TicketPriority,
     TicketRow,
+    TicketStatusHistoryRow,
     TicketWithCustomer,
     TicketWithInternalNotes,
 } from '@/lib/schemas/ticket.schemas'
@@ -158,6 +159,25 @@ export async function getTicketStats(): Promise<{
                 error instanceof DatabaseError
                     ? error.message
                     : 'Failed to fetch ticket statistics',
+        }
+    }
+}
+
+export async function getTicketHistory(id: string): Promise<{
+    data: TicketStatusHistoryRow[] | null
+    error: string | null
+}> {
+    try {
+        const data = await service.findStatusHistory(id)
+        return { data, error: null }
+    } catch (error) {
+        console.error('[getTicketHistory]', error)
+        return {
+            data: null,
+            error:
+                error instanceof DatabaseError
+                    ? error.message
+                    : 'Failed to fetch ticket history',
         }
     }
 }

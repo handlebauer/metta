@@ -198,6 +198,54 @@ export type Database = {
                     },
                 ]
             }
+            ticket_status_history: {
+                Row: {
+                    changed_by: string
+                    created_at: string | null
+                    id: string
+                    new_status: Database['public']['Enums']['ticket_status']
+                    old_status:
+                        | Database['public']['Enums']['ticket_status']
+                        | null
+                    ticket_id: string
+                }
+                Insert: {
+                    changed_by: string
+                    created_at?: string | null
+                    id?: string
+                    new_status: Database['public']['Enums']['ticket_status']
+                    old_status?:
+                        | Database['public']['Enums']['ticket_status']
+                        | null
+                    ticket_id: string
+                }
+                Update: {
+                    changed_by?: string
+                    created_at?: string | null
+                    id?: string
+                    new_status?: Database['public']['Enums']['ticket_status']
+                    old_status?:
+                        | Database['public']['Enums']['ticket_status']
+                        | null
+                    ticket_id?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: 'ticket_status_history_changed_by_fkey'
+                        columns: ['changed_by']
+                        isOneToOne: false
+                        referencedRelation: 'users'
+                        referencedColumns: ['id']
+                    },
+                    {
+                        foreignKeyName: 'ticket_status_history_ticket_id_fkey'
+                        columns: ['ticket_id']
+                        isOneToOne: false
+                        referencedRelation: 'tickets'
+                        referencedColumns: ['id']
+                    },
+                ]
+            }
             tickets: {
                 Row: {
                     agent_id: string | null
