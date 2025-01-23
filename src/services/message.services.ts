@@ -10,12 +10,12 @@ import { createClient } from '@/lib/supabase/server'
 
 import { EmailService } from './email.services'
 import { TicketService } from './ticket.services'
-import { UserService } from './user.services'
+import { UserWithProfileService } from './user-with-profile.services'
 
 import type { MessageRow, MessageWithUser } from '@/lib/schemas/message.schemas'
 
 const ticketService = new TicketService()
-const userService = new UserService()
+const userService = new UserWithProfileService()
 
 export class MessageService {
     async findByTicketId(ticketId: string): Promise<MessageWithUser[]> {
