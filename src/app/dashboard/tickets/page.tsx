@@ -31,13 +31,13 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
         <div className="flex-1 space-y-4 p-8">
             <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                    <h1 className="text-2xl font-bold flex items-center">
+                    <h1 className="flex items-center text-2xl font-bold">
                         Tickets
                         <Button
                             variant="ghost"
                             size="sm"
                             asChild
-                            className="ml-2 h-8 hover:bg-transparent group"
+                            className="group ml-2 h-8 hover:bg-transparent"
                             aria-label="Create new ticket"
                         >
                             <Link
@@ -45,8 +45,8 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                                 prefetch={true}
                                 className="flex items-center gap-1"
                             >
-                                <PlusCircle className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                                <span className="text-sm font-normal text-semi-muted-foreground group-hover:text-foreground transition-colors">
+                                <PlusCircle className="h-5 w-5 transition-transform group-hover:scale-110" />
+                                <span className="text-sm font-normal text-semi-muted-foreground transition-colors group-hover:text-foreground">
                                     Create
                                 </span>
                             </Link>
@@ -57,7 +57,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
 
             <div className="mt-8">
                 {/* Filter Buttons */}
-                <div className="flex gap-2 mb-4">
+                <div className="mb-4 flex gap-2">
                     <Button
                         asChild
                         variant="outline"

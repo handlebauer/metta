@@ -76,7 +76,7 @@ export function TicketList({
     // Error state
     if (error) {
         return (
-            <Card className="p-6 bg-destructive/10">
+            <Card className="bg-destructive/10 p-6">
                 <p className="text-destructive">
                     Failed to load tickets: {error}
                 </p>

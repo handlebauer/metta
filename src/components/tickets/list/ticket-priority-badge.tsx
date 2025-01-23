@@ -16,7 +16,7 @@ interface TicketPriorityBadgeProps {
 export function TicketPriorityBadge({ priority }: TicketPriorityBadgeProps) {
     const { icon: Icon, className } = getPriorityStyles(priority)
     return (
-        <div className="flex items-center gap-1.5 min-w-[60px] text-muted-foreground">
+        <div className="flex min-w-[60px] items-center gap-1.5 text-muted-foreground">
             <Icon className={cn('h-3.5 w-3.5', className)} />
             {priority}
         </div>

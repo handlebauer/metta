@@ -54,7 +54,7 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
         ),
         cell: ({ row }) => (
             <div
-                className="font-medium truncate max-w-[300px]"
+                className="max-w-[300px] truncate font-medium"
                 title={row.getValue('subject')}
             >
                 {row.getValue('subject')}
@@ -138,7 +138,7 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
             />
         ),
         cell: ({ row }) => (
-            <div className="text-semi-muted-foreground line-clamp-1">
+            <div className="line-clamp-1 text-semi-muted-foreground">
                 {row.getValue('description')}
             </div>
         ),

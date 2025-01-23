@@ -26,7 +26,7 @@ export function TicketsErrorBoundary({
     }, [error])
 
     return (
-        <div className="container flex items-center justify-center min-h-[400px] p-4">
+        <div className="container flex min-h-[400px] items-center justify-center p-4">
             <Card className="w-full max-w-md">
                 <CardHeader>
                     <CardTitle>Something went wrong</CardTitle>

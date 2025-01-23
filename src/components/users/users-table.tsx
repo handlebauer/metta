@@ -52,7 +52,7 @@ export function UsersTable({ users }: UsersTableProps) {
                         <TableRow key={user.id}>
                             <TableCell className="flex items-center gap-3">
                                 <Avatar className="h-8 w-8">
-                                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                                    <AvatarFallback className="bg-primary/10 text-xs text-primary">
                                         {initials}
                                     </AvatarFallback>
                                 </Avatar>

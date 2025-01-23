@@ -95,7 +95,7 @@ export function EditableStatus({
         <div className={cn('inline-flex translate-y-2', className)}>
             <Button
                 className={cn(
-                    'h-auto py-4 px-6 rounded-r-none border-r-0 shadow-sm transition-all duration-200 w-[280px] border-foreground/30',
+                    'h-auto w-[280px] rounded-r-none border-r-0 border-foreground/30 px-6 py-4 shadow-sm transition-all duration-200',
                     'shadow-[0_2px_8px_rgba(0,0,0,0.2)]',
                     actionConfig.accent,
                 )}
@@ -103,8 +103,8 @@ export function EditableStatus({
                 onClick={() => handleStatusChange(nextStatus[currentStatus])}
                 disabled={isPending}
             >
-                <div className="flex items-center gap-3 w-full">
-                    <div className="w-5 h-5 flex-none flex items-center justify-center">
+                <div className="flex w-full items-center gap-3">
+                    <div className="flex h-5 w-5 flex-none items-center justify-center">
                         <Icon
                             className={cn(
                                 'h-5 w-5',
@@ -112,11 +112,11 @@ export function EditableStatus({
                             )}
                         />
                     </div>
-                    <div className="flex flex-col items-start min-w-0">
-                        <span className="text-sm font-medium leading-none min-h-[1rem]">
+                    <div className="flex min-w-0 flex-col items-start">
+                        <span className="min-h-[1rem] text-sm font-medium leading-none">
                             {isPending ? 'Updating...' : actionConfig.label}
                         </span>
-                        <span className="text-xs text-muted-foreground mt-1">
+                        <span className="mt-1 text-xs text-muted-foreground">
                             {actionConfig.description}
                         </span>
                     </div>
@@ -127,7 +127,7 @@ export function EditableStatus({
                     <Button
                         variant={actionConfig.variant}
                         className={cn(
-                            'h-auto py-4 px-3 rounded-l-none border-l shadow-sm transition-all duration-200 w-[42px] border-foreground/30',
+                            'h-auto w-[42px] rounded-l-none border-l border-foreground/30 px-3 py-4 shadow-sm transition-all duration-200',
                             'shadow-[0_2px_8px_rgba(0,0,0,0.2)]',
                             actionConfig.accent,
                         )}

@@ -35,18 +35,18 @@ export function TextVariations() {
 
     return (
         <div className="relative">
-            <div className="text-center space-y-4 mb-16">
-                <h2 className="text-3xl md:text-4xl font-medium tracking-tight">
+            <div className="mb-16 space-y-4 text-center">
+                <h2 className="text-3xl font-medium tracking-tight md:text-4xl">
                     {variations[selectedIndex].title}
                 </h2>
-                <p className="text-xl text-muted-foreground font-light">
+                <p className="text-xl font-light text-muted-foreground">
                     {variations[selectedIndex].subtitle}
                 </p>
             </div>
 
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="absolute -right-16 top-1/2 -translate-y-1/2 p-2 hover:bg-muted rounded-full transition-colors"
+                className="absolute -right-16 top-1/2 -translate-y-1/2 rounded-full p-2 transition-colors hover:bg-muted"
                 aria-label="Show text variations"
             >
                 <ChevronDown
@@ -58,12 +58,12 @@ export function TextVariations() {
             </button>
 
             {isOpen && (
-                <div className="absolute left-0 right-0 bg-background/95 backdrop-blur-sm rounded-lg shadow-lg p-4 space-y-4 border z-10">
+                <div className="absolute left-0 right-0 z-10 space-y-4 rounded-lg border bg-background/95 p-4 shadow-lg backdrop-blur-sm">
                     {variations.map((variation, index) => (
                         <button
                             key={index}
                             className={cn(
-                                'w-full text-left p-3 rounded-md hover:bg-muted transition-colors',
+                                'w-full rounded-md p-3 text-left transition-colors hover:bg-muted',
                                 index === selectedIndex && 'bg-muted',
                             )}
                             onClick={() => {

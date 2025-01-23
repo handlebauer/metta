@@ -57,7 +57,7 @@ export function MagicLinkForm({ onStateChange }: MagicLinkFormProps) {
             <Button
                 type="submit"
                 size="lg"
-                className="w-full font-semibold relative"
+                className="relative w-full font-semibold"
                 disabled={buttonState.status === 'loading'}
                 variant={
                     buttonState.status === 'success'
@@ -69,7 +69,7 @@ export function MagicLinkForm({ onStateChange }: MagicLinkFormProps) {
             >
                 {buttonState.status === 'loading' && (
                     <span className="inline-flex items-center">
-                        <span className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                        <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                         Sending...
                     </span>
                 )}

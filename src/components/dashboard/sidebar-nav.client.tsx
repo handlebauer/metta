@@ -96,7 +96,7 @@ export function SidebarNav({ user }: SidebarNavProps) {
         | null
 
     return (
-        <div className="space-y-0.5 select-none">
+        <div className="select-none space-y-0.5">
             <Button
                 asChild
                 variant="ghost"
@@ -150,7 +150,7 @@ export function SidebarNav({ user }: SidebarNavProps) {
                         variant="ghost"
                         size="sm"
                         className={cn(
-                            'w-full justify-start font-medium mt-4',
+                            'mt-4 w-full justify-start font-medium',
                             isUsersSection && 'bg-muted/50',
                         )}
                     >
@@ -177,7 +177,7 @@ export function SidebarNav({ user }: SidebarNavProps) {
                         variant="ghost"
                         size="sm"
                         className={cn(
-                            'w-full justify-start font-medium mt-4',
+                            'mt-4 w-full justify-start font-medium',
                             pathname?.startsWith('/dashboard/settings') &&
                                 'bg-muted/50',
                         )}

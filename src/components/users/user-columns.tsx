@@ -10,7 +10,7 @@ export const userColumns: ColumnDef<UserWithProfile>[] = [
         id: 'user',
         header: ({ column }) => {
             return (
-                <div className="text-left pl-10">
+                <div className="pl-10 text-left">
                     <Button
                         variant="ghost"
                         onClick={() =>

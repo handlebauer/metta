@@ -3,10 +3,10 @@ import Link from 'next/link'
 
 export function HeroSection({ isLoggedIn }: { isLoggedIn: boolean }) {
     return (
-        <div className="flex w-full min-h-[calc(100vh-4rem)]">
+        <div className="flex min-h-[calc(100vh-4rem)] w-full">
             <div className="container mx-auto flex items-center justify-center">
                 <div className="relative w-full max-w-[580px]">
-                    <div className="absolute -right-[250px] top-1/2 -translate-y-1/2 hidden lg:block pointer-events-none select-none">
+                    <div className="pointer-events-none absolute -right-[250px] top-1/2 hidden -translate-y-1/2 select-none lg:block">
                         <Image
                             src="/ai.png"
                             alt="AI and Human Connection Visualization"
@@ -17,23 +17,23 @@ export function HeroSection({ isLoggedIn }: { isLoggedIn: boolean }) {
                         />
                     </div>
 
-                    <div className="relative z-10 flex flex-col items-center -translate-x-14">
-                        <h1 className="font-outfit scroll-m-20 text-4xl lg:text-5xl font-bold tracking-tight leading-[1.3] lg:leading-[1.2] text-center">
+                    <div className="relative z-10 flex -translate-x-14 flex-col items-center">
+                        <h1 className="scroll-m-20 text-center font-outfit text-4xl font-bold leading-[1.3] tracking-tight lg:text-5xl lg:leading-[1.2]">
                             Support with{' '}
-                            <span className="p-2 bg-accent-purple rounded-[8px] whitespace-nowrap tracking-wide">
+                            <span className="whitespace-nowrap rounded-[8px] bg-accent-purple p-2 tracking-wide">
                                 Balance
                             </span>
                         </h1>
 
-                        <p className="text-gray-500 mt-4 dark:text-gray-400 max-w-[550px] text-center font-medium">
+                        <p className="mt-4 max-w-[550px] text-center font-medium text-gray-500 dark:text-gray-400">
                             Harmonizing AI efficiency with authentic human
                             connection
                         </p>
 
-                        <div className="flex gap-2 mt-8 -ml-12">
+                        <div className="-ml-12 mt-8 flex gap-2">
                             <Link
                                 href="/login"
-                                className="relative cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 rounded-xl overflow-hidden shadow-lg shadow-zinc-900/20 dark:shadow-zinc-100/20"
+                                className="relative inline-flex cursor-pointer items-center gap-2 overflow-hidden rounded-xl bg-zinc-900 px-6 py-3 text-white shadow-lg shadow-zinc-900/20 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:shadow-zinc-100/20 dark:hover:bg-zinc-200"
                             >
                                 <div className="relative z-10 flex items-center gap-2">
                                     {isLoggedIn ? 'Dashboard' : 'Get Started'}
@@ -41,7 +41,7 @@ export function HeroSection({ isLoggedIn }: { isLoggedIn: boolean }) {
                             </Link>
                             <a
                                 href="#features"
-                                className="relative cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-xl overflow-hidden shadow-lg shadow-zinc-900/20 dark:shadow-zinc-100/20"
+                                className="relative inline-flex cursor-pointer items-center gap-2 overflow-hidden rounded-xl bg-zinc-100 px-6 py-3 text-zinc-900 shadow-lg shadow-zinc-900/20 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-100 dark:shadow-zinc-100/20 dark:hover:bg-zinc-700"
                             >
                                 <div className="relative z-10 flex items-center gap-2">
                                     See Features

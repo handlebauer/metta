@@ -55,7 +55,7 @@ export function MessageList({ messages, currentUserId }: MessageListProps) {
                 )}
             >
                 {messages.length === 0 ? (
-                    <div className="text-muted-foreground text-center py-8">
+                    <div className="py-8 text-center text-muted-foreground">
                         No messages yet
                     </div>
                 ) : (

@@ -78,10 +78,10 @@ export function TicketConversation({
     )
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex h-full flex-col">
             {error && (
                 <div className="px-6 py-4">
-                    <div className="p-4 text-sm text-destructive bg-destructive/10 rounded-lg">
+                    <div className="rounded-lg bg-destructive/10 p-4 text-sm text-destructive">
                         {error}
                     </div>
                 </div>

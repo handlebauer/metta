@@ -99,7 +99,7 @@ export function EditablePriority({
                 <Button
                     variant="outline"
                     className={cn(
-                        'h-6 px-2 font-medium text-xs gap-1.5 border-foreground/10 focus-visible:ring-0',
+                        'h-6 gap-1.5 border-foreground/10 px-2 text-xs font-medium focus-visible:ring-0',
                         currentConfig.bgColor,
                     )}
                 >
@@ -126,7 +126,7 @@ export function EditablePriority({
                             key={value}
                             onClick={() => handlePriorityChange(value)}
                             disabled={value === priority}
-                            className="gap-2 capitalize font-medium"
+                            className="gap-2 font-medium capitalize"
                         >
                             <ItemIcon
                                 className={cn('h-3.5 w-3.5', config.color)}

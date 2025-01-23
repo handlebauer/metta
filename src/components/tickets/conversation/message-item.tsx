@@ -26,7 +26,7 @@ export function MessageItem({ message, currentUserId }: MessageItemProps) {
         <div className={messageClass}>
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                    <span className="font-bold text-sm">
+                    <span className="text-sm font-bold">
                         {message.user.profile?.full_name || message.user.email}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -37,7 +37,7 @@ export function MessageItem({ message, currentUserId }: MessageItemProps) {
                     {formattedTime}
                 </span>
             </div>
-            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+            <p className="whitespace-pre-wrap text-sm">{message.content}</p>
         </div>
     )
 }

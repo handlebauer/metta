@@ -18,7 +18,7 @@ function CompactStatusBadge({ status }: { status: 'new' | 'open' | 'closed' }) {
 
     return (
         <span
-            className={`inline-block px-1.5 rounded-sm text-[10px] font-medium ${className}`}
+            className={`inline-block rounded-sm px-1.5 text-[10px] font-medium ${className}`}
         >
             {status}
         </span>
@@ -34,7 +34,7 @@ export function TicketHistory({ history }: TicketHistoryProps) {
     if (history.length === 0) {
         return (
             <div className="px-4 py-2">
-                <p className="text-sm text-muted-foreground -mx-2 mt-1">
+                <p className="-mx-2 mt-1 text-sm text-muted-foreground">
                     No status changes yet
                 </p>
             </div>
@@ -60,14 +60,14 @@ export function TicketHistory({ history }: TicketHistoryProps) {
                         {/* Timeline connector */}
                         <div className="absolute left-2 top-6 h-full w-px -translate-x-1/2 bg-border" />
 
-                        <div className="flex gap-3 items-start">
+                        <div className="flex items-start gap-3">
                             {/* Status icon */}
-                            <div className="relative z-10 rounded-full p-0.5 bg-background shadow-sm ring-1 ring-border">
+                            <div className="relative z-10 rounded-full bg-background p-0.5 shadow-sm ring-1 ring-border">
                                 <StatusIcon status={event.new_status!} />
                             </div>
 
                             {/* Event details */}
-                            <div className="flex-1 min-w-0">
+                            <div className="min-w-0 flex-1">
                                 <div className="flex items-center justify-between gap-2">
                                     <div className="flex items-baseline gap-1.5">
                                         <span className="text-[11px] font-medium">
@@ -77,12 +77,12 @@ export function TicketHistory({ history }: TicketHistoryProps) {
                                             status={event.new_status!}
                                         />
                                     </div>
-                                    <time className="text-[11px] tabular-nums text-muted-foreground flex-none">
+                                    <time className="flex-none text-[11px] tabular-nums text-muted-foreground">
                                         {formatDate(event.created_at || '')}
                                     </time>
                                 </div>
 
-                                <p className="text-[11px] text-muted-foreground mt-0.5">
+                                <p className="mt-0.5 text-[11px] text-muted-foreground">
                                     {event.changed_by_name}
                                 </p>
                             </div>
@@ -92,8 +92,8 @@ export function TicketHistory({ history }: TicketHistoryProps) {
 
                 {/* Initial creation marker */}
                 <div className="relative">
-                    <div className="flex gap-3 items-start">
-                        <div className="relative z-10 rounded-full p-0.5 bg-background shadow-sm ring-1 ring-border">
+                    <div className="flex items-start gap-3">
+                        <div className="relative z-10 rounded-full bg-background p-0.5 shadow-sm ring-1 ring-border">
                             <Clock4 className="h-3 w-3 text-foreground" />
                         </div>
                         <div className="flex-1">

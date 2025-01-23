@@ -21,8 +21,8 @@ export default function SupportPage() {
     return (
         <div className="py-20">
             <div className="container mx-auto px-4">
-                <div className="text-center mb-16">
-                    <h1 className="text-4xl font-bold mb-4">Help Center</h1>
+                <div className="mb-16 text-center">
+                    <h1 className="mb-4 text-4xl font-bold">Help Center</h1>
                     <p className="text-xl text-gray-600">
                         Find answers to common questions or get in touch with
                         our support team
@@ -30,17 +30,17 @@ export default function SupportPage() {
                 </div>
 
                 {/* FAQs Section */}
-                <div className="max-w-3xl mx-auto mb-20">
-                    <h2 className="text-2xl font-bold mb-8">
+                <div className="mx-auto mb-20 max-w-3xl">
+                    <h2 className="mb-8 text-2xl font-bold">
                         Frequently Asked Questions
                     </h2>
                     <div className="space-y-6">
                         {faqs.map(faq => (
                             <div
                                 key={faq.question}
-                                className="border border-gray-200 rounded-lg p-6"
+                                className="rounded-lg border border-gray-200 p-6"
                             >
-                                <h3 className="text-lg font-semibold mb-2">
+                                <h3 className="mb-2 text-lg font-semibold">
                                     {faq.question}
                                 </h3>
                                 <p className="text-gray-600">{faq.answer}</p>
@@ -50,17 +50,17 @@ export default function SupportPage() {
                 </div>
 
                 {/* Contact Support Section */}
-                <div className="max-w-3xl mx-auto text-center">
-                    <h2 className="text-2xl font-bold mb-4">Need More Help?</h2>
-                    <p className="text-gray-600 mb-8">
+                <div className="mx-auto max-w-3xl text-center">
+                    <h2 className="mb-4 text-2xl font-bold">Need More Help?</h2>
+                    <p className="mb-8 text-gray-600">
                         Our support team is available 24/7 to assist you with
                         any questions or concerns.
                     </p>
 
                     {/* Metta Widget Placeholder */}
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-gray-50">
+                    <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-8">
                         <div className="text-gray-500">
-                            <p className="font-semibold mb-2">
+                            <p className="mb-2 font-semibold">
                                 Metta Support Widget
                             </p>
                             <p className="text-sm">

@@ -40,7 +40,7 @@ export function DemoButton({ onStateChange }: DemoButtonProps) {
             {/* DEMO USER BUTTON - Remove this component in production */}
             <Button
                 variant="outline"
-                className="w-full bg-accent-emerald hover:bg-accent/80 dark:bg-emerald-950 dark:hover:bg-emerald-900 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-emerald-200 font-medium"
+                className="w-full border-emerald-200 bg-accent-emerald font-medium text-emerald-700 hover:bg-accent/80 hover:text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 dark:hover:bg-emerald-900 dark:hover:text-emerald-200"
                 onClick={handleDemoSignIn}
                 disabled={demoLoading}
             >

@@ -17,10 +17,10 @@ export default async function DashboardLayout({
     }
 
     return (
-        <div className="h-screen flex flex-col">
+        <div className="flex h-screen flex-col">
             {/* Top Navigation */}
-            <header className="border-b flex-none">
-                <div className="flex h-16 items-center px-4 gap-4">
+            <header className="flex-none border-b">
+                <div className="flex h-16 items-center gap-4 px-4">
                     <Brand href="/dashboard">metta</Brand>
                     <div className="ml-auto flex items-center gap-4">
                         <UserNav user={user} />
@@ -28,9 +28,9 @@ export default async function DashboardLayout({
                 </div>
             </header>
 
-            <div className="flex-1 flex min-h-0">
+            <div className="flex min-h-0 flex-1">
                 {/* Sidebar Navigation */}
-                <aside className="w-64 border-r bg-muted/30 flex-none">
+                <aside className="w-64 flex-none border-r bg-muted/30">
                     <nav className="flex flex-col gap-2 p-4">
                         <SidebarNav user={user} />
                     </nav>

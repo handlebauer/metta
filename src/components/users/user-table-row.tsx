@@ -44,9 +44,9 @@ export function UserTableRow({
 
     return (
         <TableRow>
-            <TableCell className="flex items-center gap-3 w-[300px]">
+            <TableCell className="flex w-[300px] items-center gap-3">
                 <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                    <AvatarFallback className="bg-primary/10 text-xs text-primary">
                         {initials}
                     </AvatarFallback>
                 </Avatar>
@@ -59,7 +59,7 @@ export function UserTableRow({
                     </div>
                 </div>
             </TableCell>
-            <TableCell className="text-center w-[120px]">
+            <TableCell className="w-[120px] text-center">
                 <div className="flex justify-center">
                     <Badge
                         variant={
@@ -74,24 +74,24 @@ export function UserTableRow({
                     </Badge>
                 </div>
             </TableCell>
-            <TableCell className="text-center w-[120px]">
+            <TableCell className="w-[120px] text-center">
                 <div className="flex justify-center">
                     <Badge variant={isActive ? 'default' : 'secondary'}>
                         {isActive ? 'Active' : 'Inactive'}
                     </Badge>
                 </div>
             </TableCell>
-            <TableCell className="text-center w-[100px]">
-                <span className="tabular-nums text-sm font-medium">
+            <TableCell className="w-[100px] text-center">
+                <span className="text-sm font-medium tabular-nums">
                     {user.ticket_counts.assigned}
                 </span>
             </TableCell>
-            <TableCell className="text-center w-[100px]">
-                <span className="tabular-nums text-sm font-medium">
+            <TableCell className="w-[100px] text-center">
+                <span className="text-sm font-medium tabular-nums">
                     {user.ticket_counts.created}
                 </span>
             </TableCell>
-            <TableCell className="text-center text-muted-foreground w-[150px]">
+            <TableCell className="w-[150px] text-center text-muted-foreground">
                 {user.last_sign_in_at
                     ? formatConversationalDate(user.last_sign_in_at)
                     : 'Never'}

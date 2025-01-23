@@ -9,7 +9,7 @@ export function Brand({ children, href = '/' }: BrandProps) {
     return (
         <Link
             href={href}
-            className="text-2xl font-bold hover:opacity-80 transition-opacity"
+            className="text-2xl font-bold transition-opacity hover:opacity-80"
         >
             {children}
         </Link>

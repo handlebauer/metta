@@ -12,7 +12,7 @@ export function TicketStatusBadge({ status }: TicketStatusBadgeProps) {
     return (
         <Badge
             variant={variant}
-            className={cn('min-w-[60px] text-center justify-center', className)}
+            className={cn('min-w-[60px] justify-center text-center', className)}
         >
             {status}
         </Badge>

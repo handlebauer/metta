@@ -31,11 +31,11 @@ export async function TicketView({ ticket, user }: TicketViewProps) {
     }
 
     return (
-        <div className="h-[calc(100vh-6rem)] flex">
+        <div className="flex h-[calc(100vh-6rem)]">
             {/* Main conversation area */}
-            <div className="flex-1 min-w-0 flex flex-col">
+            <div className="flex min-w-0 flex-1 flex-col">
                 {/* Header - Compact and informational */}
-                <div className="flex items-center gap-3 px-12 py-3 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <div className="flex items-center gap-3 bg-background/95 px-12 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                     <h1 className="text-xl font-semibold tracking-tight">
                         {ticket.subject}
                     </h1>
@@ -43,7 +43,7 @@ export async function TicketView({ ticket, user }: TicketViewProps) {
                 </div>
 
                 {/* Conversation */}
-                <div className="flex-1 min-h-0 px-12">
+                <div className="min-h-0 flex-1 px-12">
                     <TicketConversation
                         ticketId={ticket.id}
                         user={user}

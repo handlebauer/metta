@@ -80,7 +80,7 @@ export function TicketEditor({
     return (
         <div className="pt-0">
             <div className={containerClass}>
-                <div className="flex flex-col h-full">
+                <div className="flex h-full flex-col">
                     {/* Toolbar */}
                     <div className={toolbarClass}>
                         <Button
@@ -93,7 +93,7 @@ export function TicketEditor({
                                 editor?.chain().focus().toggleBold().run()
                             }
                         >
-                            <Bold className="w-4 h-4" />
+                            <Bold className="h-4 w-4" />
                         </Button>
                         <Button
                             variant="ghost"
@@ -105,7 +105,7 @@ export function TicketEditor({
                                 editor?.chain().focus().toggleItalic().run()
                             }
                         >
-                            <Italic className="w-4 h-4" />
+                            <Italic className="h-4 w-4" />
                         </Button>
                         <Button
                             variant="ghost"
@@ -117,7 +117,7 @@ export function TicketEditor({
                                 editor?.chain().focus().toggleStrike().run()
                             }
                         >
-                            <Strikethrough className="w-4 h-4" />
+                            <Strikethrough className="h-4 w-4" />
                         </Button>
                     </div>
 

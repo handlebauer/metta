@@ -67,7 +67,7 @@ export function TicketInternalNotes({
     }
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex h-full flex-col">
             {/* Add new note */}
             <div className="pb-2 pt-1">
                 <div className="relative">
@@ -91,7 +91,7 @@ export function TicketInternalNotes({
             </div>
 
             {/* Notes list */}
-            <div className="flex-1 overflow-y-auto min-h-0 px-6">
+            <div className="min-h-0 flex-1 overflow-y-auto px-6">
                 <div className="space-y-2">
                     {notes.map(note => (
                         <div

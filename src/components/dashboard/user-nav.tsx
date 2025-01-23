@@ -20,8 +20,8 @@ export function UserNav({ user }: { user: UserWithProfile }) {
             <DashboardButton />
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Avatar className="h-11 w-11 border border-muted-foreground/30 cursor-pointer hover:opacity-80">
-                        <AvatarFallback className="bg-zinc-700 text-zinc-50 font-medium text-sm select-none">
+                    <Avatar className="h-11 w-11 cursor-pointer border border-muted-foreground/30 hover:opacity-80">
+                        <AvatarFallback className="select-none bg-zinc-700 text-sm font-medium text-zinc-50">
                             {initials}
                         </AvatarFallback>
                     </Avatar>

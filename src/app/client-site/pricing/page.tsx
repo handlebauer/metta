@@ -45,8 +45,8 @@ export default function PricingPage() {
     return (
         <div className="py-20">
             <div className="container mx-auto px-4">
-                <div className="text-center mb-16">
-                    <h1 className="text-4xl font-bold mb-4">
+                <div className="mb-16 text-center">
+                    <h1 className="mb-4 text-4xl font-bold">
                         Simple, Transparent Pricing
                     </h1>
                     <p className="text-xl text-gray-600">
@@ -54,7 +54,7 @@ export default function PricingPage() {
                     </p>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-3">
                     {plans.map(plan => (
                         <div
                             key={plan.name}
@@ -62,24 +62,24 @@ export default function PricingPage() {
                                 plan.popular
                                     ? 'border-blue-500 shadow-lg'
                                     : 'border-gray-200'
-                            } p-8 relative`}
+                            } relative p-8`}
                         >
                             {plan.popular && (
-                                <div className="absolute top-0 right-0 bg-blue-500 text-white px-4 py-1 rounded-bl-lg rounded-tr-lg text-sm font-medium">
+                                <div className="absolute right-0 top-0 rounded-bl-lg rounded-tr-lg bg-blue-500 px-4 py-1 text-sm font-medium text-white">
                                     Most Popular
                                 </div>
                             )}
-                            <div className="text-2xl font-bold mb-2">
+                            <div className="mb-2 text-2xl font-bold">
                                 {plan.name}
                             </div>
-                            <div className="text-4xl font-bold mb-6">
+                            <div className="mb-6 text-4xl font-bold">
                                 {plan.price}
                                 <span className="text-lg font-normal text-gray-600">
                                     /mo
                                 </span>
                             </div>
 
-                            <div className="space-y-4 mb-8">
+                            <div className="mb-8 space-y-4">
                                 <div className="flex items-center space-x-2">
                                     <span className="font-semibold">
                                         Storage:
@@ -94,7 +94,7 @@ export default function PricingPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-3 mb-8">
+                            <div className="mb-8 space-y-3">
                                 {plan.features.map(feature => (
                                     <div
                                         key={feature}
@@ -117,7 +117,7 @@ export default function PricingPage() {
                             </div>
 
                             <button
-                                className={`w-full py-3 rounded-lg font-semibold ${
+                                className={`w-full rounded-lg py-3 font-semibold ${
                                     plan.popular
                                         ? 'bg-blue-600 text-white hover:bg-blue-700'
                                         : 'bg-gray-100 text-gray-800 hover:bg-gray-200'

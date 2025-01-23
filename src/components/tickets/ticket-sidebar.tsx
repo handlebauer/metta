@@ -54,19 +54,19 @@ export async function TicketSidebar({
         .slice(0, 2)
 
     return (
-        <div className="w-[360px] border-l bg-muted/10 flex flex-col h-full">
+        <div className="flex h-full w-[360px] flex-col border-l bg-muted/10">
             {/* Fixed Header Section */}
-            <div className="px-6 py-4 space-y-4 flex-none">
+            <div className="flex-none space-y-4 px-6 py-4">
                 {/* Customer Details Section */}
                 <div className="border-b pb-4">
                     <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10">
-                            <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                            <AvatarFallback className="bg-primary/10 text-sm text-primary">
                                 {initials}
                             </AvatarFallback>
                         </Avatar>
                         <div className="space-y-1">
-                            <p className="font-medium text-sm">
+                            <p className="text-sm font-medium">
                                 {customerProfile.data?.full_name ||
                                     'Unknown Customer'}
                             </p>
@@ -79,7 +79,7 @@ export async function TicketSidebar({
                 </div>
                 {/* Ticket Details Section */}
                 <div className="border-b pb-4">
-                    <h2 className="text-sm font-medium mb-3">Details</h2>
+                    <h2 className="mb-3 text-sm font-medium">Details</h2>
                     <div className="space-y-1.5 text-sm">
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">ID</span>
@@ -125,16 +125,16 @@ export async function TicketSidebar({
             {/* Scrollable Notes Section */}
             {isAgentOrAdmin && (
                 <>
-                    <div className="flex-1 overflow-y-auto min-h-0">
+                    <div className="min-h-0 flex-1 overflow-y-auto">
                         <Tabs
                             defaultValue="notes"
-                            className="w-full h-full flex flex-col"
+                            className="flex h-full w-full flex-col"
                         >
-                            <div className="px-6 bg-muted/5 pb-2">
-                                <TabsList className="w-full grid grid-cols-2 bg-transparent p-0 h-auto gap-4">
+                            <div className="bg-muted/5 px-6 pb-2">
+                                <TabsList className="grid h-auto w-full grid-cols-2 gap-4 bg-transparent p-0">
                                     <TabsTrigger
                                         value="notes"
-                                        className="border data-[state=active]:border-primary/50 data-[state=active]:text-primary data-[state=active]:shadow-none px-3 h-8"
+                                        className="h-8 border px-3 data-[state=active]:border-primary/50 data-[state=active]:text-primary data-[state=active]:shadow-none"
                                     >
                                         Notes
                                         <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] text-primary">
@@ -143,7 +143,7 @@ export async function TicketSidebar({
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="history"
-                                        className="border data-[state=active]:border-primary/50 data-[state=active]:text-primary data-[state=active]:shadow-none px-3 h-8"
+                                        className="h-8 border px-3 data-[state=active]:border-primary/50 data-[state=active]:text-primary data-[state=active]:shadow-none"
                                     >
                                         History
                                         <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] text-primary">
@@ -153,8 +153,8 @@ export async function TicketSidebar({
                                 </TabsList>
                             </div>
 
-                            <TabsContent value="notes" className="flex-1 mt-0">
-                                <div className="h-full px-6 overflow-y-auto">
+                            <TabsContent value="notes" className="mt-0 flex-1">
+                                <div className="h-full overflow-y-auto px-6">
                                     <TicketInternalNotes
                                         ticketId={ticket.id}
                                         userId={user.id}
@@ -165,7 +165,7 @@ export async function TicketSidebar({
 
                             <TabsContent
                                 value="history"
-                                className="flex-1 mt-0"
+                                className="mt-0 flex-1"
                             >
                                 <div className="px-8">
                                     <TicketHistory
@@ -177,7 +177,7 @@ export async function TicketSidebar({
                         </Tabs>
                     </div>
                     {/* Fixed Footer Section */}
-                    <div className="w-full h-[140px] px-6 py-4 flex justify-center items-center flex-none">
+                    <div className="flex h-[140px] w-full flex-none items-center justify-center px-6 py-4">
                         <EditableStatus
                             ticketId={ticket.id}
                             currentStatus={ticket.status || 'new'}

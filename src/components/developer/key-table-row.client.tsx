@@ -76,7 +76,7 @@ export function ApiKeyTableRow({ apiKey, decryptedKey }: ApiKeyTableRowProps) {
     }
 
     return (
-        <TableRow className="hover:bg-transparent border-b border-muted-foreground/10 dark:border-purple-950/50">
+        <TableRow className="border-b border-muted-foreground/10 hover:bg-transparent dark:border-purple-950/50">
             <TableCell>
                 <div className="flex items-center gap-2">
                     <KeyRound className="h-4 w-4 text-muted-foreground" />
@@ -91,13 +91,13 @@ export function ApiKeyTableRow({ apiKey, decryptedKey }: ApiKeyTableRowProps) {
                     disabled={apiKey.status !== 'active' || !decryptedKey}
                 >
                     <div
-                        className={`px-3 py-2 inline-block font-['IBM_Plex_Mono'] tracking-tight text-sm border ${
+                        className={`inline-block border px-3 py-2 font-['IBM_Plex_Mono'] text-sm tracking-tight ${
                             apiKey.status === 'active'
-                                ? 'text-muted-foreground border-purple-200 dark:border-purple-900 bg-purple-50/50 dark:bg-purple-950/20'
-                                : 'text-muted-foreground/50 border-muted-foreground/20 bg-muted/50'
+                                ? 'border-purple-200 bg-purple-50/50 text-muted-foreground dark:border-purple-900 dark:bg-purple-950/20'
+                                : 'border-muted-foreground/20 bg-muted/50 text-muted-foreground/50'
                         } cursor-pointer`}
                     >
-                        <span className="font-medium whitespace-nowrap">
+                        <span className="whitespace-nowrap font-medium">
                             {isRevealed && decryptedKey
                                 ? decryptedKey
                                 : `metta-${'*'.repeat(44)}`}

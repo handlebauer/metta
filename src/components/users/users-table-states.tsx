@@ -21,7 +21,7 @@ interface ErrorStateProps {
 
 export function ErrorState({ error }: ErrorStateProps) {
     return (
-        <Card className="p-6 bg-destructive/10">
+        <Card className="bg-destructive/10 p-6">
             <p className="text-destructive">Failed to load users: {error}</p>
         </Card>
     )

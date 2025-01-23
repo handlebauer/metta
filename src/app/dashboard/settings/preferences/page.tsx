@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch'
 
 export default function GeneralSettingsPage() {
     return (
-        <div className="container mx-auto py-6 space-y-8">
+        <div className="container mx-auto space-y-8 py-6">
             <div>
                 <h1 className="text-2xl font-semibold tracking-tight">
                     General Settings

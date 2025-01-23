@@ -88,13 +88,13 @@ export default async function UsersPage({ searchParams }: PageProps) {
         <div className="flex-1 space-y-4 p-8">
             <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                    <h2 className="text-2xl font-bold tracking-tight flex items-center">
+                    <h2 className="flex items-center text-2xl font-bold tracking-tight">
                         {title}
                         <Button
                             variant="ghost"
                             size="sm"
                             asChild
-                            className="ml-2 h-8 hover:bg-transparent group"
+                            className="group ml-2 h-8 hover:bg-transparent"
                             aria-label="Create new user"
                         >
                             <Link
@@ -102,8 +102,8 @@ export default async function UsersPage({ searchParams }: PageProps) {
                                 prefetch={true}
                                 className="flex items-center gap-1"
                             >
-                                <PlusCircle className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                                <span className="text-sm font-normal text-semi-muted-foreground group-hover:text-foreground transition-colors">
+                                <PlusCircle className="h-5 w-5 transition-transform group-hover:scale-110" />
+                                <span className="text-sm font-normal text-semi-muted-foreground transition-colors group-hover:text-foreground">
                                     Create
                                 </span>
                             </Link>

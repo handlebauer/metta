@@ -39,12 +39,12 @@ export function CustomerDetails({
         <div className="border-b pb-4">
             <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                    <AvatarFallback className="bg-primary/10 text-sm text-primary">
                         {initials}
                     </AvatarFallback>
                 </Avatar>
                 <div className="space-y-1">
-                    <p className="font-medium text-sm">
+                    <p className="text-sm font-medium">
                         {customerProfile.data?.full_name || 'Unknown Customer'}
                     </p>
                     <p className="text-xs text-muted-foreground">

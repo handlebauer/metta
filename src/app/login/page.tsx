@@ -12,7 +12,7 @@ export default function LoginPage() {
         <main className="flex min-h-screen flex-col items-center justify-center p-6">
             <Card className="w-full max-w-sm">
                 <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold text-center">
+                    <CardTitle className="text-center text-2xl font-bold">
                         Welcome back
                     </CardTitle>
                     <CardDescription className="text-center">
