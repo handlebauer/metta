@@ -1,7 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 
 import type { MessageWithUser } from '@/lib/schemas/message.schemas'
-import type { TicketWithCustomer } from '@/lib/schemas/ticket.schemas'
+import type {
+    TicketStatusHistoryRow,
+    TicketWithCustomer,
+} from '@/lib/schemas/ticket.schemas'
 
 export async function generateTicketAccessToken(
     ticketId: string,
@@ -180,4 +183,39 @@ export async function getTicketWithToken(
         },
         messages,
     }
+}
+
+export async function getTicketHistoryWithToken(
+    ticketId: string,
+    token: string,
+): Promise<TicketStatusHistoryRow[]> {
+    const supabase = await createClient({ 'x-ticket-token': token })
+
+    const { data, error } = await supabase
+        .from('ticket_status_history')
+        .select(
+            `
+            *,
+            changed_by_name:users!changed_by(
+                email,
+                profile:profiles(
+                    full_name
+                )
+            )
+        `,
+        )
+        .eq('ticket_id', ticketId)
+        .order('created_at', { ascending: false })
+        .limit(5)
+
+    if (error) {
+        console.warn('Failed to fetch ticket history:', error)
+        return []
+    }
+
+    return data.map(event => ({
+        ...event,
+        changed_by_name: event.changed_by_name.profile?.full_name ?? '',
+        changed_by_email: event.changed_by_name.email,
+    }))
 }

@@ -1,12 +1,12 @@
-'use client'
-
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { formatConversationalDate } from '@/lib/utils/dates'
 
+import { TicketHistory } from '../history/ticket-history'
 import { TicketStatusBadge } from '../list/ticket-status-badge'
 import { CustomerConversation } from './customer-conversation.client'
 
 import type { MessageWithUser } from '@/lib/schemas/message.schemas'
+import type { TicketStatusHistoryRow } from '@/lib/schemas/ticket.schemas'
 
 export interface CustomerTicketViewProps {
     ticket: {
@@ -22,9 +22,14 @@ export interface CustomerTicketViewProps {
         messages: MessageWithUser[]
     }
     token: string
+    history: TicketStatusHistoryRow[]
 }
 
-export function CustomerTicketView({ ticket, token }: CustomerTicketViewProps) {
+export function CustomerTicketView({
+    ticket,
+    token,
+    history,
+}: CustomerTicketViewProps) {
     return (
         <div className="flex h-screen items-center justify-center py-12">
             <div className="flex gap-8">
@@ -147,6 +152,14 @@ export function CustomerTicketView({ ticket, token }: CustomerTicketViewProps) {
                                 </span>
                             </div>
                         </div>
+                    </div>
+
+                    {/* Ticket History Section */}
+                    <div className="rounded-lg border bg-card shadow-sm">
+                        <h3 className="border-b px-6 py-3 text-sm font-medium">
+                            Status History
+                        </h3>
+                        <TicketHistory ticketId={ticket.id} history={history} />
                     </div>
                 </div>
             </div>

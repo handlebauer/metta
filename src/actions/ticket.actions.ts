@@ -9,6 +9,7 @@ import {
     ticketInternalNoteInsertSchema,
     ticketUpdateSchema,
 } from '@/lib/schemas/ticket.schemas'
+import { getTicketHistoryWithToken } from '@/services/ticket-access.services'
 import { TicketService } from '@/services/ticket.services'
 
 import type {
@@ -182,6 +183,22 @@ export async function getTicketHistory(id: string): Promise<{
     }
 }
 
+export async function getPublicTicketHistory(ticketId: string, token: string) {
+    try {
+        const history = await getTicketHistoryWithToken(ticketId, token)
+        return { data: history, error: null }
+    } catch (error) {
+        console.error('[getPublicTicketHistory]', error)
+        return {
+            data: null,
+            error:
+                error instanceof Error
+                    ? error.message
+                    : 'Failed to load history',
+        }
+    }
+}
+
 // Mutation operations (for forms and client components)
 export async function createTicket(
     input: FormData | z.infer<typeof ticketInsertSchema>,
@@ -261,6 +278,7 @@ export async function updateTicket(
         // Revalidate relevant paths
         revalidatePath('/tickets')
         revalidatePath(`/tickets/${id}`)
+        revalidatePath(`/tickets/${id}/[token]`)
         if (data.agent_id) {
             revalidatePath(`/agents/${data.agent_id}/tickets`)
         }
@@ -332,6 +350,7 @@ export async function claimTicket(
         // Revalidate relevant paths
         revalidatePath('/tickets')
         revalidatePath(`/tickets/${ticketId}`)
+        revalidatePath(`/tickets/${ticketId}/[token]`)
         revalidatePath(`/agents/${agentId}/tickets`)
         revalidatePath(`/customers/${data.customer_id}/tickets`)
 

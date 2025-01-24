@@ -387,6 +387,7 @@ export class TicketService {
                 )
                 .eq('ticket_id', ticketId)
                 .order('created_at', { ascending: false })
+                .limit(5)
 
             if (error) throw new DatabaseError(error.message)
 
