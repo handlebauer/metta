@@ -99,28 +99,36 @@ async function sendNotification(params: {
 
     if (isAgent) {
         // Agent replied - notify customer
-        const { data: customer } = await supabase
+        const { data: customer, error } = await supabase
             .from('users')
             .select('*')
             .eq('id', ticket.customer_id)
             .single()
 
-        if (customer) {
-            console.log('[SendGrid] Notifying customer:', customer.email)
-            // Generate access token for customer to view ticket
-            const accessToken = await generateTicketAccessToken(
-                ticket.id,
-                '7 days',
-                sender.id,
-            )
-
-            await EmailService.sendAgentReplyNotification(
-                ticket,
-                customer,
-                messageContent,
-                accessToken,
-            )
+        if (error || !customer) {
+            console.error('[SendGrid] Failed to find customer:', error)
+            throw new Error('Customer not found for notification')
         }
+
+        console.log('[SendGrid] Agent reply - notifying customer:', {
+            agent_email: sender.email,
+            customer_email: customer.email,
+            ticket_id: ticket.id,
+        })
+
+        // Generate access token for customer to view ticket
+        const accessToken = await generateTicketAccessToken(
+            ticket.id,
+            '7 days',
+            sender.id,
+        )
+
+        await EmailService.sendAgentReplyNotification(
+            ticket,
+            customer,
+            messageContent,
+            accessToken,
+        )
     } else if (ticket.agent_id) {
         // Customer replied - notify agent if assigned
         const { data: agent } = await supabase
