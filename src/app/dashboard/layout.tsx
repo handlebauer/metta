@@ -20,8 +20,8 @@ export default async function DashboardLayout({
         <div className="flex h-screen flex-col">
             {/* Top Navigation */}
             <header className="flex-none border-b">
-                <div className="flex h-16 items-center gap-4 px-4">
-                    <Brand href="/dashboard">metta</Brand>
+                <div className="flex h-16 items-center gap-4 px-4 font-outfit">
+                    <Brand href="/dashboard">Demo Host</Brand>
                     <div className="ml-auto flex items-center gap-4">
                         <UserNav user={user} />
                     </div>
