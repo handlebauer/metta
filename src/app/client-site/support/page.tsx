@@ -1,3 +1,5 @@
+import { SupportWidget } from './support-widget.client'
+
 export default function SupportPage() {
     const faqs = [
         {
@@ -57,19 +59,7 @@ export default function SupportPage() {
                         any questions or concerns.
                     </p>
 
-                    {/* Metta Widget Placeholder */}
-                    <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-8">
-                        <div className="text-gray-500">
-                            <p className="mb-2 font-semibold">
-                                Metta Support Widget
-                            </p>
-                            <p className="text-sm">
-                                This is where the Metta support widget will be
-                                embedded to provide real-time AI-powered
-                                assistance.
-                            </p>
-                        </div>
-                    </div>
+                    <SupportWidget />
                 </div>
             </div>
         </div>
