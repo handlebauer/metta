@@ -42,26 +42,18 @@ export class EmailService {
         html: string
         role?: 'agent' | 'customer' | 'admin' // Used to determine email direction in development
     }) {
-        let from: string
-        if (process.env.NODE_ENV === 'development') {
-            // In development:
-            // - If sending TO a customer, use test email as recipient
-            // - If sending TO an agent/admin, use a different test email to see both sides
-            if (options.role === 'customer') {
-                options.to = process.env.SENDGRID_TEST_EMAIL!
-            } else {
-                // For agent/admin notifications, use a different test email if provided
-                options.to =
-                    process.env.SENDGRID_TEST_EMAIL_AGENT ||
-                    process.env.SENDGRID_TEST_EMAIL!
-            }
-            from = 'test@metta.now'
-        } else {
-            /**
-             * XXX: FOR NOW, JUST SEND TO THE TEST USER IN PRODUCTION
-             */
+        // Always use test configuration regardless of environment
+        const from = 'test@metta.now'
+
+        // If sending TO a customer, use test email as recipient
+        // If sending TO an agent/admin, use a different test email to see both sides
+        if (options.role === 'customer') {
             options.to = process.env.SENDGRID_TEST_EMAIL!
-            from = 'support@metta.now'
+        } else {
+            // For agent/admin notifications, use a different test email if provided
+            options.to =
+                process.env.SENDGRID_TEST_EMAIL_AGENT ||
+                process.env.SENDGRID_TEST_EMAIL!
         }
 
         try {

@@ -32,10 +32,9 @@ function extractReplyContent(text: string): string {
 }
 
 /**
- * Check if an email is one of our test emails in development mode
+ * Check if an email matches our test emails
  */
 function isTestEmail(email: string): false | 'agent' | 'customer' {
-    if (process.env.NODE_ENV !== 'development') return false
     if (email === process.env.SENDGRID_TEST_EMAIL_AGENT) return 'agent'
     if (email === process.env.SENDGRID_TEST_EMAIL) return 'customer'
     return false
@@ -68,7 +67,7 @@ async function findTicket(id: string): Promise<TicketRow> {
 /**
  * Find a user by email
  */
-async function findUser(email: string): Promise<UserRow> {
+async function _findUser(email: string): Promise<UserRow> {
     const { data, error } = await supabase
         .from('users')
         .select('*, profiles(*)')
@@ -169,7 +168,7 @@ export async function POST(request: Request) {
         const ticketId = extractTicketId(payload.subject)
         const ticket = await findTicket(ticketId)
 
-        // Get sender, using test user in development if needed
+        // Get sender, always checking for test emails
         let sender: UserRow
         let isTestUser = false
         const senderEmail = extractEmailAddress(payload.from)
@@ -177,7 +176,7 @@ export async function POST(request: Request) {
 
         if (testEmailType !== false) {
             if (testEmailType === 'customer') {
-                // For customer messages in development, use the actual ticket customer
+                // For customer messages, use the actual ticket customer
                 const { data: customer } = await supabase
                     .from('users')
                     .select('*, profiles(*)')
@@ -193,13 +192,17 @@ export async function POST(request: Request) {
                 sender = testUser
             }
             isTestUser = true
-            console.log('[SendGrid] Development mode: Using proxy user:', {
+            console.log('[SendGrid] Using proxy user:', {
                 role: testEmailType,
                 email: sender.email,
                 is_actual_customer: testEmailType === 'customer',
             })
         } else {
-            sender = await findUser(senderEmail)
+            // If not a test email, still use test user behavior
+            const testUser = await EmailService.getTestUser('agent')
+            if (!testUser) throw new Error('Test user not found')
+            sender = testUser
+            isTestUser = true
         }
 
         // Clean and prepare message content
