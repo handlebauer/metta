@@ -255,9 +255,6 @@ export class TicketService {
             const ticket = ticketSchema.parse(data)
             const userService = new UserWithProfileService()
 
-            console.log('validated.status', validated.status)
-            console.log('currentTicket.status', currentTicket.status)
-
             // Send appropriate notification based on status change
             if (validated.status === 'closed') {
                 const customer = await userService.findById(ticket.customer_id)
@@ -297,8 +294,6 @@ export class TicketService {
                     console.error('Agent not found')
                 }
             }
-
-            console.log('just returning the ticket')
 
             return ticket
         } catch (error) {
