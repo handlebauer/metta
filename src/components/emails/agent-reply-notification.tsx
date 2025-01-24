@@ -55,7 +55,7 @@ export function AgentReplyNotification({
                 {messageContent}
             </div>
 
-            <div style={{ marginBottom: '24px' }}>
+            <div>
                 <p
                     style={{
                         color: '#374151',
@@ -66,20 +66,37 @@ export function AgentReplyNotification({
                     You can reply to this email to continue the conversation, or
                     visit your ticket here:
                 </p>
-                <a
-                    href={`${process.env.NEXT_PUBLIC_SITE_URL}/tickets/${ticket.id}/${accessToken}`}
+                <table
+                    role="presentation"
+                    border={0}
+                    cellPadding="0"
+                    cellSpacing="0"
                     style={{
-                        display: 'inline-block',
-                        padding: '12px 20px',
-                        backgroundColor: '#0284c7',
-                        color: 'white',
-                        textDecoration: 'none',
-                        borderRadius: '6px',
-                        fontSize: '16px',
+                        width: 'auto',
                     }}
                 >
-                    View Ticket
-                </a>
+                    <tr>
+                        <td>
+                            <a
+                                href={`${process.env.NEXT_PUBLIC_SITE_URL}/tickets/${ticket.id}/${accessToken}`}
+                                target="_blank"
+                                style={{
+                                    backgroundColor: '#2563eb',
+                                    border: '1px solid #2563eb',
+                                    borderRadius: '6px',
+                                    color: '#ffffff',
+                                    display: 'inline-block',
+                                    fontSize: '16px',
+                                    fontWeight: 'bold',
+                                    padding: '12px 24px',
+                                    textDecoration: 'none',
+                                }}
+                            >
+                                View Ticket
+                            </a>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
             <hr

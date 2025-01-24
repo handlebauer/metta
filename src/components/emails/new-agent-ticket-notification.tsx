@@ -52,20 +52,41 @@ export const NewAgentTicketNotification: React.FC<
             >
                 Please review and handle this ticket as soon as possible:
             </p>
-            <a
-                href={`${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/tickets/${ticket.id}`}
-                style={{
-                    display: 'inline-block',
-                    padding: '12px 20px',
-                    backgroundColor: '#0284c7',
-                    color: 'white',
-                    textDecoration: 'none',
-                    borderRadius: '6px',
-                    fontSize: '16px',
-                }}
+
+            <table
+                role="presentation"
+                cellPadding={0}
+                cellSpacing={0}
+                style={{ margin: '0 auto' }}
             >
-                View Ticket
-            </a>
+                <tbody>
+                    <tr>
+                        <td
+                            style={{
+                                backgroundColor: '#0284c7',
+                                borderRadius: '6px',
+                                padding: 0,
+                            }}
+                        >
+                            <a
+                                href={`${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/tickets/${ticket.id}`}
+                                style={{
+                                    display: 'inline-block',
+                                    padding: '12px 24px',
+                                    color: '#ffffff',
+                                    fontSize: '16px',
+                                    fontWeight: 500,
+                                    textDecoration: 'none',
+                                    textAlign: 'center',
+                                    minWidth: '160px',
+                                }}
+                            >
+                                View Ticket
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
         <hr

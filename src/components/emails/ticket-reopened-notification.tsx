@@ -67,20 +67,46 @@ export function TicketReopenedNotification({
                     Our support team will review your case and get back to you
                     shortly. You can view the latest updates here:
                 </p>
-                <a
-                    href={`${process.env.NEXT_PUBLIC_SITE_URL}/tickets/${ticket.id}`}
-                    style={{
-                        display: 'inline-block',
-                        padding: '12px 20px',
-                        backgroundColor: '#0284c7',
-                        color: 'white',
-                        textDecoration: 'none',
-                        borderRadius: '6px',
-                        fontSize: '16px',
-                    }}
+
+                <table
+                    border={0}
+                    cellPadding="0"
+                    cellSpacing="0"
+                    role="presentation"
                 >
-                    View Ticket
-                </a>
+                    <tr>
+                        <td align="left">
+                            <table
+                                border={0}
+                                cellPadding="0"
+                                cellSpacing="0"
+                                role="presentation"
+                            >
+                                <tr>
+                                    <td
+                                        style={{
+                                            backgroundColor: '#2563EB',
+                                            borderRadius: '6px',
+                                            padding: '10px 20px',
+                                        }}
+                                    >
+                                        <a
+                                            href={`${process.env.NEXT_PUBLIC_SITE_URL}/tickets/${ticket.id}`}
+                                            style={{
+                                                color: '#ffffff',
+                                                fontSize: '16px',
+                                                textDecoration: 'none',
+                                                display: 'inline-block',
+                                            }}
+                                        >
+                                            View Ticket
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
             <hr

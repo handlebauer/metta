@@ -164,6 +164,7 @@ export class EmailService {
     static async sendTicketResolutionNotification(
         ticket: TicketRow,
         customer: UserRow,
+        accessToken: string,
     ) {
         if (!customer.email) {
             console.error('Customer email not found')
@@ -171,7 +172,10 @@ export class EmailService {
         }
 
         const html = await render(
-            createElement(TicketResolutionNotification, { ticket }),
+            createElement(TicketResolutionNotification, {
+                ticket,
+                accessToken,
+            }),
         )
 
         return this.sendEmail({

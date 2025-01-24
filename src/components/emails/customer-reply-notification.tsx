@@ -67,20 +67,40 @@ export function CustomerReplyNotification({
                     You can reply to this email to continue the conversation, or
                     handle this ticket here:
                 </p>
-                <a
-                    href={`${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/tickets/${ticket.id}`}
-                    style={{
-                        display: 'inline-block',
-                        padding: '12px 20px',
-                        backgroundColor: '#0284c7',
-                        color: 'white',
-                        textDecoration: 'none',
-                        borderRadius: '6px',
-                        fontSize: '16px',
-                    }}
+                <table
+                    role="presentation"
+                    cellPadding={0}
+                    cellSpacing={0}
+                    style={{ margin: '0 auto' }}
                 >
-                    View in Dashboard
-                </a>
+                    <tbody>
+                        <tr>
+                            <td
+                                style={{
+                                    backgroundColor: '#0284c7',
+                                    borderRadius: '6px',
+                                    padding: 0,
+                                }}
+                            >
+                                <a
+                                    href={`${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/tickets/${ticket.id}`}
+                                    style={{
+                                        display: 'inline-block',
+                                        padding: '12px 24px',
+                                        color: '#ffffff',
+                                        fontSize: '16px',
+                                        fontWeight: 500,
+                                        textDecoration: 'none',
+                                        textAlign: 'center',
+                                        minWidth: '160px',
+                                    }}
+                                >
+                                    View in Dashboard
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <hr
@@ -98,21 +118,17 @@ export function CustomerReplyNotification({
                     lineHeight: '1.5',
                 }}
             >
-                <p style={{ margin: '0 0 4px 0' }}>
+                <p style={{ margin: '0 0 2px 0' }}>
                     <strong style={{ color: '#374151' }}>Ticket ID:</strong> #
                     {ticket.id}
                 </p>
-                <p style={{ margin: '0 0 4px 0' }}>
+                <p style={{ margin: '0 0 2px 0' }}>
                     <strong style={{ color: '#374151' }}>Priority:</strong>{' '}
                     {ticket.priority}
                 </p>
-                <p style={{ margin: '0 0 4px 0' }}>
+                <p style={{ margin: '0 0 2px 0' }}>
                     <strong style={{ color: '#374151' }}>Status:</strong>{' '}
                     {ticket.status}
-                </p>
-                <p style={{ margin: '0' }}>
-                    <strong style={{ color: '#374151' }}>Customer:</strong>{' '}
-                    {customer.email}
                 </p>
             </div>
         </div>

@@ -2,10 +2,12 @@ import { TicketRow } from '@/lib/schemas/ticket.schemas'
 
 interface TicketResolutionNotificationProps {
     ticket: TicketRow
+    accessToken: string
 }
 
 export function TicketResolutionNotification({
     ticket,
+    accessToken,
 }: TicketResolutionNotificationProps) {
     return (
         <div
@@ -49,20 +51,36 @@ export function TicketResolutionNotification({
                     experience by replying to this email or visiting your ticket
                     here:
                 </p>
-                <a
-                    href={`${process.env.NEXT_PUBLIC_SITE_URL}/tickets/${ticket.id}`}
+                <table
+                    role="presentation"
+                    border={0}
+                    cellPadding={0}
+                    cellSpacing={0}
                     style={{
-                        display: 'inline-block',
-                        padding: '12px 20px',
-                        backgroundColor: '#0284c7',
-                        color: 'white',
-                        textDecoration: 'none',
-                        borderRadius: '6px',
-                        fontSize: '16px',
+                        width: '100%',
+                        textAlign: 'center',
+                        marginBottom: '16px',
                     }}
                 >
-                    View Ticket
-                </a>
+                    <tr>
+                        <td align="center">
+                            <a
+                                href={`${process.env.NEXT_PUBLIC_SITE_URL}/tickets/${ticket.id}/${accessToken}`}
+                                target="_blank"
+                                style={{
+                                    backgroundColor: '#0284c7',
+                                    borderRadius: '4px',
+                                    color: '#ffffff',
+                                    display: 'inline-block',
+                                    padding: '12px 24px',
+                                    textDecoration: 'none',
+                                }}
+                            >
+                                View Ticket
+                            </a>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
             <hr

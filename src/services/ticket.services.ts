@@ -10,9 +10,9 @@ import {
     ticketUpdateSchema,
 } from '@/lib/schemas/ticket.schemas'
 import { createClient } from '@/lib/supabase/server'
-
-import { EmailService } from './email.services'
-import { UserWithProfileService } from './user-with-profile.services'
+import { EmailService } from '@/services/email.services'
+import { generateTicketAccessToken } from '@/services/ticket-access.services'
+import { UserWithProfileService } from '@/services/user-with-profile.services'
 
 import type {
     TicketInternalNoteRow,
@@ -259,9 +259,17 @@ export class TicketService {
             if (validated.status === 'closed') {
                 const customer = await userService.findById(ticket.customer_id)
                 if (customer) {
+                    // Generate access token for customer to view ticket
+                    const accessToken = await generateTicketAccessToken(
+                        ticket.id,
+                        '7 days',
+                        ticket.agent_id || undefined,
+                    )
+
                     await EmailService.sendTicketResolutionNotification(
                         ticket,
                         customer,
+                        accessToken,
                     )
                 } else {
                     console.error('Customer not found')

@@ -108,7 +108,7 @@ async function sendNotification(params: {
 
         if (customer) {
             console.log('[SendGrid] Notifying customer:', customer.email)
-            // Generate access token for customer to view ticket, created by the agent
+            // Generate access token for customer to view ticket
             const accessToken = await generateTicketAccessToken(
                 ticket.id,
                 '7 days',
@@ -176,14 +176,27 @@ export async function POST(request: Request) {
         const testEmailType = isTestEmail(senderEmail)
 
         if (testEmailType !== false) {
-            const testUser = await EmailService.getTestUser(testEmailType)
-            if (!testUser) throw new Error('Test user not found')
+            if (testEmailType === 'customer') {
+                // For customer messages in development, use the actual ticket customer
+                const { data: customer } = await supabase
+                    .from('users')
+                    .select('*, profiles(*)')
+                    .eq('id', ticket.customer_id)
+                    .single()
 
-            sender = testUser
+                if (!customer) throw new Error('Customer not found')
+                sender = customer
+            } else {
+                // For agent messages, use the test agent user
+                const testUser = await EmailService.getTestUser(testEmailType)
+                if (!testUser) throw new Error('Test user not found')
+                sender = testUser
+            }
             isTestUser = true
             console.log('[SendGrid] Development mode: Using proxy user:', {
                 role: testEmailType,
                 email: sender.email,
+                is_actual_customer: testEmailType === 'customer',
             })
         } else {
             sender = await findUser(senderEmail)
