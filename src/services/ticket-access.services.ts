@@ -215,7 +215,9 @@ export async function getTicketHistoryWithToken(
 
     return data.map(event => ({
         ...event,
-        changed_by_name: event.changed_by_name.profile?.full_name ?? '',
+        changed_by_name:
+            event.changed_by_name.profile?.full_name ??
+            event.changed_by_name.email,
         changed_by_email: event.changed_by_name.email,
     }))
 }
