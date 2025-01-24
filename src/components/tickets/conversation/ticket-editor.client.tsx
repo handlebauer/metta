@@ -5,8 +5,8 @@ import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Bold, Italic, Strikethrough } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 interface TicketEditorProps {
     onSend: (content: string) => Promise<void>
@@ -27,15 +27,18 @@ export function TicketEditor({
         editable: !disabled,
         editorProps: {
             attributes: {
-                class: 'w-full text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-y-auto min-h-[24px] max-h-[200px]',
+                class: 'w-full text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 min-h-[24px]',
             },
             handleKeyDown: (_, event) => {
-                if (event.key === 'Enter' && !event.shiftKey) {
+                if (event.key === 'Enter' && event.shiftKey) {
                     event.preventDefault()
                     if (!isSending && editor?.getText().trim()) {
                         handleSend()
                     }
                     return true
+                }
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    return false
                 }
                 return false
             },
@@ -62,32 +65,51 @@ export function TicketEditor({
         'transition-all duration-200 hover:bg-background',
         'focus-within:bg-background focus-within:border-zinc-400',
         'focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.2)]',
-        'group h-[140px]',
+        'group flex flex-col min-h-[140px] max-h-[400px]',
         disabled ? 'cursor-not-allowed opacity-50' : 'cursor-text',
     )
 
-    const toolbarClass = cn('flex gap-1 px-[1px] py-1 bg-zinc-50/30')
-    const editorContentClass = cn('flex-1 p-3')
-    const actionsClass = cn('flex justify-end px-4 py-1 bg-zinc-50/30')
+    const toolbarClass = cn(
+        'flex gap-1 px-[1px] py-1 bg-zinc-50/10 border-b border-input/20',
+    )
+    const editorContentClass = cn('flex-1 p-3 overflow-y-auto min-h-0')
+    const actionsClass = cn(
+        'flex justify-end px-4 py-1 bg-zinc-50/10 border-t border-input/20',
+    )
     const hintTextClass = cn('text-xs text-muted-foreground')
 
     const handleSend = useCallback(async () => {
         if (!editor?.getText().trim()) return
-        await onSend(editor.getText())
+        const content = editor.getText()
         editor.commands.clearContent()
+        await onSend(content)
     }, [editor, onSend])
+
+    const handleContainerClick = useCallback(
+        (e: React.MouseEvent) => {
+            // Don't focus if clicking toolbar buttons
+            if ((e.target as HTMLElement).closest('.toolbar-button')) {
+                return
+            }
+            editor?.commands.focus()
+        },
+        [editor],
+    )
 
     return (
         <div className="pt-0">
-            <div className={containerClass}>
-                <div className="flex h-full flex-col">
+            <div className={containerClass} onClick={handleContainerClick}>
+                <div className="flex h-full min-h-[inherit] flex-col">
                     {/* Toolbar */}
                     <div className={toolbarClass}>
                         <Button
                             variant="ghost"
                             size="sm"
-                            className={toolbarButtonClass(
-                                editor?.isActive('bold') ?? false,
+                            className={cn(
+                                toolbarButtonClass(
+                                    editor?.isActive('bold') ?? false,
+                                ),
+                                'toolbar-button',
                             )}
                             onClick={() =>
                                 editor?.chain().focus().toggleBold().run()
@@ -98,8 +120,11 @@ export function TicketEditor({
                         <Button
                             variant="ghost"
                             size="sm"
-                            className={toolbarButtonClass(
-                                editor?.isActive('italic') ?? false,
+                            className={cn(
+                                toolbarButtonClass(
+                                    editor?.isActive('italic') ?? false,
+                                ),
+                                'toolbar-button',
                             )}
                             onClick={() =>
                                 editor?.chain().focus().toggleItalic().run()
@@ -110,8 +135,11 @@ export function TicketEditor({
                         <Button
                             variant="ghost"
                             size="sm"
-                            className={toolbarButtonClass(
-                                editor?.isActive('strike') ?? false,
+                            className={cn(
+                                toolbarButtonClass(
+                                    editor?.isActive('strike') ?? false,
+                                ),
+                                'toolbar-button',
                             )}
                             onClick={() =>
                                 editor?.chain().focus().toggleStrike().run()
@@ -126,13 +154,13 @@ export function TicketEditor({
                         <EditorContent editor={editor} />
                     </div>
 
-                    {/* Hint Text - Only show when editor is focused */}
+                    {/* Hint Text - Always show the bar, but only show text when focused */}
                     <div className={actionsClass}>
-                        {editor?.isFocused && (
-                            <span className={hintTextClass}>
-                                Press Enter to Send
-                            </span>
-                        )}
+                        <span className={hintTextClass}>
+                            {editor?.isFocused
+                                ? 'Press Shift+Enter to Send'
+                                : '\u00A0'}
+                        </span>
                     </div>
                 </div>
             </div>
