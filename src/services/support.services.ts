@@ -2,6 +2,8 @@ import { z } from 'zod'
 
 import { UserWithProfile } from '@/lib/schemas/user-with-profile.schemas'
 import { createServiceClient } from '@/lib/supabase/service'
+import { EmailService } from '@/services/email.services'
+import { generateTicketAccessToken } from '@/services/ticket-access.services'
 
 const _supportTicketSchema = z.object({
     name: z.string().min(1, 'Please provide your name'),
@@ -140,6 +142,48 @@ export class SupportService {
 
         if (ticketError) throw ticketError
         if (!ticket) throw new Error('Failed to create ticket')
+
+        // Generate access token for the ticket
+        const accessToken = await generateTicketAccessToken(
+            ticket.id,
+            '7 days',
+            user.id,
+        )
+
+        // Send email notification to customer
+        await EmailService.sendNewCustomerTicketNotification(
+            ticket,
+            user,
+            accessToken,
+        )
+
+        // Find an admin to notify
+        const { data: adminData } = await supabase
+            .from('users')
+            .select(
+                `
+                *,
+                profile:profiles (
+                    id,
+                    created_at,
+                    updated_at,
+                    full_name,
+                    avatar_url,
+                    bio,
+                    role
+                )
+                `,
+            )
+            .eq('profiles.role', 'admin')
+            .eq('is_active', true)
+            .limit(1)
+            .single()
+
+        if (!adminData) throw new Error('Failed to find admin')
+        const admin = adminData as UserWithProfile
+
+        // Send notification to admin
+        await EmailService.sendNewAdminTicketNotification(ticket, admin, user)
 
         return ticket
     }

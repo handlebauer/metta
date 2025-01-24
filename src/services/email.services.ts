@@ -1,13 +1,15 @@
 import { createElement } from 'react'
 import { render } from '@react-email/render'
 
-import { AgentReplyNotification } from '@/components/emails/agent-reply-notification'
-import { CustomerReplyNotification } from '@/components/emails/customer-reply-notification'
-import { NewAgentTicketNotification } from '@/components/emails/new-agent-ticket-notification'
-import { TicketReopenedNotification } from '@/components/emails/ticket-reopened-notification'
-import { TicketResolutionNotification } from '@/components/emails/ticket-resolution-notification'
 import { sendgrid } from '@/lib/sendgrid'
 import { createServiceClient } from '@/lib/supabase/service'
+import { AgentReplyNotification } from '@/components/emails/agent-reply-notification'
+import { CustomerReplyNotification } from '@/components/emails/customer-reply-notification'
+import { NewAdminTicketNotification } from '@/components/emails/new-admin-ticket-notification'
+import { NewAgentTicketNotification } from '@/components/emails/new-agent-ticket-notification'
+import { NewCustomerTicketNotification } from '@/components/emails/new-customer-ticket-notification'
+import { TicketReopenedNotification } from '@/components/emails/ticket-reopened-notification'
+import { TicketResolutionNotification } from '@/components/emails/ticket-resolution-notification'
 
 import type { TicketRow } from '@/lib/schemas/ticket.schemas'
 import type { UserRow } from '@/lib/schemas/user.schemas'
@@ -37,17 +39,17 @@ export class EmailService {
         to: string
         subject: string
         html: string
-        role?: 'agent' | 'customer' // Used to determine email direction in development
+        role?: 'agent' | 'customer' | 'admin' // Used to determine email direction in development
     }) {
         let from: string
         if (process.env.NODE_ENV === 'development') {
             // In development:
             // - If sending TO a customer, use test email as recipient
-            // - If sending TO an agent, use a different test email to see both sides
+            // - If sending TO an agent/admin, use a different test email to see both sides
             if (options.role === 'customer') {
                 options.to = process.env.SENDGRID_TEST_EMAIL!
             } else {
-                // For agent notifications, use a different test email if provided
+                // For agent/admin notifications, use a different test email if provided
                 options.to =
                     process.env.SENDGRID_TEST_EMAIL_AGENT ||
                     process.env.SENDGRID_TEST_EMAIL!
@@ -104,6 +106,28 @@ export class EmailService {
             subject: `[Metta] New ticket assigned: ${ticket.subject} (#${ticket.id})`,
             html,
             role: 'agent',
+        })
+    }
+
+    static async sendNewAdminTicketNotification(
+        ticket: TicketRow,
+        admin: UserRow,
+        customer: UserRow,
+    ) {
+        if (!admin.email) {
+            console.error('Admin email not found')
+            throw new Error('Admin email not found')
+        }
+
+        const html = await render(
+            createElement(NewAdminTicketNotification, { ticket, customer }),
+        )
+
+        return this.sendEmail({
+            to: admin.email,
+            subject: `[Metta] New support ticket: ${ticket.subject} (#${ticket.id})`,
+            html,
+            role: 'admin',
         })
     }
 
@@ -203,6 +227,31 @@ export class EmailService {
         return this.sendEmail({
             to: customer.email,
             subject: `[Metta] Ticket reopened: ${ticket.subject} (#${ticket.id})`,
+            html,
+            role: 'customer',
+        })
+    }
+
+    static async sendNewCustomerTicketNotification(
+        ticket: TicketRow,
+        customer: UserRow,
+        accessToken: string,
+    ) {
+        if (!customer.email) {
+            console.error('Customer email not found')
+            throw new Error('Customer email not found')
+        }
+
+        const html = await render(
+            createElement(NewCustomerTicketNotification, {
+                ticket,
+                accessToken,
+            }),
+        )
+
+        return this.sendEmail({
+            to: customer.email,
+            subject: `[Metta] Support ticket created: ${ticket.subject} (#${ticket.id})`,
             html,
             role: 'customer',
         })
