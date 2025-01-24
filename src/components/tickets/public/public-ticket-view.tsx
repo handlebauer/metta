@@ -159,7 +159,11 @@ export function CustomerTicketView({
                         <h3 className="border-b px-6 py-3 text-sm font-medium">
                             Status History
                         </h3>
-                        <TicketHistory ticketId={ticket.id} history={history} />
+                        <TicketHistory
+                            ticketId={ticket.id}
+                            history={history}
+                            createdAt={ticket.created_at!}
+                        />
                     </div>
                 </div>
             </div>
