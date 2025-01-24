@@ -13,6 +13,7 @@ import { createClient } from '@/lib/supabase/server'
 import { EmailService } from '@/services/email.services'
 import { generateTicketAccessToken } from '@/services/ticket-access.services'
 import { UserWithProfileService } from '@/services/user-with-profile.services'
+import { sendWebhookEvent } from '@/services/webhook.services'
 
 import type {
     TicketInternalNoteRow,
@@ -200,6 +201,18 @@ export class TicketService {
             if (!data) throw new DatabaseError('Failed to create ticket')
 
             const ticket = ticketSchema.parse(data)
+
+            // Send webhook event for ticket creation
+            await sendWebhookEvent('ticket.created', {
+                ticket_id: ticket.id,
+                subject: ticket.subject,
+                description: ticket.description,
+                status: ticket.status,
+                priority: ticket.priority,
+                customer_id: ticket.customer_id,
+                agent_id: ticket.agent_id,
+                created_at: ticket.created_at,
+            })
 
             // If an agent is assigned, send them an email notification
             if (ticket.agent_id) {
