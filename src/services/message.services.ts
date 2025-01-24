@@ -109,6 +109,25 @@ export class MessageService {
                         accessToken,
                     )
                 }
+            } else if (message.role === 'customer') {
+                // If this is a customer message, send email notification to assigned agent
+                const ticket = await ticketService.findById(message.ticket_id)
+                if (!ticket) throw new DatabaseError('Ticket not found')
+
+                if (ticket.agent_id) {
+                    const agent = await userService.findById(ticket.agent_id)
+                    const customer = await userService.findById(
+                        ticket.customer_id,
+                    )
+                    if (agent && customer) {
+                        await EmailService.sendCustomerReplyNotification(
+                            ticket,
+                            agent,
+                            customer,
+                            message.content,
+                        )
+                    }
+                }
             }
 
             return message

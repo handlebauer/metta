@@ -27,8 +27,6 @@ export default async function TokenAccessPage({
         notFound()
     }
 
-    console.log('got here')
-
     return (
         <CustomerTicketView
             ticket={ticket}
