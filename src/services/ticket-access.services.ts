@@ -59,7 +59,6 @@ export async function getTicketWithToken(
 
     // Ensure token is properly decoded
     const decodedToken = decodeURIComponent(token)
-    console.log('Looking up token:', { decodedToken, original: token })
 
     // First verify the token exists and is valid
     const { data: tokenData, error: tokenError } = await supabase
@@ -156,8 +155,6 @@ export async function getTicketWithToken(
         console.warn('No ticket data found')
         return null
     }
-
-    console.log('Full ticket data:', JSON.stringify(ticketData, null, 2))
 
     // Transform the messages to match MessageWithUser shape
     const messages = ticketData.messages.map(message => ({
