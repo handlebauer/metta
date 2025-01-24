@@ -431,6 +431,83 @@ export type Database = {
                 }
                 Relationships: []
             }
+            webhook_delivery_attempts: {
+                Row: {
+                    created_at: string
+                    error: string | null
+                    event: Database['public']['Enums']['webhook_event']
+                    id: string
+                    payload: Json
+                    response_body: string | null
+                    response_status: number | null
+                    webhook_id: string
+                }
+                Insert: {
+                    created_at?: string
+                    error?: string | null
+                    event: Database['public']['Enums']['webhook_event']
+                    id?: string
+                    payload: Json
+                    response_body?: string | null
+                    response_status?: number | null
+                    webhook_id: string
+                }
+                Update: {
+                    created_at?: string
+                    error?: string | null
+                    event?: Database['public']['Enums']['webhook_event']
+                    id?: string
+                    payload?: Json
+                    response_body?: string | null
+                    response_status?: number | null
+                    webhook_id?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: 'webhook_delivery_attempts_webhook_id_fkey'
+                        columns: ['webhook_id']
+                        isOneToOne: false
+                        referencedRelation: 'webhook_endpoints'
+                        referencedColumns: ['id']
+                    },
+                ]
+            }
+            webhook_endpoints: {
+                Row: {
+                    active: boolean
+                    created_at: string
+                    events: Database['public']['Enums']['webhook_event'][]
+                    id: string
+                    name: string
+                    secret: string
+                    updated_at: string
+                    url: string
+                    user_id: string
+                }
+                Insert: {
+                    active?: boolean
+                    created_at?: string
+                    events: Database['public']['Enums']['webhook_event'][]
+                    id?: string
+                    name: string
+                    secret: string
+                    updated_at?: string
+                    url: string
+                    user_id: string
+                }
+                Update: {
+                    active?: boolean
+                    created_at?: string
+                    events?: Database['public']['Enums']['webhook_event'][]
+                    id?: string
+                    name?: string
+                    secret?: string
+                    updated_at?: string
+                    url?: string
+                    user_id?: string
+                }
+                Relationships: []
+            }
         }
         Views: {
             decrypted_api_keys: {
@@ -460,6 +537,25 @@ export type Database = {
             }
         }
         Functions: {
+            create_webhook_endpoint: {
+                Args: {
+                    p_name: string
+                    p_url: string
+                    p_events: Database['public']['Enums']['webhook_event'][]
+                    p_active?: boolean
+                }
+                Returns: {
+                    active: boolean
+                    created_at: string
+                    events: Database['public']['Enums']['webhook_event'][]
+                    id: string
+                    name: string
+                    secret: string
+                    updated_at: string
+                    url: string
+                    user_id: string
+                }
+            }
             current_ticket_token: {
                 Args: Record<PropertyKey, never>
                 Returns: string
@@ -481,6 +577,10 @@ export type Database = {
                     p_expires_in?: unknown
                     p_created_by?: string
                 }
+                Returns: string
+            }
+            generate_webhook_secret: {
+                Args: Record<PropertyKey, never>
                 Returns: string
             }
             has_token_access: {
@@ -509,6 +609,11 @@ export type Database = {
             ticket_priority: 'low' | 'medium' | 'high' | 'urgent'
             ticket_status: 'new' | 'open' | 'closed'
             user_role: 'customer' | 'agent' | 'admin'
+            webhook_event:
+                | 'ticket.created'
+                | 'ticket.updated'
+                | 'ticket.closed'
+                | 'message.created'
         }
         CompositeTypes: {
             [_ in never]: never

@@ -52,23 +52,34 @@ Metta is an AI-powered Customer Relationship Management system designed to minim
 2. As necessary, add shadcn components with `bun run shadcn:add <component-name>`
 3. When creating a new component, check for related types in the `lib/schemas` directory
 4. Keep UI logic in the function body and pass the values into the render body
+5. For clickable labels (especially with checkboxes/radios), always use these Tailwind classes:
 
-```tsx
-function Component(props: ComponentProps) {
-    // ✅ GOOD: Compute the value in the function body
-    const initials = useMemo(
-        () => props.name.split(' ').map(upperCase),
-        [props.name],
-    )
+    ```tsx
+    // ✅ GOOD: Makes label clickable and prevents text selection
+    <label className="cursor-pointer select-none">Click me</label>
 
-    return <div>{initials}</div>
-}
+    // ❌ BAD: Text gets highlighted when clicking
+    <label className="cursor-pointer">Click me</label>
+    ```
 
-function Component(props: ComponentProps) {
-    // ❌ BAD: Compute the value in the render body
-    return <div>{props.name.split(' ').map(upperCase)}</div>
-}
-```
+6. Keep expensive computations out of the render body:
+
+    ```tsx
+    function Component(props: ComponentProps) {
+        // ✅ GOOD: Compute the value in the function body
+        const initials = useMemo(
+            () => props.name.split(' ').map(upperCase),
+            [props.name],
+        )
+
+        return <div>{initials}</div>
+    }
+
+    function Component(props: ComponentProps) {
+        // ❌ BAD: Compute the value in the render body
+        return <div>{props.name.split(' ').map(upperCase)}</div>
+    }
+    ```
 
 ## Next.js Code Style
 
@@ -150,3 +161,20 @@ interface TokenAccessPageProps {
 3. When requesting code generation, provide context about the desired functionality and how it fits into the existing project structure.
 4. For refactoring tasks, describe the current code structure and the desired outcome.
 5. When addressing errors, provide details about the error message and the surrounding code context.
+
+```tsx
+function Component(props: ComponentProps) {
+    // ✅ GOOD: Compute the value in the function body
+    const initials = useMemo(
+        () => props.name.split(' ').map(upperCase),
+        [props.name],
+    )
+
+    return <div>{initials}</div>
+}
+
+function Component(props: ComponentProps) {
+    // ❌ BAD: Compute the value in the render body
+    return <div>{props.name.split(' ').map(upperCase)}</div>
+}
+```

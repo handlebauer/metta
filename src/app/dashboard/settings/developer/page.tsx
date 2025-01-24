@@ -18,13 +18,17 @@ import {
 } from '@/components/ui/table'
 import { CreateApiKeyDialog } from '@/components/developer/create-api-key-dialog.client'
 import { ApiKeyTableRow } from '@/components/developer/key-table-row.client'
+import { WebhookEndpointForm } from '@/components/developer/webhook-endpoint-form.client'
 import {
     getDecryptedApiKeyAction,
     listApiKeysAction,
 } from '@/actions/api-key.actions'
+import { listWebhookEndpointsAction } from '@/actions/webhook.actions'
 
 export default async function DeveloperSettingsPage() {
-    const { data: apiKeys, error } = await listApiKeysAction()
+    const { data: apiKeys, error: apiKeyError } = await listApiKeysAction()
+    const { data: webhooks, error: webhookError } =
+        await listWebhookEndpointsAction()
 
     // Pre-fetch decrypted keys for active keys
     const decryptedKeys = new Map<string, string>()
@@ -70,8 +74,10 @@ export default async function DeveloperSettingsPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    {error ? (
-                        <p className="text-sm text-destructive">{error}</p>
+                    {apiKeyError ? (
+                        <p className="text-sm text-destructive">
+                            {apiKeyError}
+                        </p>
                     ) : (
                         <Table>
                             <TableHeader>
@@ -115,13 +121,21 @@ export default async function DeveloperSettingsPage() {
                 <CardHeader>
                     <CardTitle>Webhook Settings</CardTitle>
                     <CardDescription>
-                        Configure webhook endpoints and preferences
+                        <p>
+                            Configure webhook endpoints to receive real-time
+                            notifications for ticket events and other CRM
+                            updates.
+                        </p>
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                        Webhook configuration will be available soon.
-                    </p>
+                    {webhookError ? (
+                        <p className="text-sm text-destructive">
+                            {webhookError}
+                        </p>
+                    ) : (
+                        <WebhookEndpointForm initialWebhooks={webhooks || []} />
+                    )}
                 </CardContent>
             </Card>
 
