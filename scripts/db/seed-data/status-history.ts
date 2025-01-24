@@ -91,9 +91,8 @@ const STATUS_HISTORY: StatusHistoryEntry[] = [
     // Index 7: Integration with Slack (new)
     // No history needed as it's still new
 
-    // Index 8: Billing issue (closed)
     {
-        ticket_index: 8,
+        ticket_index: 7,
         changes: [
             {
                 old_status: 'new',
@@ -109,6 +108,8 @@ const STATUS_HISTORY: StatusHistoryEntry[] = [
             },
         ],
     },
+
+    // Index 8: Billing issue (closed)
 
     // Index 9: Feature request: Dark mode (open)
     {

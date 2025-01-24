@@ -88,7 +88,7 @@ export const SEED_TICKETS: SeedTicket[] = [
     {
         subject: 'Integration with ChatGenius',
         description:
-            'Looking to integrate your service with our ChatGenius workspace. Is this possible?',
+            'Looking to push notifications to our ChatGenius workspace. Is this possible?',
         status: 'new',
         priority: 'low', // Integration inquiries are low priority
         customer_index: 0, // customer1
