@@ -100,3 +100,24 @@ export const ticketStatusHistorySchema = z.object({
 >
 
 export type TicketStatusHistoryRow = z.infer<typeof ticketStatusHistorySchema>
+
+// Ticket Priority History schema
+export const ticketPriorityHistorySchema = z.object({
+    id: z.string(),
+    created_at: z.string().nullable(),
+    ticket_id: z.string(),
+    old_priority: ticketPriorityEnum.nullable(),
+    new_priority: ticketPriorityEnum,
+    changed_by: z.string(),
+    changed_by_email: z.string(),
+    changed_by_name: z.string(),
+}) satisfies z.ZodType<
+    Tables<'ticket_priority_history'> & {
+        changed_by_email: string
+        changed_by_name: string
+    }
+>
+
+export type TicketPriorityHistoryRow = z.infer<
+    typeof ticketPriorityHistorySchema
+>

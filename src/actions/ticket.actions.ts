@@ -9,6 +9,7 @@ import {
     ticketInternalNoteInsertSchema,
     ticketUpdateSchema,
 } from '@/lib/schemas/ticket.schemas'
+import { createClient } from '@/lib/supabase/server'
 import { getTicketHistoryWithToken } from '@/services/ticket-access.services'
 import { TicketService } from '@/services/ticket.services'
 
@@ -16,11 +17,10 @@ import type {
     TicketInternalNoteRow,
     TicketPriority,
     TicketRow,
-    TicketStatusHistoryRow,
     TicketWithCustomer,
     TicketWithInternalNotes,
 } from '@/lib/schemas/ticket.schemas'
-import type { Tables } from '@/lib/supabase/types'
+import type { Database, Tables } from '@/lib/supabase/types'
 import type { TicketStats } from '@/services/ticket.services'
 
 const service = new TicketService()
@@ -164,21 +164,89 @@ export async function getTicketStats(): Promise<{
     }
 }
 
-export async function getTicketHistory(id: string): Promise<{
-    data: TicketStatusHistoryRow[] | null
-    error: string | null
-}> {
+type StatusHistoryWithRelations =
+    Database['public']['Tables']['ticket_status_history']['Row'] & {
+        users: Pick<Database['public']['Tables']['users']['Row'], 'email'> & {
+            profiles: Pick<
+                Database['public']['Tables']['profiles']['Row'],
+                'full_name'
+            >
+        }
+    }
+
+type PriorityHistoryWithRelations =
+    Database['public']['Tables']['ticket_priority_history']['Row'] & {
+        users: Pick<Database['public']['Tables']['users']['Row'], 'email'> & {
+            profiles: Pick<
+                Database['public']['Tables']['profiles']['Row'],
+                'full_name'
+            >
+        }
+    }
+
+export async function getTicketHistory(ticketId: string) {
     try {
-        const data = await service.findStatusHistory(id)
-        return { data, error: null }
+        const supabase = await createClient()
+
+        // Get status history
+        const { data: statusHistory, error: statusError } = await supabase
+            .from('ticket_status_history')
+            .select(
+                'id, created_at, ticket_id, old_status, new_status, changed_by, users!inner(email, profiles!inner(full_name))',
+            )
+            .eq('ticket_id', ticketId)
+            .order('created_at', { ascending: false })
+            .returns<StatusHistoryWithRelations[]>()
+
+        if (statusError) {
+            console.error('Error getting status history:', statusError)
+            return { data: null, error: statusError.message }
+        }
+
+        // Get priority history
+        const { data: priorityHistory, error: priorityError } = await supabase
+            .from('ticket_priority_history')
+            .select(
+                'id, created_at, ticket_id, old_priority, new_priority, changed_by, users!inner(email, profiles!inner(full_name))',
+            )
+            .eq('ticket_id', ticketId)
+            .order('created_at', { ascending: false })
+            .returns<PriorityHistoryWithRelations[]>()
+
+        if (priorityError) {
+            console.error('Error getting priority history:', priorityError)
+            return { data: null, error: priorityError.message }
+        }
+
+        // Combine and sort both histories
+        const combinedHistory = [
+            ...statusHistory.map(item => ({
+                ...item,
+                changed_by_name:
+                    item.users.profiles.full_name || 'Unknown User',
+                changed_by_email: item.users.email,
+            })),
+            ...priorityHistory.map(item => ({
+                ...item,
+                changed_by_name:
+                    item.users.profiles.full_name || 'Unknown User',
+                changed_by_email: item.users.email,
+            })),
+        ].sort((a, b) => {
+            const dateA = new Date(a.created_at || 0)
+            const dateB = new Date(b.created_at || 0)
+            return dateB.getTime() - dateA.getTime()
+        })
+
+        return { data: combinedHistory, error: null }
     } catch (error) {
-        console.error('[getTicketHistory]', error)
+        console.error('Error getting ticket history:', error)
         return {
             data: null,
             error:
-                error instanceof DatabaseError
+                error instanceof Error
                     ? error.message
-                    : 'Failed to fetch ticket history',
+                    : 'An error occurred while fetching ticket history',
         }
     }
 }
