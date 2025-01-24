@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 
 import { TicketView } from '@/components/tickets/ticket-view'
-import { TicketService } from '@/services/ticket.services'
+import { getTicket } from '@/actions/ticket.actions'
 import { getAuthenticatedUserWithProfile } from '@/actions/user-with-profile.actions'
 
 interface TicketPageProps {
@@ -19,10 +19,9 @@ export default async function TicketPage({ params }: TicketPageProps) {
     }
 
     // Get ticket
-    const ticketService = new TicketService()
-    const ticket = await ticketService.findById(id)
+    const { data: ticket, error: ticketError } = await getTicket(id)
 
-    if (!ticket) {
+    if (!ticket || ticketError) {
         notFound()
     }
 
