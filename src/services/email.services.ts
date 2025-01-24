@@ -23,8 +23,6 @@ export class EmailService {
     static async getTestUser(
         role: 'agent' | 'customer',
     ): Promise<UserRow | null> {
-        if (process.env.NODE_ENV !== 'development') return null
-
         const supabase = createServiceClient()
         const { data } = await supabase
             .from('users')

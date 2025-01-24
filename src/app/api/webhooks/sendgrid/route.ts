@@ -206,11 +206,34 @@ export async function POST(request: Request) {
                 is_actual_customer: testEmailType === 'customer',
             })
         } else {
-            // If not a test email, still use test user behavior
-            const testUser = await EmailService.getTestUser('agent')
-            if (!testUser) throw new Error('Test user not found')
-            sender = testUser
-            isTestUser = true
+            // If not a test email, try to find the actual user first
+            console.log('[SendGrid] Looking up user by email:', senderEmail)
+            const { data: actualUser } = await supabase
+                .from('users')
+                .select('*, profiles(*)')
+                .eq('email', senderEmail)
+                .single()
+
+            if (actualUser) {
+                console.log('[SendGrid] Found actual user:', actualUser.email)
+                sender = actualUser
+                isTestUser = false
+            } else {
+                // Fall back to test agent if user not found
+                console.log(
+                    '[SendGrid] User not found, falling back to test agent',
+                )
+                const testUser = await EmailService.getTestUser('agent')
+                if (!testUser) {
+                    console.error('[SendGrid] Failed to get test agent user')
+                    throw new Error(
+                        'Could not find actual user or test user for: ' +
+                            senderEmail,
+                    )
+                }
+                sender = testUser
+                isTestUser = true
+            }
         }
 
         // Clean and prepare message content
