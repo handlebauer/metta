@@ -12,6 +12,7 @@ import { TicketReopenedNotification } from '@/components/emails/ticket-reopened-
 import { TicketResolutionNotification } from '@/components/emails/ticket-resolution-notification'
 
 import type { TicketRow } from '@/lib/schemas/ticket.schemas'
+import type { UserWithProfile } from '@/lib/schemas/user-with-profile.schemas'
 import type { UserRow } from '@/lib/schemas/user.schemas'
 
 export class EmailService {
@@ -111,8 +112,8 @@ export class EmailService {
 
     static async sendNewAdminTicketNotification(
         ticket: TicketRow,
-        admin: UserRow,
-        customer: UserRow,
+        admin: UserWithProfile,
+        customer: UserWithProfile,
     ) {
         if (!admin.email) {
             console.error('Admin email not found')
