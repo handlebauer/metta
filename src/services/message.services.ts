@@ -72,10 +72,12 @@ export class MessageService {
 
     async create(
         input: z.infer<typeof messageInsertSchema>,
+        token?: string,
     ): Promise<MessageRow> {
         try {
             const validated = messageInsertSchema.parse(input)
-            const db = await createClient()
+            const opts = token ? { 'x-ticket-token': token } : undefined
+            const db = await createClient(opts)
             const { data, error } = await db
                 .from('messages')
                 .insert(validated)

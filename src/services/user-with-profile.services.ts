@@ -217,15 +217,14 @@ export class UserWithProfileService {
     async getAuthenticatedUser(): Promise<UserWithProfile | null> {
         try {
             const db = await createClient()
-            const {
-                data: { user: authUser },
-                error: authError,
-            } = await db.auth.getUser()
+            const { data, error } = await db.auth.getUser()
 
-            if (authError) throw new DatabaseError(authError.message)
-            if (!authUser) return null
+            // If there's no session or user, return null instead of throwing
+            if (error?.status === 401 || !data.user) return null
+            // For other errors, throw as usual
+            if (error) throw new DatabaseError(error.message)
 
-            return this.findById(authUser.id)
+            return this.findById(data.user.id)
         } catch (error) {
             console.error(
                 '[UserWithProfileService.getAuthenticatedUser]',

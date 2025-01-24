@@ -12,6 +12,16 @@ export interface SeedTicket {
 }
 
 export const SEED_TICKETS: SeedTicket[] = [
+    // Access Token Test Ticket (Test Customer)
+    {
+        subject: '[Test] Access Token Test Ticket',
+        description:
+            'This is a dedicated ticket for testing public access tokens.',
+        status: 'open',
+        priority: 'medium',
+        customer_index: -2, // Test Customer
+        agent_index: -1, // Demo Agent
+    },
     // Test customer tickets (previously demo user tickets)
     {
         subject: 'Need help with API integration',
@@ -125,35 +135,63 @@ export async function seedTickets(supabase: SupabaseClient) {
 
     const ticketMap: Record<number, string> = {}
 
+    // Get all customers first
+    const { data: customers } = await supabase
+        .from('users')
+        .select('id, email, profiles(role)')
+        .eq('profiles.role', 'customer')
+        .throwOnError()
+
+    if (!customers?.length) {
+        throw new Error('No customers found for ticket creation')
+    }
+
+    // Get all agents first
+    const { data: agents } = await supabase
+        .from('users')
+        .select('id, email, profiles(role)')
+        .eq('profiles.role', 'agent')
+        .throwOnError()
+
+    if (!agents?.length) {
+        throw new Error('No agents found for ticket creation')
+    }
+
     // Create tickets
     for (const [index, ticket] of SEED_TICKETS.entries()) {
-        const { data: users } = await supabase
-            .from('users')
-            .select('id, profiles(role)')
-            .eq('profiles.role', 'customer')
-            .limit(1)
-            .throwOnError()
+        // Find the right customer based on index
+        let customerId: string | null = null
+        let customerEmail = ''
 
-        if (!users?.length) {
-            console.warn('⚠️ No customers found for ticket creation')
-            continue
+        if (ticket.customer_index === 0) {
+            customerEmail = 'customer1@example.com'
+        } else if (ticket.customer_index === 1) {
+            customerEmail = 'customer2@example.com'
+        } else if (ticket.customer_index === -2) {
+            customerEmail = 'testcustomer@example.com'
         }
 
-        const customerId = users[0].id
+        const customer = customers.find(c => c.email === customerEmail)
+        if (customer) customerId = customer.id
+
+        if (!customerId) {
+            throw new Error(`No customer found with email ${customerEmail}`)
+        }
 
         // Get agent if needed
         let agentId = null
         if (ticket.agent_index !== undefined) {
-            const { data: agents } = await supabase
-                .from('users')
-                .select('id, profiles(role)')
-                .eq('profiles.role', 'agent')
-                .limit(1)
-                .throwOnError()
-
-            if (agents?.length) {
-                agentId = agents[0].id
+            let agentEmail = ''
+            if (ticket.agent_index === -1) {
+                agentEmail = 'demo@example.com'
+            } else if (ticket.agent_index === 2) {
+                agentEmail = 'agent1@example.com'
+            } else if (ticket.agent_index === 3) {
+                agentEmail = 'agent2@example.com'
             }
+
+            const agent = agents.find(a => a.email === agentEmail)
+            if (agent) agentId = agent.id
         }
 
         const { data, error } = await supabase
@@ -170,8 +208,9 @@ export async function seedTickets(supabase: SupabaseClient) {
             .single()
 
         if (error) {
-            console.error(`Failed to create ticket ${ticket.subject}:`, error)
-            continue
+            throw new Error(
+                `Failed to create ticket ${ticket.subject}: ${error.message}`,
+            )
         }
 
         ticketMap[index] = data.id

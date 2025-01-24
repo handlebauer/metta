@@ -167,6 +167,51 @@ export type Database = {
                     },
                 ]
             }
+            ticket_access_tokens: {
+                Row: {
+                    created_at: string
+                    created_by: string
+                    expires_at: string
+                    id: string
+                    last_accessed_at: string | null
+                    ticket_id: string
+                    token: string
+                }
+                Insert: {
+                    created_at?: string
+                    created_by: string
+                    expires_at: string
+                    id?: string
+                    last_accessed_at?: string | null
+                    ticket_id: string
+                    token: string
+                }
+                Update: {
+                    created_at?: string
+                    created_by?: string
+                    expires_at?: string
+                    id?: string
+                    last_accessed_at?: string | null
+                    ticket_id?: string
+                    token?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: 'ticket_access_tokens_created_by_fkey'
+                        columns: ['created_by']
+                        isOneToOne: false
+                        referencedRelation: 'users'
+                        referencedColumns: ['id']
+                    },
+                    {
+                        foreignKeyName: 'ticket_access_tokens_ticket_id_fkey'
+                        columns: ['ticket_id']
+                        isOneToOne: false
+                        referencedRelation: 'tickets'
+                        referencedColumns: ['id']
+                    },
+                ]
+            }
             ticket_internal_notes: {
                 Row: {
                     content: string
@@ -367,6 +412,10 @@ export type Database = {
             }
         }
         Functions: {
+            current_ticket_token: {
+                Args: Record<PropertyKey, never>
+                Returns: string
+            }
             gen_ulid: {
                 Args: Record<PropertyKey, never>
                 Returns: string
@@ -378,9 +427,30 @@ export type Database = {
                 }
                 Returns: Json
             }
+            generate_ticket_access_token: {
+                Args: {
+                    p_ticket_id: string
+                    p_expires_in?: unknown
+                    p_created_by?: string
+                }
+                Returns: string
+            }
+            has_token_access: {
+                Args: {
+                    p_ticket_id: string
+                    p_token: string
+                }
+                Returns: boolean
+            }
             revoke_api_key: {
                 Args: {
                     api_key_id: string
+                }
+                Returns: undefined
+            }
+            set_ticket_access_token: {
+                Args: {
+                    p_token: string
                 }
                 Returns: undefined
             }

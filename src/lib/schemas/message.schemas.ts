@@ -14,8 +14,8 @@ export type MessageUpdate = TablesUpdate<'messages'>
 // Base schema matching database exactly
 export const messageSchema = z.object({
     id: z.string(),
-    created_at: z.string().datetime(),
-    updated_at: z.string().datetime(),
+    created_at: z.string(),
+    updated_at: z.string(),
     ticket_id: z.string(),
     user_id: z.string(),
     role: z.enum(['customer', 'agent', 'admin']),

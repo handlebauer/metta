@@ -9,6 +9,7 @@ Metta is an AI-powered Customer Relationship Management system designed to minim
 3. Utilize Server Components by default.
 4. Use Client Components only when necessary for interactivity or client-side state.
 5. Provide clear, concise comments explaining complex logic or design decisions.
+6. Never create new interfaces or types without first checking the `@/lib/schemas` directory.
 
 ## Project Structure
 
@@ -121,6 +122,26 @@ function Component(props: ComponentProps) {
 1. Use `useMemo` for expensive calculations.
 2. Use `useCallback` for expensive functions.
 3. Implement parallel data fetching using `Promise.all`.
+
+## Next.js Miscellaneous
+
+```tsx
+// ❌ Don't define params as a plain object since they are resolved asynchronously
+// interface TokenAccessPageProps {
+//     params: {
+//         id: string
+//         token: string
+//     }
+// }
+
+// ✅ Define params as a Promise since they are resolved asynchronously
+interface TokenAccessPageProps {
+    params: Promise<{
+        id: string
+        token: string
+    }>
+}
+```
 
 # Composer Mode
 

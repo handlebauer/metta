@@ -24,10 +24,32 @@ export async function getTicketMessages(ticketId: string) {
     }
 }
 
-export async function createMessage(ticketId: string, content: string) {
+export async function createMessage(
+    ticketId: string,
+    content: string,
+    customerId?: string,
+    token?: string,
+) {
     try {
-        const currentUser = await userService.getAuthenticatedUser()
+        // If customerId is provided, this is a public token-based access
+        if (customerId) {
+            const message = await messageService.create(
+                {
+                    ticket_id: ticketId,
+                    user_id: customerId,
+                    role: 'customer',
+                    content,
+                    html_content: content,
+                },
+                token,
+            )
 
+            revalidatePath(`/tickets/${ticketId}`)
+            return { data: message, error: null }
+        }
+
+        // Otherwise, this is an authenticated user
+        const currentUser = await userService.getAuthenticatedUser()
         if (!currentUser) {
             throw new Error('User not found')
         }
@@ -37,7 +59,7 @@ export async function createMessage(ticketId: string, content: string) {
             user_id: currentUser.id,
             role: currentUser.profile.role,
             content,
-            html_content: content, // For now, just store the plain text
+            html_content: content,
         })
 
         revalidatePath(`/dashboard/tickets/${ticketId}`)

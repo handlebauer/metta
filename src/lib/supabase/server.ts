@@ -3,7 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 
 import { Database } from './types'
 
-export const createClient = async () => {
+export const createClient = async (headers?: Record<string, string>) => {
     const cookieStore = await cookies()
 
     return createServerClient<Database>(
@@ -20,6 +20,13 @@ export const createClient = async () => {
                     })
                 },
             },
+            ...(headers
+                ? {
+                      global: {
+                          headers,
+                      },
+                  }
+                : {}),
         },
     )
 }

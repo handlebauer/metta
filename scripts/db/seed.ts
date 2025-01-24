@@ -2,6 +2,7 @@ import dotenv from 'dotenv'
 
 import { createServiceClient } from '@/lib/supabase/service'
 
+import { seedAccessTokens } from './seed-data/access-tokens'
 import { seedApiKeys } from './seed-data/api-keys'
 import { seedInternalNotes } from './seed-data/internal-notes'
 import { seedMessages } from './seed-data/messages'
@@ -51,6 +52,11 @@ async function main() {
         await supabase.from('messages').delete().neq('id', '0').throwOnError()
         await supabase.from('tickets').delete().neq('id', '0').throwOnError()
         await supabase.from('api_keys').delete().neq('id', '0').throwOnError()
+        await supabase
+            .from('ticket_access_tokens')
+            .delete()
+            .neq('id', '0')
+            .throwOnError()
         await supabase.from('profiles').delete().neq('id', '0').throwOnError()
         await supabase.from('users').delete().neq('id', '0').throwOnError()
         console.log('✅ Database cleaned')
@@ -62,9 +68,21 @@ async function main() {
         await seedMessages(supabase)
         await seedApiKeys(supabase)
         await seedStatusHistory(supabase, ticketMap, agentMap)
+        const { ticketId, token } = await seedAccessTokens(supabase)
         console.log('✅ Seed data created successfully')
+
+        // Log the access URL if we're not in production
+        if (!isProd && token) {
+            const baseUrl =
+                process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+            console.log('\n🔗 Demo Ticket Access URL:')
+            console.log(`${baseUrl}/tickets/${ticketId}/access/${token}`)
+            console.log(
+                '\nThis URL can be used to access the ticket without authentication',
+            )
+        }
     } catch (error) {
-        console.error('❌ Failed to seed database:', error)
+        console.error('❌ Error seeding database:', error)
         if (isProd) {
             console.error('\nFor production seeding, please ensure:')
             console.error(

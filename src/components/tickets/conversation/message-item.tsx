@@ -22,6 +22,8 @@ export function MessageItem({ message, currentUserId }: MessageItemProps) {
         isCurrentUser ? 'bg-primary/10 ml-16' : 'bg-accent mr-16',
     )
 
+    console.log('message', message)
+
     return (
         <div className={messageClass}>
             <div className="flex items-center justify-between">

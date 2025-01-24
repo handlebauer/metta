@@ -11,6 +11,27 @@ export interface SeedMessage {
 }
 
 export const SEED_MESSAGES: SeedMessage[] = [
+    // Access Token Test Ticket
+    {
+        ticket_index: 0,
+        user_index: -2, // Test Customer
+        role: 'customer',
+        content: 'Hello! This is a test message for the access token feature.',
+    },
+    {
+        ticket_index: 0,
+        user_index: -1, // Demo Agent
+        role: 'agent',
+        content:
+            'Hi there! I can confirm this ticket is accessible via the public access token. How can I help you today?',
+    },
+    {
+        ticket_index: 0,
+        user_index: -2, // Test Customer
+        role: 'customer',
+        content:
+            'Great! I can see the messages are working correctly. This will be perfect for testing.',
+    },
     // Billing cycle question (Test Customer)
     {
         ticket_index: 1,
@@ -76,7 +97,7 @@ export const SEED_MESSAGES: SeedMessage[] = [
     },
     {
         ticket_index: 5,
-        user_index: 1,
+        user_index: 2,
         role: 'agent',
         content: "Hello! I'd be happy to help. What seems to be the issue?",
     },
@@ -89,7 +110,7 @@ export const SEED_MESSAGES: SeedMessage[] = [
     },
     {
         ticket_index: 5,
-        user_index: 1,
+        user_index: 2,
         role: 'agent',
         content:
             "I'll help you reset your password. First, can you confirm if you're using the correct email address?",
@@ -104,7 +125,7 @@ export const SEED_MESSAGES: SeedMessage[] = [
     },
     {
         ticket_index: 9,
-        user_index: 0,
+        user_index: 2,
         role: 'agent',
         content:
             "Thanks for the suggestion! We've actually been working on a dark mode feature. Would you be interested in beta testing it?",
@@ -117,7 +138,7 @@ export const SEED_MESSAGES: SeedMessage[] = [
     },
     {
         ticket_index: 9,
-        user_index: 0,
+        user_index: 2,
         role: 'agent',
         content:
             "Perfect! I'll add you to our beta testing group and send you instructions shortly.",
@@ -171,9 +192,11 @@ export async function seedMessages(
                 ? testCustomer.id
                 : message.user_index === -1
                   ? demoAgent.id
-                  : message.user_index < 2
-                    ? customers[message.user_index].id
-                    : agents[message.user_index - 2].id,
+                  : message.user_index === 0
+                    ? customers[0].id
+                    : message.user_index === 1
+                      ? customers[1].id
+                      : agents[message.user_index - 2].id,
         role: message.role,
     }))
 

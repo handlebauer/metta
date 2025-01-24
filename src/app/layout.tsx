@@ -39,7 +39,7 @@ export default function RootLayout({
             <head />
             <body
                 className={cn(
-                    'min-h-screen bg-background font-outfit antialiased',
+                    'min-h-screen bg-background font-inter antialiased',
                     outfit.variable,
                     inter.variable,
                     ibmPlexMono.variable,
