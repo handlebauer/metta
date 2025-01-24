@@ -86,9 +86,9 @@ export const SEED_TICKETS: SeedTicket[] = [
         agent_index: 3, // agent2
     },
     {
-        subject: 'Integration with Slack',
+        subject: 'Integration with ChatGenius',
         description:
-            'Looking to integrate your service with our Slack workspace. Is this possible?',
+            'Looking to integrate your service with our ChatGenius workspace. Is this possible?',
         status: 'new',
         priority: 'low', // Integration inquiries are low priority
         customer_index: 0, // customer1
