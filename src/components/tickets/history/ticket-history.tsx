@@ -68,10 +68,11 @@ function CompactPriorityBadge({
 interface TicketHistoryProps {
     ticketId: string
     history: (TicketStatusHistoryRow | TicketPriorityHistoryRow)[]
+    createdAt: string
 }
 
-export function TicketHistory({ history }: TicketHistoryProps) {
-    if (history.length === 0) {
+export function TicketHistory({ history, createdAt }: TicketHistoryProps) {
+    if (history.length === 0 && !createdAt) {
         return (
             <div className="px-4 py-2">
                 <p className="-mx-2 mt-1 text-sm text-muted-foreground">
@@ -157,10 +158,15 @@ export function TicketHistory({ history }: TicketHistoryProps) {
                         <div className="relative z-10 rounded-full bg-background p-0.5 shadow-sm ring-1 ring-border">
                             <Clock4 className="h-3 w-3 text-foreground" />
                         </div>
-                        <div className="flex-1">
-                            <p className="text-[11px] font-medium">
-                                Ticket created
-                            </p>
+                        <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                                <p className="text-[11px] font-medium">
+                                    Ticket created
+                                </p>
+                                <time className="flex-none text-[11px] tabular-nums text-muted-foreground">
+                                    {formatDate(createdAt)}
+                                </time>
+                            </div>
                         </div>
                     </div>
                 </div>

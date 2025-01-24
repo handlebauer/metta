@@ -129,11 +129,20 @@ export async function TicketSidebar({
                 <>
                     <div className="min-h-0 flex-1 overflow-y-auto">
                         <Tabs
-                            defaultValue="notes"
+                            defaultValue="history"
                             className="flex h-full w-full flex-col"
                         >
                             <div className="bg-muted/5 px-6 pb-2">
                                 <TabsList className="grid h-auto w-full grid-cols-2 gap-4 bg-transparent p-0">
+                                    <TabsTrigger
+                                        value="history"
+                                        className="h-8 border px-3 data-[state=active]:border-primary/50 data-[state=active]:text-primary data-[state=active]:shadow-none"
+                                    >
+                                        History
+                                        <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] text-primary">
+                                            {(history?.length || 0) + 1}
+                                        </span>
+                                    </TabsTrigger>
                                     <TabsTrigger
                                         value="notes"
                                         className="h-8 border px-3 data-[state=active]:border-primary/50 data-[state=active]:text-primary data-[state=active]:shadow-none"
@@ -143,27 +152,8 @@ export async function TicketSidebar({
                                             {notesResult.data?.length || 0}
                                         </span>
                                     </TabsTrigger>
-                                    <TabsTrigger
-                                        value="history"
-                                        className="h-8 border px-3 data-[state=active]:border-primary/50 data-[state=active]:text-primary data-[state=active]:shadow-none"
-                                    >
-                                        History
-                                        <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] text-primary">
-                                            {history?.length || 0}
-                                        </span>
-                                    </TabsTrigger>
                                 </TabsList>
                             </div>
-
-                            <TabsContent value="notes" className="mt-0 flex-1">
-                                <div className="h-full overflow-y-auto px-6">
-                                    <TicketInternalNotes
-                                        ticketId={ticket.id}
-                                        userId={user.id}
-                                        initialNotes={notesResult.data || []}
-                                    />
-                                </div>
-                            </TabsContent>
 
                             <TabsContent
                                 value="history"
@@ -173,6 +163,20 @@ export async function TicketSidebar({
                                     <TicketHistory
                                         ticketId={ticket.id}
                                         history={history || []}
+                                        createdAt={
+                                            ticket.created_at ||
+                                            new Date().toISOString()
+                                        }
+                                    />
+                                </div>
+                            </TabsContent>
+
+                            <TabsContent value="notes" className="mt-0 flex-1">
+                                <div className="h-full overflow-y-auto px-6">
+                                    <TicketInternalNotes
+                                        ticketId={ticket.id}
+                                        userId={user.id}
+                                        initialNotes={notesResult.data || []}
                                     />
                                 </div>
                             </TabsContent>
