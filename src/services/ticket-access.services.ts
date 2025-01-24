@@ -84,7 +84,7 @@ export async function getTicketWithToken(
         return null
     }
 
-    console.log('Found valid token:', tokenData)
+    console.log('Found valid token ✅')
 
     // Set the token in the session
     const { error: setTokenError } = await supabase.rpc(
