@@ -67,6 +67,11 @@ export class EmailService {
                 from,
                 subject: options.subject,
                 html: options.html,
+                mail_settings: {
+                    click_tracking: {
+                        enable: false,
+                    },
+                },
             }
 
             console.log('[Email] Sending to:', {
