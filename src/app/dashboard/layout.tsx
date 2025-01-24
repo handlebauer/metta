@@ -21,7 +21,7 @@ export default async function DashboardLayout({
             {/* Top Navigation */}
             <header className="flex-none border-b">
                 <div className="flex h-16 items-center gap-4 px-4 font-outfit">
-                    <Brand href="/dashboard">Demo Host</Brand>
+                    <Brand href="/dashboard">DemoHost</Brand>
                     <div className="ml-auto flex items-center gap-4">
                         <UserNav user={user} />
                     </div>
