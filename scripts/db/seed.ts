@@ -76,7 +76,7 @@ async function main() {
             const baseUrl =
                 process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
             console.log('\n🔗 Demo Ticket Access URL:')
-            console.log(`${baseUrl}/tickets/${ticketId}/access/${token}`)
+            console.log(`${baseUrl}/tickets/${ticketId}/${token}`)
             console.log(
                 '\nThis URL can be used to access the ticket without authentication',
             )
