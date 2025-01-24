@@ -3,11 +3,13 @@ import { TicketRow } from '@/lib/schemas/ticket.schemas'
 interface AgentReplyNotificationProps {
     ticket: TicketRow
     messageContent: string
+    accessToken: string
 }
 
 export function AgentReplyNotification({
     ticket,
     messageContent,
+    accessToken,
 }: AgentReplyNotificationProps) {
     return (
         <div>
@@ -29,7 +31,7 @@ export function AgentReplyNotification({
                 You can reply to this email to continue the conversation, or
                 visit your ticket at:{' '}
                 <a
-                    href={`${process.env.NEXT_PUBLIC_SITE_URL}/tickets/${ticket.id}`}
+                    href={`${process.env.NEXT_PUBLIC_SITE_URL}/tickets/${ticket.id}/${accessToken}`}
                 >
                     View Ticket
                 </a>

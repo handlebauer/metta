@@ -106,6 +106,7 @@ export class EmailService {
         ticket: TicketRow,
         customer: UserRow,
         messageContent: string,
+        accessToken: string,
     ) {
         if (!customer.email) {
             console.error('Customer email not found')
@@ -113,7 +114,11 @@ export class EmailService {
         }
 
         const html = await render(
-            createElement(AgentReplyNotification, { ticket, messageContent }),
+            createElement(AgentReplyNotification, {
+                ticket,
+                messageContent,
+                accessToken,
+            }),
         )
 
         return this.sendEmail({

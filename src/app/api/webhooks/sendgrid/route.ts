@@ -3,6 +3,7 @@ import { ticketSchema } from '@/lib/schemas/ticket.schemas'
 import { SendGridInboundPayload } from '@/lib/sendgrid'
 import { createServiceClient } from '@/lib/supabase/service'
 import { EmailService } from '@/services/email.services'
+import { generateTicketAccessToken } from '@/services/ticket-access.services'
 
 import type { MessageInsert } from '@/lib/schemas/message.schemas'
 import type { TicketRow } from '@/lib/schemas/ticket.schemas'
@@ -107,10 +108,18 @@ async function sendNotification(params: {
 
         if (customer) {
             console.log('[SendGrid] Notifying customer:', customer.email)
+            // Generate access token for customer to view ticket, created by the agent
+            const accessToken = await generateTicketAccessToken(
+                ticket.id,
+                '7 days',
+                sender.id,
+            )
+
             await EmailService.sendAgentReplyNotification(
                 ticket,
                 customer,
                 messageContent,
+                accessToken,
             )
         }
     } else if (ticket.agent_id) {
@@ -135,6 +144,15 @@ async function sendNotification(params: {
     }
 }
 
+/**
+ * Extract email address from a From field
+ * Handles formats like "Name <email@example.com>" or just "email@example.com"
+ */
+function extractEmailAddress(from: string): string {
+    const match = from.match(/<(.+?)>/) // Match anything between < and >
+    return match ? match[1] : from.trim() // If no match, assume the whole string is an email
+}
+
 export async function POST(request: Request) {
     try {
         const formData = await request.formData()
@@ -154,7 +172,8 @@ export async function POST(request: Request) {
         // Get sender, using test user in development if needed
         let sender: UserRow
         let isTestUser = false
-        const testEmailType = isTestEmail(payload.from)
+        const senderEmail = extractEmailAddress(payload.from)
+        const testEmailType = isTestEmail(senderEmail)
 
         if (testEmailType !== false) {
             const testUser = await EmailService.getTestUser(testEmailType)
@@ -167,7 +186,7 @@ export async function POST(request: Request) {
                 email: sender.email,
             })
         } else {
-            sender = await findUser(payload.from)
+            sender = await findUser(senderEmail)
         }
 
         // Clean and prepare message content

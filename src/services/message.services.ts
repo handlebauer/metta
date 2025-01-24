@@ -9,6 +9,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 
 import { EmailService } from './email.services'
+import { generateTicketAccessToken } from './ticket-access.services'
 import { TicketService } from './ticket.services'
 import { UserWithProfileService } from './user-with-profile.services'
 
@@ -90,16 +91,22 @@ export class MessageService {
             const message = messageSchema.parse(data)
 
             // If this is an agent message, send email notification to customer
-            if (message.role === 'agent') {
+            if (message.role === 'agent' || message.role === 'admin') {
                 const ticket = await ticketService.findById(message.ticket_id)
                 if (!ticket) throw new DatabaseError('Ticket not found')
 
                 const customer = await userService.findById(ticket.customer_id)
                 if (customer) {
+                    // Generate access token for customer to view ticket
+                    const accessToken = await generateTicketAccessToken(
+                        ticket.id,
+                    )
+
                     await EmailService.sendAgentReplyNotification(
                         ticket,
                         customer,
                         message.content,
+                        accessToken,
                     )
                 }
             }

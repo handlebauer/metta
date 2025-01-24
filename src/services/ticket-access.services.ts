@@ -6,11 +6,13 @@ import type { TicketWithCustomer } from '@/lib/schemas/ticket.schemas'
 export async function generateTicketAccessToken(
     ticketId: string,
     expiresIn = '7 days',
+    createdBy?: string,
 ) {
     const supabase = await createClient()
     const { data, error } = await supabase.rpc('generate_ticket_access_token', {
         p_ticket_id: ticketId,
         p_expires_in: expiresIn,
+        p_created_by: createdBy,
     })
 
     if (error) throw error
