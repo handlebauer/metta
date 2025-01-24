@@ -22,7 +22,7 @@ const STATUS_HISTORY: StatusHistoryEntry[] = [
                 old_status: 'new',
                 new_status: 'open',
                 agent_index: -1,
-                minutes_ago: 60,
+                minutes_ago: 60 * 24 * 2, // 2 days after creation
             },
         ],
     },
@@ -35,13 +35,13 @@ const STATUS_HISTORY: StatusHistoryEntry[] = [
                 old_status: 'new',
                 new_status: 'open',
                 agent_index: -1,
-                minutes_ago: 240,
+                minutes_ago: 60 * 24 * 5, // 5 days after creation
             },
             {
                 old_status: 'open',
                 new_status: 'closed',
                 agent_index: -1,
-                minutes_ago: 180,
+                minutes_ago: 60 * 24 * 4, // Resolved 1 day after opening
             },
         ],
     },
@@ -54,8 +54,8 @@ const STATUS_HISTORY: StatusHistoryEntry[] = [
                 old_status: 'new',
                 new_status: 'open',
                 agent_index: -1,
-                minutes_ago: 1440,
-            }, // 24 hours ago
+                minutes_ago: 60 * 24 * 7, // 1 week after creation
+            },
         ],
     },
 
@@ -70,7 +70,7 @@ const STATUS_HISTORY: StatusHistoryEntry[] = [
                 old_status: 'new',
                 new_status: 'open',
                 agent_index: 2,
-                minutes_ago: 120,
+                minutes_ago: 60 * 24 * 10, // 10 days after creation
             },
         ],
     },
@@ -99,13 +99,13 @@ const STATUS_HISTORY: StatusHistoryEntry[] = [
                 old_status: 'new',
                 new_status: 'open',
                 agent_index: 3,
-                minutes_ago: 360,
+                minutes_ago: 60 * 24 * 14, // 2 weeks after creation
             },
             {
                 old_status: 'open',
                 new_status: 'closed',
                 agent_index: 3,
-                minutes_ago: 300,
+                minutes_ago: 60 * 24 * 13, // Resolved 1 day after opening
             },
         ],
     },
@@ -131,19 +131,86 @@ const STATUS_HISTORY: StatusHistoryEntry[] = [
                 old_status: 'new',
                 new_status: 'open',
                 agent_index: 2,
-                minutes_ago: 240,
+                minutes_ago: 60 * 24 * 18, // 18 days after creation
             },
             {
                 old_status: 'open',
                 new_status: 'closed',
                 agent_index: 2,
-                minutes_ago: 200,
+                minutes_ago: 60 * 24 * 17, // Resolved 1 day after opening
             },
         ],
     },
 
     // Index 11: Mobile app suggestion (new)
     // No history needed as it's still new
+
+    // Index 13: API Rate Limiting Issue (closed)
+    {
+        ticket_index: 13,
+        changes: [
+            {
+                old_status: 'new',
+                new_status: 'open',
+                agent_index: 2,
+                minutes_ago: 60 * 24 * 21, // 3 weeks after creation
+            },
+            {
+                old_status: 'open',
+                new_status: 'closed',
+                agent_index: 2,
+                minutes_ago: 60 * 24 * 20, // Resolved 1 day after opening
+            },
+        ],
+    },
+
+    // Index 14: Custom Dashboard Setup (open)
+    {
+        ticket_index: 14,
+        changes: [
+            {
+                old_status: 'new',
+                new_status: 'open',
+                agent_index: 3,
+                minutes_ago: 60 * 24 * 3, // 3 days ago
+            },
+        ],
+    },
+
+    // Index 15: Security Audit Results (new)
+    // No history needed as it's still new
+
+    // Index 16: Data Migration Support (closed)
+    {
+        ticket_index: 16,
+        changes: [
+            {
+                old_status: 'new',
+                new_status: 'open',
+                agent_index: 2,
+                minutes_ago: 60 * 24 * 25, // 25 days after creation
+            },
+            {
+                old_status: 'open',
+                new_status: 'closed',
+                agent_index: 2,
+                minutes_ago: 60 * 24 * 24, // Resolved 1 day after opening
+            },
+        ],
+    },
+
+    // Index 17: Account Upgrade Request (open)
+    {
+        ticket_index: 17,
+        changes: [
+            {
+                old_status: 'new',
+                new_status: 'open',
+                agent_index: 3,
+                minutes_ago: 60 * 24 * 5, // 5 days ago
+            },
+        ],
+    },
 ]
 
 export async function seedStatusHistory(

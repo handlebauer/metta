@@ -128,6 +128,52 @@ export const SEED_TICKETS: SeedTicket[] = [
         priority: 'low', // Feature suggestions are low priority
         customer_index: 1, // customer2
     },
+
+    // Additional varied tickets
+    {
+        subject: 'API Rate Limiting Issue',
+        description:
+            'We are hitting the API rate limits frequently. Can we increase our quota?',
+        status: 'closed',
+        priority: 'high',
+        customer_index: 0, // customer1
+        agent_index: 2, // agent1
+    },
+    {
+        subject: 'Custom Dashboard Setup',
+        description:
+            'Need help configuring our custom dashboard with the new metrics.',
+        status: 'open',
+        priority: 'medium',
+        customer_index: 1, // customer2
+        agent_index: 3, // agent2
+    },
+    {
+        subject: 'Security Audit Results',
+        description:
+            'Sharing results from our recent security audit. A few items need attention.',
+        status: 'new',
+        priority: 'urgent',
+        customer_index: 1, // customer2
+    },
+    {
+        subject: 'Data Migration Support',
+        description:
+            'Planning to migrate from a competitor. Need guidance on the process.',
+        status: 'closed',
+        priority: 'medium',
+        customer_index: 0, // customer1
+        agent_index: 2, // agent1
+    },
+    {
+        subject: 'Account Upgrade Request',
+        description:
+            'Current plan is insufficient. Looking to upgrade to enterprise.',
+        status: 'open',
+        priority: 'high',
+        customer_index: 1, // customer2
+        agent_index: 3, // agent2
+    },
 ]
 
 export async function seedTickets(supabase: SupabaseClient) {
@@ -157,7 +203,7 @@ export async function seedTickets(supabase: SupabaseClient) {
         throw new Error('No agents found for ticket creation')
     }
 
-    // Create tickets
+    // Create tickets with deterministic dates
     for (const [index, ticket] of SEED_TICKETS.entries()) {
         // Find the right customer based on index
         let customerId: string | null = null
@@ -194,6 +240,13 @@ export async function seedTickets(supabase: SupabaseClient) {
             if (agent) agentId = agent.id
         }
 
+        // Calculate creation date based on index to spread tickets across weeks
+        const now = new Date()
+        const daysAgo = Math.floor(index * 2.5) // Spread tickets every 2-3 days
+        const createdAt = new Date(now)
+        createdAt.setDate(now.getDate() - daysAgo)
+        createdAt.setHours(10, 0, 0, 0) // Set to 10 AM for consistency
+
         const { data, error } = await supabase
             .from('tickets')
             .insert({
@@ -203,6 +256,7 @@ export async function seedTickets(supabase: SupabaseClient) {
                 priority: ticket.priority,
                 customer_id: customerId,
                 agent_id: agentId,
+                created_at: createdAt.toISOString(),
             })
             .select()
             .single()

@@ -3,10 +3,13 @@
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import {
+    BarChart,
+    Clock,
     Code,
     Crown,
     Headphones,
     Inbox,
+    LineChart,
     List,
     Plus,
     Settings,
@@ -89,6 +92,7 @@ export function SidebarNav({ user }: SidebarNavProps) {
     const searchParams = useSearchParams()
     const isTicketsSection = pathname?.startsWith('/dashboard/tickets')
     const isUsersSection = pathname?.startsWith('/dashboard/users')
+    const isStatsSection = pathname?.startsWith('/dashboard/stats')
     const userType = searchParams.get('type') as
         | 'admin'
         | 'agent'
@@ -172,6 +176,57 @@ export function SidebarNav({ user }: SidebarNavProps) {
                         />
                     ))}
 
+                    <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className={cn(
+                            'mt-4 w-full justify-start font-medium',
+                            isStatsSection && 'bg-muted/50',
+                        )}
+                    >
+                        <Link href="/dashboard/stats">
+                            <div className="flex items-center">
+                                <BarChart className="mr-2 h-3.5 w-3.5" />
+                                Stats
+                            </div>
+                        </Link>
+                    </Button>
+                    <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className={cn(
+                            'w-full justify-start pl-7',
+                            pathname === '/dashboard/stats' && 'bg-muted',
+                        )}
+                    >
+                        <Link href="/dashboard/stats">
+                            <LineChart className="mr-2 h-3.5 w-3.5" />
+                            Overview
+                        </Link>
+                    </Button>
+                    <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className={cn(
+                            'w-full justify-start pl-7',
+                            pathname === '/dashboard/stats/trends' &&
+                                'bg-muted',
+                        )}
+                    >
+                        <Link href="/dashboard/stats/trends">
+                            <Clock className="mr-2 h-3.5 w-3.5" />
+                            Trends
+                        </Link>
+                    </Button>
+                </>
+            )}
+
+            {/* Settings section - only visible to admins */}
+            {user.profile.role === 'admin' && (
+                <>
                     <Button
                         asChild
                         variant="ghost"
