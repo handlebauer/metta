@@ -350,7 +350,7 @@ export async function claimTicket(
         // Revalidate relevant paths
         revalidatePath('/tickets')
         revalidatePath(`/tickets/${ticketId}`)
-        revalidatePath(`/tickets/${ticketId}/[token]`)
+        revalidatePath(`/tickets/${ticketId}/[token]`, 'page')
         revalidatePath(`/agents/${agentId}/tickets`)
         revalidatePath(`/customers/${data.customer_id}/tickets`)
 

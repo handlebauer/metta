@@ -1,5 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatConversationalDate } from '@/lib/utils/dates'
+import { getAgents } from '@/actions/agent.actions'
 import { getTicketHistory } from '@/actions/ticket.actions'
 
 import { Avatar, AvatarFallback } from '../ui/avatar'
@@ -42,6 +43,7 @@ export async function TicketSidebar({
     notesResult,
 }: TicketSidebarProps) {
     const { data: history } = await getTicketHistory(ticket.id)
+    const agents = await getAgents()
 
     const isAgentOrAdmin = user.role === 'agent' || user.role === 'admin'
 
@@ -182,6 +184,7 @@ export async function TicketSidebar({
                             ticketId={ticket.id}
                             currentStatus={ticket.status || 'new'}
                             userId={user.id}
+                            agents={agents}
                         />
                     </div>
                 </>

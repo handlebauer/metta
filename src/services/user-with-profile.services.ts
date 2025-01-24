@@ -233,4 +233,49 @@ export class UserWithProfileService {
             throw error
         }
     }
+
+    /**
+     * Gets all active agents in the system
+     * @returns Array of active agents with their profiles
+     */
+    async findAllActiveAgents(): Promise<UserWithProfile[]> {
+        try {
+            const db = await createClient()
+            const { data, error } = await db
+                .from('users')
+                .select(
+                    `
+                    *,
+                    profile:profiles!inner (
+                        id,
+                        created_at,
+                        updated_at,
+                        full_name,
+                        avatar_url,
+                        bio,
+                        role
+                    )
+                `,
+                )
+                .eq('is_active', true)
+                .eq('profiles.role', 'agent')
+                .order('email')
+
+            if (error) throw new DatabaseError(error.message)
+
+            // Sort the results by full name after fetching, falling back to email
+            const sortedData = data?.sort((a, b) => {
+                const nameA = a.profile?.full_name || a.email
+                const nameB = b.profile?.full_name || b.email
+                return nameA.localeCompare(nameB)
+            })
+
+            return sortedData
+                ? userWithProfileSchema.array().parse(sortedData)
+                : []
+        } catch (error) {
+            console.error('[UserWithProfileService.findAllActiveAgents]', error)
+            throw error
+        }
+    }
 }

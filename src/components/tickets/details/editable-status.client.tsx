@@ -7,6 +7,7 @@ import {
     Lock,
     RotateCcw,
     UserPlus2,
+    Users,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -23,6 +24,9 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Textarea } from '@/components/ui/textarea'
@@ -32,25 +36,22 @@ import { claimTicket, updateTicket } from '@/actions/ticket.actions'
 interface EditableStatusProps {
     ticketId: string
     currentStatus: 'new' | 'open' | 'closed'
-    className?: string
-    userId: string // Need this for claiming tickets
+    userId: string
+    agents: Array<{
+        id: string
+        email: string
+        profile: {
+            full_name: string | null
+            avatar_url: string | null
+        } | null
+    }>
 }
-
-// Define the next logical status for each current status
-const nextStatus = {
-    new: 'open',
-    open: 'closed',
-    closed: 'open',
-} as const
-
-// All possible statuses
-const allStatuses = ['new', 'open', 'closed'] as const
 
 export function EditableStatus({
     ticketId,
     currentStatus,
-    className,
     userId,
+    agents,
 }: EditableStatusProps) {
     const [isPending, startTransition] = useTransition()
     const [showReopenDialog, setShowReopenDialog] = useState(false)
@@ -83,13 +84,18 @@ export function EditableStatus({
     }, [currentStatus])
 
     const handleStatusChange = async (
-        newStatus: (typeof allStatuses)[number],
+        newStatus: 'new' | 'open' | 'closed',
+        agentId?: string,
         reason?: string,
     ) => {
         startTransition(async () => {
             try {
-                // If it's a new ticket being claimed
-                if (currentStatus === 'new' && newStatus === 'open') {
+                if (
+                    currentStatus === 'new' &&
+                    newStatus === 'open' &&
+                    !agentId
+                ) {
+                    // Self-assign the ticket
                     await claimTicket(ticketId, userId)
                 } else {
                     // For all other status changes
@@ -97,6 +103,7 @@ export function EditableStatus({
                         ticketId,
                         {
                             status: newStatus,
+                            ...(agentId && { agent_id: agentId }),
                         },
                         reason,
                     )
@@ -108,24 +115,16 @@ export function EditableStatus({
     }
 
     const handleReopenConfirm = () => {
-        handleStatusChange('open', reopenReason)
+        handleStatusChange('open', undefined, reopenReason)
         setShowReopenDialog(false)
         setReopenReason('')
-    }
-
-    const handleStatusClick = (newStatus: (typeof allStatuses)[number]) => {
-        if (currentStatus === 'closed' && newStatus === 'open') {
-            setShowReopenDialog(true)
-        } else {
-            handleStatusChange(newStatus)
-        }
     }
 
     const Icon = actionConfig.icon
 
     return (
         <>
-            <div className={cn('inline-flex translate-y-2', className)}>
+            <div className="inline-flex translate-y-2">
                 <Button
                     className={cn(
                         'h-auto w-[280px] rounded-r-none border-r-0 border-foreground/30 px-6 py-4 shadow-sm transition-all duration-200',
@@ -133,7 +132,15 @@ export function EditableStatus({
                         actionConfig.accent,
                     )}
                     variant={actionConfig.variant}
-                    onClick={() => handleStatusClick(nextStatus[currentStatus])}
+                    onClick={() => {
+                        if (currentStatus === 'closed') {
+                            setShowReopenDialog(true)
+                        } else if (currentStatus === 'new') {
+                            handleStatusChange('open')
+                        } else {
+                            handleStatusChange('closed')
+                        }
+                    }}
                     disabled={isPending}
                 >
                     <div className="flex w-full items-center gap-3">
@@ -177,25 +184,47 @@ export function EditableStatus({
                             </p>
                         </div>
                         <DropdownMenuSeparator />
-                        {allStatuses.map(status => (
-                            <DropdownMenuItem
-                                key={status}
-                                onClick={() => handleStatusClick(status)}
-                                disabled={status === currentStatus || isPending}
-                                className="capitalize"
-                            >
-                                {status === 'new' && (
-                                    <UserPlus2 className="mr-2 h-4 w-4" />
-                                )}
-                                {status === 'open' && (
-                                    <CheckCircle2 className="mr-2 h-4 w-4" />
-                                )}
-                                {status === 'closed' && (
-                                    <Lock className="mr-2 h-4 w-4" />
-                                )}
-                                {status}
-                            </DropdownMenuItem>
-                        ))}
+                        <DropdownMenuItem
+                            disabled={currentStatus === 'new' || isPending}
+                            onClick={() => handleStatusChange('new')}
+                            className="capitalize"
+                        >
+                            <UserPlus2 className="mr-2 h-4 w-4" />
+                            New
+                        </DropdownMenuItem>
+                        {(currentStatus === 'new' ||
+                            currentStatus === 'closed') && (
+                            <DropdownMenuSub>
+                                <DropdownMenuSubTrigger>
+                                    <Users className="mr-2 h-4 w-4" />
+                                    Assign To
+                                </DropdownMenuSubTrigger>
+                                <DropdownMenuSubContent className="w-56">
+                                    {agents.map(agent => (
+                                        <DropdownMenuItem
+                                            key={agent.id}
+                                            onClick={() =>
+                                                handleStatusChange(
+                                                    'open',
+                                                    agent.id,
+                                                )
+                                            }
+                                        >
+                                            {agent.profile?.full_name ||
+                                                agent.email}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuSubContent>
+                            </DropdownMenuSub>
+                        )}
+                        <DropdownMenuItem
+                            disabled={currentStatus === 'closed' || isPending}
+                            onClick={() => handleStatusChange('closed')}
+                            className="capitalize"
+                        >
+                            <Lock className="mr-2 h-4 w-4" />
+                            Resolved
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
