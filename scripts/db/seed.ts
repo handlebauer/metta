@@ -9,6 +9,7 @@ import { seedMessages } from './seed-data/messages'
 import { seedStatusHistory } from './seed-data/status-history'
 import { seedTickets } from './seed-data/tickets'
 import { seedUsers } from './seed-data/users'
+import { seedWorkspaces } from './seed-data/workspaces'
 
 // Load the environment variables first
 dotenv.config({ path: '.env.local' }) // Load local env first as fallback
@@ -40,6 +41,12 @@ async function main() {
 
         console.log('🧹 Cleaning existing data...')
         await supabase
+            .from('workspace_members')
+            .delete()
+            .neq('id', '0')
+            .throwOnError()
+        await supabase.from('workspaces').delete().neq('id', '0').throwOnError()
+        await supabase
             .from('ticket_status_history')
             .delete()
             .neq('id', '0')
@@ -62,7 +69,11 @@ async function main() {
         console.log('✅ Database cleaned')
 
         console.log('🌱 Creating application data...')
-        const { agentMap } = await seedUsers(supabase)
+        const { agentMap, userMap } = await seedUsers(supabase)
+        const { workspaceId: _workspaceId } = await seedWorkspaces(supabase, {
+            userMap,
+            agentMap,
+        })
         const ticketMap = await seedTickets(supabase)
         await seedInternalNotes(supabase)
         await seedMessages(supabase)

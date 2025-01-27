@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
 
-export default function DashboardPage() {
-    redirect('/dashboard/tickets')
+export default async function DashboardPage() {
+    redirect('/dashboard/workspaces')
 }

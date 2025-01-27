@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
+import { Database } from '@/lib/supabase/types'
+
 import type { NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({ request })
 
-    const supabase = createServerClient(
+    const supabase = createServerClient<Database>(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
@@ -44,8 +46,8 @@ export async function updateSession(request: NextRequest) {
      */
     if (
         !user &&
-        pathname.startsWith('/login') &&
-        pathname.startsWith('/auth')
+        !pathname.startsWith('/login') &&
+        !pathname.startsWith('/auth')
     ) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
@@ -57,6 +59,13 @@ export async function updateSession(request: NextRequest) {
      */
     if (user) {
         if (pathname.startsWith('/login') || pathname.startsWith('/auth')) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/dashboard'
+            return NextResponse.redirect(url)
+        }
+
+        // If user is trying to access root, redirect to dashboard
+        if (pathname === '/') {
             const url = request.nextUrl.clone()
             url.pathname = '/dashboard'
             return NextResponse.redirect(url)

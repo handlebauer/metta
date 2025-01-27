@@ -508,6 +508,78 @@ export type Database = {
                 }
                 Relationships: []
             }
+            workspace_members: {
+                Row: {
+                    created_at: string | null
+                    id: string
+                    role: Database['public']['Enums']['user_role']
+                    updated_at: string | null
+                    user_id: string
+                    workspace_id: string
+                }
+                Insert: {
+                    created_at?: string | null
+                    id?: string
+                    role?: Database['public']['Enums']['user_role']
+                    updated_at?: string | null
+                    user_id: string
+                    workspace_id: string
+                }
+                Update: {
+                    created_at?: string | null
+                    id?: string
+                    role?: Database['public']['Enums']['user_role']
+                    updated_at?: string | null
+                    user_id?: string
+                    workspace_id?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: 'workspace_members_user_id_fkey'
+                        columns: ['user_id']
+                        isOneToOne: false
+                        referencedRelation: 'users'
+                        referencedColumns: ['id']
+                    },
+                    {
+                        foreignKeyName: 'workspace_members_workspace_id_fkey'
+                        columns: ['workspace_id']
+                        isOneToOne: false
+                        referencedRelation: 'workspaces'
+                        referencedColumns: ['id']
+                    },
+                ]
+            }
+            workspaces: {
+                Row: {
+                    created_at: string | null
+                    id: string
+                    logo_url: string | null
+                    name: string
+                    settings: Json | null
+                    slug: string
+                    updated_at: string | null
+                }
+                Insert: {
+                    created_at?: string | null
+                    id?: string
+                    logo_url?: string | null
+                    name: string
+                    settings?: Json | null
+                    slug: string
+                    updated_at?: string | null
+                }
+                Update: {
+                    created_at?: string | null
+                    id?: string
+                    logo_url?: string | null
+                    name?: string
+                    settings?: Json | null
+                    slug?: string
+                    updated_at?: string | null
+                }
+                Relationships: []
+            }
         }
         Views: {
             decrypted_api_keys: {
@@ -556,6 +628,22 @@ export type Database = {
                     user_id: string
                 }
             }
+            create_workspace_with_admin: {
+                Args: {
+                    workspace_name: string
+                    workspace_slug: string
+                    creator_id: string
+                }
+                Returns: {
+                    created_at: string | null
+                    id: string
+                    logo_url: string | null
+                    name: string
+                    settings: Json | null
+                    slug: string
+                    updated_at: string | null
+                }
+            }
             current_ticket_token: {
                 Args: Record<PropertyKey, never>
                 Returns: string
@@ -587,6 +675,20 @@ export type Database = {
                 Args: {
                     p_ticket_id: string
                     p_token: string
+                }
+                Returns: boolean
+            }
+            is_workspace_admin: {
+                Args: {
+                    workspace_id: string
+                    user_id: string
+                }
+                Returns: boolean
+            }
+            is_workspace_member: {
+                Args: {
+                    workspace_id: string
+                    user_id: string
                 }
                 Returns: boolean
             }

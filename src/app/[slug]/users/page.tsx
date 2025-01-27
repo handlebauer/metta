@@ -2,18 +2,20 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { PlusCircle } from 'lucide-react'
 
+import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { UsersTable } from '@/components/users/users-table.client'
-import { createClient } from '@/lib/supabase/server'
 import { getAuthenticatedUserWithProfile } from '@/actions/user-with-profile.actions'
 
 import type { UserWithProfile } from '@/components/users/users-table.client'
 
 interface PageProps {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+    params: Promise<{ slug: string }>
 }
 
-export default async function UsersPage({ searchParams }: PageProps) {
+export default async function UsersPage({ searchParams, params }: PageProps) {
+    const { slug } = await params
     // Get authenticated user with profile
     const { data: user, error } = await getAuthenticatedUserWithProfile()
 
@@ -23,7 +25,7 @@ export default async function UsersPage({ searchParams }: PageProps) {
 
     // Only admins can access this page
     if (user.profile.role !== 'admin') {
-        redirect('/dashboard')
+        redirect(`/${slug}`)
     }
 
     const supabase = await createClient()
@@ -98,7 +100,7 @@ export default async function UsersPage({ searchParams }: PageProps) {
                             aria-label="Create new user"
                         >
                             <Link
-                                href="/dashboard/users/new"
+                                href={`/${slug}/users/new`}
                                 prefetch={true}
                                 className="flex items-center gap-1"
                             >

@@ -2,21 +2,26 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { CheckCircle2, Clock, Inbox, PlusCircle } from 'lucide-react'
 
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { TicketList } from '@/components/tickets/list/ticket-list.client'
-import { cn } from '@/lib/utils'
 import { getTickets, getTicketStats } from '@/actions/ticket.actions'
 
 type TicketStatus = 'new' | 'open' | 'closed'
 
 interface TicketsPageProps {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+    params: Promise<{ slug: string }>
 }
 
-export default async function TicketsPage({ searchParams }: TicketsPageProps) {
+export default async function TicketsPage({
+    searchParams,
+    params,
+}: TicketsPageProps) {
+    const { slug } = await params
     const status = (await searchParams).status as TicketStatus | undefined
     if (status && !['new', 'open', 'closed'].includes(status)) {
-        redirect('/dashboard/tickets')
+        redirect(`/${slug}/tickets`)
     }
 
     // Get ticket stats and tickets
@@ -41,7 +46,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                             aria-label="Create new ticket"
                         >
                             <Link
-                                href="/dashboard/tickets/new"
+                                href={`/${slug}/tickets/new`}
                                 prefetch={true}
                                 className="flex items-center gap-1"
                             >
@@ -64,7 +69,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                         size="sm"
                         className={cn('gap-2', !status && 'bg-muted')}
                     >
-                        <Link href="/dashboard/tickets">
+                        <Link href={`/${slug}/tickets`}>
                             <Inbox className="h-4 w-4" />
                             All
                             <span className="text-muted-foreground">
@@ -78,7 +83,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                         size="sm"
                         className={cn('gap-2', status === 'open' && 'bg-muted')}
                     >
-                        <Link href="/dashboard/tickets?status=open">
+                        <Link href={`/${slug}/tickets?status=open`}>
                             <Clock className="h-4 w-4" />
                             Open
                             <span className="text-muted-foreground">
@@ -95,7 +100,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                             status === 'closed' && 'bg-muted',
                         )}
                     >
-                        <Link href="/dashboard/tickets?status=closed">
+                        <Link href={`/${slug}/tickets?status=closed`}>
                             <CheckCircle2 className="h-4 w-4" />
                             Closed Today
                             <span className="text-muted-foreground">

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { useParams, usePathname, useSearchParams } from 'next/navigation'
 import {
     BarChart,
     Clock,
@@ -18,8 +18,8 @@ import {
     Users,
 } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 import type { UserWithProfile } from '@/lib/schemas/user-with-profile.schemas'
 
@@ -47,6 +47,7 @@ function UserTypeButton({
     showAdd,
 }: UserType & { isActive: boolean; showAdd: boolean }) {
     const pathname = usePathname()
+    const { slug } = useParams()
 
     return (
         <>
@@ -59,7 +60,7 @@ function UserTypeButton({
                     isActive && 'bg-muted',
                 )}
             >
-                <Link href={`/dashboard/users?type=${type}`}>
+                <Link href={`/${slug}/users?type=${type}`}>
                     <Icon className="mr-2 h-3.5 w-3.5" />
                     {label}
                 </Link>
@@ -71,11 +72,11 @@ function UserTypeButton({
                     size="sm"
                     className={cn(
                         'w-full justify-start pl-10',
-                        pathname === '/dashboard/users/new' && 'bg-muted',
+                        pathname === `/${slug}/users/new` && 'bg-muted',
                     )}
                 >
                     <Link
-                        href={`/dashboard/users/new?type=${type}`}
+                        href={`/${slug}/users/new?type=${type}`}
                         prefetch={true}
                     >
                         <Plus className="mr-2 h-3.5 w-3.5" />
@@ -89,10 +90,11 @@ function UserTypeButton({
 
 export function SidebarNav({ user }: SidebarNavProps) {
     const pathname = usePathname()
+    const { slug } = useParams()
     const searchParams = useSearchParams()
-    const isTicketsSection = pathname?.startsWith('/dashboard/tickets')
-    const isUsersSection = pathname?.startsWith('/dashboard/users')
-    const isStatsSection = pathname?.startsWith('/dashboard/stats')
+    const isTicketsSection = pathname?.startsWith(`/${slug}/tickets`)
+    const isUsersSection = pathname?.startsWith(`/${slug}/users`)
+    const isStatsSection = pathname?.startsWith(`/${slug}/stats`)
     const userType = searchParams.get('type') as
         | 'admin'
         | 'agent'
@@ -110,7 +112,7 @@ export function SidebarNav({ user }: SidebarNavProps) {
                     isTicketsSection && 'bg-muted/50',
                 )}
             >
-                <Link href="/dashboard/tickets">
+                <Link href={`/${slug}/tickets`}>
                     <div className="flex items-center">
                         <Inbox className="mr-2 h-3.5 w-3.5" />
                         Tickets
@@ -123,10 +125,10 @@ export function SidebarNav({ user }: SidebarNavProps) {
                 size="sm"
                 className={cn(
                     'w-full justify-start pl-7',
-                    pathname === '/dashboard/tickets' && 'bg-muted',
+                    pathname === `/${slug}/tickets` && 'bg-muted',
                 )}
             >
-                <Link href="/dashboard/tickets">
+                <Link href={`/${slug}/tickets`}>
                     <List className="mr-2 h-3.5 w-3.5" />
                     View
                 </Link>
@@ -137,10 +139,10 @@ export function SidebarNav({ user }: SidebarNavProps) {
                 size="sm"
                 className={cn(
                     'w-full justify-start pl-7',
-                    pathname === '/dashboard/tickets/new' && 'bg-muted',
+                    pathname === `/${slug}/tickets/new` && 'bg-muted',
                 )}
             >
-                <Link href="/dashboard/tickets/new" prefetch={true}>
+                <Link href={`/${slug}/tickets/new`} prefetch={true}>
                     <Plus className="mr-2 h-3.5 w-3.5" />
                     Create
                 </Link>
@@ -158,7 +160,7 @@ export function SidebarNav({ user }: SidebarNavProps) {
                             isUsersSection && 'bg-muted/50',
                         )}
                     >
-                        <Link href="/dashboard/users">
+                        <Link href={`/${slug}/users`}>
                             <div className="flex items-center">
                                 <Users className="mr-2 h-3.5 w-3.5" />
                                 Users
@@ -185,7 +187,7 @@ export function SidebarNav({ user }: SidebarNavProps) {
                             isStatsSection && 'bg-muted/50',
                         )}
                     >
-                        <Link href="/dashboard/stats">
+                        <Link href={`/${slug}/stats`}>
                             <div className="flex items-center">
                                 <BarChart className="mr-2 h-3.5 w-3.5" />
                                 Stats
@@ -198,10 +200,10 @@ export function SidebarNav({ user }: SidebarNavProps) {
                         size="sm"
                         className={cn(
                             'w-full justify-start pl-7',
-                            pathname === '/dashboard/stats' && 'bg-muted',
+                            pathname === `/${slug}/stats` && 'bg-muted',
                         )}
                     >
-                        <Link href="/dashboard/stats">
+                        <Link href={`/${slug}/stats`}>
                             <LineChart className="mr-2 h-3.5 w-3.5" />
                             Overview
                         </Link>
@@ -212,11 +214,10 @@ export function SidebarNav({ user }: SidebarNavProps) {
                         size="sm"
                         className={cn(
                             'w-full justify-start pl-7',
-                            pathname === '/dashboard/stats/trends' &&
-                                'bg-muted',
+                            pathname === `/${slug}/stats/trends` && 'bg-muted',
                         )}
                     >
-                        <Link href="/dashboard/stats/trends">
+                        <Link href={`/${slug}/stats/trends`}>
                             <Clock className="mr-2 h-3.5 w-3.5" />
                             Trends
                         </Link>
@@ -233,11 +234,11 @@ export function SidebarNav({ user }: SidebarNavProps) {
                         size="sm"
                         className={cn(
                             'mt-4 w-full justify-start font-medium',
-                            pathname?.startsWith('/dashboard/settings') &&
+                            pathname?.startsWith(`/${slug}/settings`) &&
                                 'bg-muted/50',
                         )}
                     >
-                        <Link href="/dashboard/settings">
+                        <Link href={`/${slug}/settings`}>
                             <div className="flex items-center">
                                 <Settings className="mr-2 h-3.5 w-3.5" />
                                 Settings
@@ -250,11 +251,11 @@ export function SidebarNav({ user }: SidebarNavProps) {
                         size="sm"
                         className={cn(
                             'w-full justify-start pl-7',
-                            pathname === '/dashboard/settings/preferences' &&
+                            pathname === `/${slug}/settings/preferences` &&
                                 'bg-muted',
                         )}
                     >
-                        <Link href="/dashboard/settings/preferences">
+                        <Link href={`/${slug}/settings/preferences`}>
                             <Sliders className="mr-2 h-3.5 w-3.5" />
                             General
                         </Link>
@@ -265,11 +266,11 @@ export function SidebarNav({ user }: SidebarNavProps) {
                         size="sm"
                         className={cn(
                             'w-full justify-start pl-7',
-                            pathname === '/dashboard/settings/developer' &&
+                            pathname === `/${slug}/settings/developer` &&
                                 'bg-muted',
                         )}
                     >
-                        <Link href="/dashboard/settings/developer">
+                        <Link href={`/${slug}/settings/developer`}>
                             <Code className="mr-2 h-3.5 w-3.5" />
                             Developer
                         </Link>

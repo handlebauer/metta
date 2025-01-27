@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import {
     flexRender,
     getCoreRowModel,
@@ -8,6 +9,7 @@ import {
     useReactTable,
 } from '@tanstack/react-table'
 
+import { cn } from '@/lib/utils'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
@@ -18,7 +20,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { cn } from '@/lib/utils'
 
 import { ticketColumns } from './ticket-columns'
 
@@ -38,12 +39,18 @@ export function TicketList({
     error,
     className,
 }: TicketListProps) {
+    const router = useRouter()
+    const { slug } = useParams()
     const [sorting, setSorting] = useState<SortingState>([
         {
             id: 'status',
             desc: false,
         },
     ])
+
+    const handleTicketClick = (ticketId: string) => {
+        router.push(`/${slug}/tickets/${ticketId}`)
+    }
 
     const table = useReactTable({
         data: tickets,
@@ -123,9 +130,7 @@ export function TicketList({
                         <TableRow
                             key={row.id}
                             className="cursor-pointer hover:bg-muted/50"
-                            onClick={() =>
-                                (window.location.href = `/dashboard/tickets/${row.original.id}`)
-                            }
+                            onClick={() => handleTicketClick(row.original.id)}
                         >
                             {row.getVisibleCells().map(cell => (
                                 <TableCell key={cell.id}>
