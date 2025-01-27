@@ -11,13 +11,24 @@ export interface SeedUser {
 }
 
 export const DEMO_USER: SeedUser = {
-    email: 'demo@example.com',
+    email: 'demo@metta.now',
     password: 'demo123',
     profile: {
         full_name: 'Demo Admin',
         bio: 'This is a demo admin account with full system access.',
         role: 'admin',
-        avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=demo@example.com`,
+        avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo',
+    },
+}
+
+export const DEMO_USER_NO_WORKSPACE: SeedUser = {
+    email: 'demo.new@metta.now',
+    password: 'demo123',
+    profile: {
+        full_name: 'Demo New Admin',
+        bio: 'This is a demo admin account for testing the onboarding flow.',
+        role: 'admin',
+        avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo_new',
     },
 }
 
@@ -86,7 +97,7 @@ export async function seedUsers(
     const userMap: Record<number, string> = {}
     const agentMap: Record<number, string> = {}
 
-    const allUsers = [DEMO_USER, ...TEST_USERS]
+    const allUsers = [DEMO_USER, DEMO_USER_NO_WORKSPACE, ...TEST_USERS]
     for (const [_index, userData] of allUsers.entries()) {
         const existingUser = existingUsers?.users.find(
             u => u.email === userData.email,
@@ -133,7 +144,7 @@ export async function seedUsers(
         ) {
             // Map agent/admin emails to their indices
             switch (userData.email) {
-                case 'demo@example.com':
+                case 'demo@metta.now':
                     agentMap[-1] = user.id // Demo admin is -1
                     break
                 case 'agent1@example.com':

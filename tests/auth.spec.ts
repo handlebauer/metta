@@ -25,7 +25,7 @@ test.describe('Authentication and Dashboard', () => {
 
                 // Verify user menu shows the email
                 await expect(
-                    page.getByText('demo@example.com', { exact: true }),
+                    page.getByText('demo@metta.now', { exact: true }),
                 ).toBeVisible()
 
                 // Verify sign out menu item is present

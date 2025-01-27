@@ -1,6 +1,9 @@
 import { createClient } from '@/lib/supabase/client'
 
-import { DEMO_USER } from '../../scripts/db/seed-data/users'
+import {
+    DEMO_USER,
+    DEMO_USER_NO_WORKSPACE,
+} from '../../scripts/db/seed-data/users'
 
 export async function signInWithGitHub() {
     const supabase = createClient()
@@ -50,14 +53,18 @@ export async function signInWithMagicLink(email: string) {
     return { success: 'Check your email for the magic link' }
 }
 
-export async function signInAsDemoUser() {
+export async function signInAsDemoUser(
+    type: 'default' | 'no-workspace' = 'default',
+) {
     const supabase = createClient()
+    const demoUser = type === 'default' ? DEMO_USER : DEMO_USER_NO_WORKSPACE
+
     const { error } = await supabase.auth.signInWithPassword({
-        email: DEMO_USER.email,
-        password: DEMO_USER.password,
+        email: demoUser.email,
+        password: demoUser.password,
     })
 
-    console.log('[Auth] Signing in as demo user')
+    console.log(`[Auth] Signing in as demo user (${type})`)
 
     if (error) {
         throw new Error('The database may not be seeded yet')

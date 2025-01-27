@@ -7,13 +7,13 @@ import { MagicLinkForm } from './magic-link.client'
 import { SocialButtons } from './social-buttons.client'
 
 export function SignIn() {
-    const [, setLoading] = useState(false)
+    const [, setIsLoading] = useState(false)
 
     return (
-        <>
-            <MagicLinkForm onStateChange={setLoading} />
-            <SocialButtons onStateChange={setLoading} />
-            <DemoButton onStateChange={setLoading} />
-        </>
+        <div className="space-y-4">
+            <MagicLinkForm onStateChange={setIsLoading} />
+            <SocialButtons onStateChange={setIsLoading} />
+            <DemoButton onStateChange={setIsLoading} />
+        </div>
     )
 }

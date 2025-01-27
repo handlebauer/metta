@@ -2,8 +2,9 @@ import { createClient } from '@supabase/supabase-js'
 import { expect, mock, test } from 'bun:test'
 import dotenv from 'dotenv'
 
-import { ProfileService } from '../profile.services'
+import { UserWithProfileService } from '../user-with-profile.services'
 
+import type { UserWithProfile } from '@/lib/schemas/user-with-profile.schemas'
 import type { Database } from '@/lib/supabase/types'
 
 dotenv.config({ path: '.env.local' })
@@ -25,127 +26,92 @@ mock.module('@/lib/supabase/server', () => ({
     createClient: () => supabaseAdmin,
 }))
 
-const service = new ProfileService()
+const service = new UserWithProfileService()
 
 // Create a test user and profile for testing
-let testUser: { id: string } | null = null
-let testProfile: {
-    id: string
-    user_id: string
-    full_name: string | null
-    avatar_url: string | null
-    bio: string | null
-    role: 'customer' | 'agent' | 'admin'
-} | null = null
+let testUser: UserWithProfile | null = null
 
 test('setup test data', async () => {
-    // Create a test user
-    const { data: user, error: userError } = await supabaseAdmin
-        .from('users')
-        .insert({
-            email: 'test_profile@example.com',
-            is_active: true,
-        })
-        .select()
-        .single()
-
-    if (userError) throw userError
-    expect(user).toBeDefined()
-    testUser = user
-
-    // Create a test profile
-    const { data: profile, error: profileError } = await supabaseAdmin
-        .from('profiles')
-        .insert({
-            user_id: user.id,
+    // Create a test user with profile
+    const result = await service.create({
+        email: 'test_profile@example.com',
+        is_active: true,
+        profile: {
             full_name: 'Test Profile',
             bio: 'Test Bio',
             role: 'customer',
             avatar_url: 'https://example.com/test-avatar.jpg',
-        })
-        .select()
-        .single()
-
-    if (profileError) throw profileError
-    expect(profile).toBeDefined()
-    testProfile = profile
-})
-
-test('findById - should return a profile by id', async () => {
-    expect(testProfile).toBeDefined()
-    const result = await service.findById(testProfile!.id)
+        },
+    })
 
     expect(result).toBeDefined()
-    expect(result?.id).toBe(testProfile!.id)
-    expect(result?.full_name).toBe(testProfile!.full_name)
-    expect(result?.avatar_url).toBe(testProfile!.avatar_url)
-    expect(result?.bio).toBe(testProfile!.bio)
-    expect(result?.role).toBe(testProfile!.role)
-    expect(result?.user_id).toBe(testProfile!.user_id)
+    testUser = result
 })
 
-test('findByUserId - should return a profile by user id', async () => {
+test('findById - should return a user with profile by id', async () => {
     expect(testUser).toBeDefined()
-    const profile = await service.findByUserId(testUser!.id)
+    const result = await service.findById(testUser!.id)
 
-    expect(profile).toBeDefined()
-    expect(profile?.user_id).toBe(testUser!.id)
-    expect(profile?.role).toBe('customer')
+    expect(result).toBeDefined()
+    expect(result?.id).toBe(testUser!.id)
+    expect(result?.profile.full_name).toBe(testUser!.profile.full_name)
+    expect(result?.profile.avatar_url).toBe(testUser!.profile.avatar_url)
+    expect(result?.profile.bio).toBe(testUser!.profile.bio)
+    expect(result?.profile.role).toBe(testUser!.profile.role)
 })
 
-test('create and update - should create and update a profile', async () => {
-    // Create a new test user for this test
-    const { data: user, error: userError } = await supabaseAdmin
-        .from('users')
-        .insert({
-            email: 'test_profile_crud@example.com',
-            is_active: true,
-        })
-        .select()
-        .single()
+test('findByEmail - should return a user with profile by email', async () => {
+    expect(testUser).toBeDefined()
+    const user = await service.findByEmail(testUser!.email)
 
-    if (userError) throw userError
     expect(user).toBeDefined()
+    expect(user?.id).toBe(testUser!.id)
+    expect(user?.profile.role).toBe('customer')
+})
 
-    // Create a new profile
-    const newProfile = await service.create({
-        user_id: user.id,
-        full_name: 'Test User',
-        bio: 'This is a test profile',
-        role: 'customer',
-        avatar_url: 'https://example.com/avatar.jpg',
+test('create and update - should create and update a user with profile', async () => {
+    // Create a new user with profile
+    const newUser = await service.create({
+        email: 'test_profile_crud@example.com',
+        is_active: true,
+        profile: {
+            full_name: 'Test User',
+            bio: 'This is a test profile',
+            role: 'customer',
+            avatar_url: 'https://example.com/avatar.jpg',
+        },
     })
 
-    expect(newProfile).toBeDefined()
-    expect(newProfile.user_id).toBe(user.id)
-    expect(newProfile.full_name).toBe('Test User')
-    expect(newProfile.bio).toBe('This is a test profile')
-    expect(newProfile.role).toBe('customer')
+    expect(newUser).toBeDefined()
+    expect(newUser.email).toBe('test_profile_crud@example.com')
+    expect(newUser.profile.full_name).toBe('Test User')
+    expect(newUser.profile.bio).toBe('This is a test profile')
+    expect(newUser.profile.role).toBe('customer')
 
-    // Update the profile
-    const updatedProfile = await service.update(newProfile.id, {
-        id: newProfile.id,
-        full_name: 'Updated Test User',
-        bio: 'This is an updated test profile',
+    // Update the user with profile
+    const updatedUser = await service.update(newUser.id, {
+        profile: {
+            full_name: 'Updated Test User',
+            bio: 'This is an updated test profile',
+            role: 'customer',
+            avatar_url: 'https://example.com/avatar.jpg',
+            id: newUser.profile.id,
+        },
     })
 
-    expect(updatedProfile).toBeDefined()
-    expect(updatedProfile.id).toBe(newProfile.id)
-    expect(updatedProfile.full_name).toBe('Updated Test User')
-    expect(updatedProfile.bio).toBe('This is an updated test profile')
-    expect(updatedProfile.role).toBe('customer')
+    expect(updatedUser).toBeDefined()
+    expect(updatedUser.id).toBe(newUser.id)
+    expect(updatedUser.profile.full_name).toBe('Updated Test User')
+    expect(updatedUser.profile.bio).toBe('This is an updated test profile')
+    expect(updatedUser.profile.role).toBe('customer')
 
     // Clean up
-    await supabaseAdmin.from('profiles').delete().eq('id', newProfile.id)
-    await supabaseAdmin.from('users').delete().eq('id', user.id)
+    await service.delete(newUser.id)
 })
 
 test('cleanup test data', async () => {
-    // Clean up test profile and user
-    if (testProfile) {
-        await supabaseAdmin.from('profiles').delete().eq('id', testProfile.id)
-    }
+    // Clean up test user (which will cascade delete the profile)
     if (testUser) {
-        await supabaseAdmin.from('users').delete().eq('id', testUser.id)
+        await service.delete(testUser.id)
     }
 })

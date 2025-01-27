@@ -678,6 +678,12 @@ export type Database = {
                 }
                 Returns: boolean
             }
+            is_admin: {
+                Args: {
+                    user_id: string
+                }
+                Returns: boolean
+            }
             is_workspace_admin: {
                 Args: {
                     workspace_id: string

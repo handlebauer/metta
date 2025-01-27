@@ -1,4 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
+import {
+    createTicketTokenOptions,
+    decodeTicketToken,
+    requireTicketToken,
+    setTicketTokenInSession,
+} from '@/lib/utils/tokens'
 
 import type { MessageWithUser } from '@/lib/schemas/message.schemas'
 import type {
@@ -26,17 +32,13 @@ export async function verifyTicketAccessToken(token: string) {
     const supabase = await createClient()
 
     // First set the token in the session
-    const { error: setError } = await supabase.rpc('set_ticket_access_token', {
-        p_token: token,
-    })
-
-    if (setError) return null
+    await setTicketTokenInSession(token)
 
     // Now fetch the ticket data with the token session
     const { data: tokenData, error: tokenError } = await supabase
         .from('ticket_access_tokens')
         .select('*, ticket:tickets(*, customer:users(*))')
-        .eq('token', token)
+        .eq('token', requireTicketToken(token))
         .single()
 
     if (tokenError) throw tokenError
@@ -51,7 +53,7 @@ export async function verifyTicketAccessToken(token: string) {
     await supabase
         .from('ticket_access_tokens')
         .update({ last_accessed_at: new Date().toISOString() })
-        .eq('token', token)
+        .eq('token', requireTicketToken(token))
 
     return tokenData
 }
@@ -62,14 +64,11 @@ export async function getTicketWithToken(
 ): Promise<(TicketWithCustomer & { messages: MessageWithUser[] }) | null> {
     const supabase = await createClient()
 
-    // Ensure token is properly decoded
-    const decodedToken = decodeURIComponent(token)
-
     // First verify the token exists and is valid
     const { data: tokenData, error: tokenError } = await supabase
         .from('ticket_access_tokens')
         .select('*')
-        .eq('token', decodedToken)
+        .eq('token', requireTicketToken(token))
         .eq('ticket_id', ticketId)
         .single()
 
@@ -92,22 +91,10 @@ export async function getTicketWithToken(
     console.log('Found valid token ✅')
 
     // Set the token in the session
-    const { error: setTokenError } = await supabase.rpc(
-        'set_ticket_access_token',
-        {
-            p_token: decodedToken,
-        },
-    )
-
-    if (setTokenError) {
-        console.warn('Failed to set token in session:', setTokenError)
-        return null
-    }
+    await setTicketTokenInSession(token)
 
     // Create a new Supabase client with the token in headers
-    const clientWithToken = await createClient({
-        'x-ticket-token': decodedToken,
-    })
+    const clientWithToken = await createClient(createTicketTokenOptions(token))
 
     // Now try to get the full ticket data using the client with token headers
     const { data: ticketData, error: ticketError } = await clientWithToken
@@ -151,7 +138,7 @@ export async function getTicketWithToken(
     if (ticketError) {
         console.warn('Full ticket fetch failed:', {
             error: ticketError,
-            token: decodedToken,
+            token: decodeTicketToken(token),
         })
         return null
     }
@@ -189,7 +176,7 @@ export async function getTicketHistoryWithToken(
     ticketId: string,
     token: string,
 ): Promise<TicketStatusHistoryRow[]> {
-    const supabase = await createClient({ 'x-ticket-token': token })
+    const supabase = await createClient(createTicketTokenOptions(token))
 
     const { data, error } = await supabase
         .from('ticket_status_history')

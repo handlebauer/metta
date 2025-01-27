@@ -229,7 +229,7 @@ export async function seedTickets(supabase: SupabaseClient) {
         if (ticket.agent_index !== undefined) {
             let agentEmail = ''
             if (ticket.agent_index === -1) {
-                agentEmail = 'demo@example.com'
+                agentEmail = 'demo@metta.now'
             } else if (ticket.agent_index === 2) {
                 agentEmail = 'agent1@example.com'
             } else if (ticket.agent_index === 3) {

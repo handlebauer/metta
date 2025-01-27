@@ -71,7 +71,7 @@ test('findByAgentId - should return tickets for an agent', async () => {
     const { data: agent } = await supabaseAdmin
         .from('users')
         .select('id')
-        .eq('email', 'demo@example.com')
+        .eq('email', 'demo@metta.now')
         .single()
 
     expect(agent).toBeDefined()
@@ -142,7 +142,7 @@ test('create and update - should create and update a ticket', async () => {
     const { data: agent } = await supabaseAdmin
         .from('users')
         .select('id')
-        .eq('email', 'demo@example.com')
+        .eq('email', 'demo@metta.now')
         .single()
 
     expect(agent).toBeDefined()

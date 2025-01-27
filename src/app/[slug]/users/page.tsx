@@ -56,9 +56,7 @@ export default async function UsersPage({ searchParams, params }: PageProps) {
     }
 
     // Get users with their profiles
-    const { data: users, error: usersError } = await query.order('created_at', {
-        ascending: false,
-    })
+    const { data: users, error: usersError } = await query
 
     if (usersError) {
         throw new Error('Failed to load users')

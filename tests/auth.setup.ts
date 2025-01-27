@@ -9,7 +9,7 @@ import type { FullConfig } from '@playwright/test'
 // ============================================================================
 
 const CONFIG = {
-    email: 'demo@example.com',
+    email: 'demo@metta.now',
     maxRetries: 10,
     retryDelay: 500,
     authDir: './tests/.auth',

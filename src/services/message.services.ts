@@ -7,6 +7,10 @@ import {
     messageUpdateSchema,
 } from '@/lib/schemas/message.schemas'
 import { createClient } from '@/lib/supabase/server'
+import {
+    createTicketTokenOptions,
+    setTicketTokenInSession,
+} from '@/lib/utils/tokens'
 
 import { EmailService } from './email.services'
 import { generateTicketAccessToken } from './ticket-access.services'
@@ -77,8 +81,13 @@ export class MessageService {
     ): Promise<MessageRow> {
         try {
             const validated = messageInsertSchema.parse(input)
-            const opts = token ? { 'x-ticket-token': token } : undefined
-            const db = await createClient(opts)
+            const db = await createClient(createTicketTokenOptions(token))
+
+            // If token is provided, set it in the session first
+            if (token) {
+                await setTicketTokenInSession(token)
+            }
+
             const { data, error } = await db
                 .from('messages')
                 .insert(validated)

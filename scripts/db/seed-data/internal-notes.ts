@@ -50,7 +50,7 @@ export async function seedInternalNotes(
     const { data: demoAgent } = await supabase
         .from('users')
         .select('id')
-        .eq('email', 'demo@example.com')
+        .eq('email', 'demo@metta.now')
         .single()
 
     const { data: agents } = await supabase

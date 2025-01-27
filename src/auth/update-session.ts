@@ -47,7 +47,8 @@ export async function updateSession(request: NextRequest) {
     if (
         !user &&
         !pathname.startsWith('/login') &&
-        !pathname.startsWith('/auth')
+        !pathname.startsWith('/auth') &&
+        !pathname.match(/^\/tickets\/[^/]+\/[^/]+$/) // Allow public ticket access via /tickets/[id]/[token]
     ) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'

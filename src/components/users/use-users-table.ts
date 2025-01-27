@@ -24,7 +24,7 @@ export function useUsersTable({
     const [sorting, setSorting] = useState<SortingState>([
         {
             id: 'role',
-            desc: false,
+            desc: true,
         },
     ])
 
