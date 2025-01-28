@@ -9,9 +9,12 @@
         "cf-typegen": "wrangler types"
     },
     "dependencies": {
+        "@cloudflare/ai": "^1.2.2",
         "chanfana": "^2.0.2",
         "dedent": "^1.5.3",
         "hono": "^4.4.7",
+        "langfuse": "^3.33.1",
+        "langsmith": "^0.3.3",
         "openai": "^4.80.1",
         "zod": "^3.23.8"
     },

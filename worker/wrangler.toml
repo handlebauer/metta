@@ -1,0 +1,12 @@
+name = "metta-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# Enable Workers AI
+[ai]
+binding = "AI"
+
+# Configure Vectorize
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "metta-content"

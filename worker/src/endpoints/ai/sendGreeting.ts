@@ -55,7 +55,7 @@ export class SendGreeting extends OpenAPIRoute {
         },
     }
 
-    async handle(c) {
+    async handle(context) {
         try {
             // Get validated data
             const data = await this.getValidatedData<typeof this.schema>()
@@ -63,7 +63,7 @@ export class SendGreeting extends OpenAPIRoute {
 
             // Initialize OpenAI client
             const openai = new OpenAI({
-                apiKey: c.env.OPENAI_API_KEY,
+                apiKey: context.env.OPENAI_API_KEY,
             })
 
             // Construct the system prompt
