@@ -12,6 +12,17 @@ interface WebsiteLinksPopoverProps {
     onPathsChange: (paths: string[]) => void
 }
 
+function getDisplayPath(url: string): string {
+    try {
+        const urlObj = new URL(url)
+        return (
+            urlObj.hostname + (urlObj.pathname === '/' ? '' : urlObj.pathname)
+        )
+    } catch {
+        return url
+    }
+}
+
 export function WebsiteLinksPopover({
     links,
     selectedPaths,
@@ -86,7 +97,7 @@ export function WebsiteLinksPopover({
                                         htmlFor={link}
                                         className="cursor-pointer select-none text-[9px] leading-none"
                                     >
-                                        {link}
+                                        {getDisplayPath(link)}
                                     </label>
                                 </li>
                             ))}

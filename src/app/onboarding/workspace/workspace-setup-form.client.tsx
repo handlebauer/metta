@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
+import { cleanUrl, ensureFullyQualifiedUrl } from '@/lib/utils/url'
 import { Button } from '@/components/ui/button'
 import {
     Form,
@@ -18,6 +19,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { useAIAssistant } from '@/components/ai/use-ai-assistant'
 import { createWorkspace } from '@/actions/workspace.actions'
 
 // Workspace form schema
@@ -48,11 +50,16 @@ function generateSlug(text: string): string {
         .replace(/^-+|-+$/g, '')
 }
 
-// Helper function to extract domain parts
-function extractDomainInfo(website: string) {
+interface DomainInfo {
+    domainPart: string
+    suggestedName: string
+}
+
+// Helper function to extract domain info
+function extractDomainInfo(url: string): DomainInfo {
     try {
         // Clean the input
-        const cleanWebsite = website
+        const cleanWebsite = url
             .replace(/^https?:\/\//, '')
             .replace(/^www\./, '')
 
@@ -62,7 +69,6 @@ function extractDomainInfo(website: string) {
             const hostname = url.hostname.replace(/^www\./, '')
             const domainPart = hostname.split('.')[0]
             return {
-                isValid: true,
                 domainPart,
                 suggestedName: domainPart
                     .split('-')
@@ -73,7 +79,6 @@ function extractDomainInfo(website: string) {
 
         // If no dot yet, just use what they've typed
         return {
-            isValid: false,
             domainPart: cleanWebsite,
             suggestedName: cleanWebsite
                 .split('-')
@@ -83,9 +88,8 @@ function extractDomainInfo(website: string) {
     } catch {
         // If URL parsing fails, just clean and use the input
         return {
-            isValid: false,
-            domainPart: website,
-            suggestedName: website
+            domainPart: url,
+            suggestedName: url
                 .split('-')
                 .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                 .join(' '),
@@ -97,6 +101,22 @@ export function WorkspaceSetupForm() {
     const router = useRouter()
     const [step, setStep] = useState(1)
     const [website, setWebsite] = useState('')
+
+    const assistantSteps = useMemo(
+        () => [
+            {
+                message:
+                    "Great! I've created your workspace. Now let's set up your data sources.",
+            },
+        ],
+        [],
+    )
+
+    const handleComplete = useCallback(() => {
+        router.push('/onboarding/data-sources')
+    }, [router])
+
+    const assistant = useAIAssistant(assistantSteps, handleComplete)
 
     const websiteForm = useForm<WebsiteFormValues>({
         resolver: zodResolver(websiteFormSchema),
@@ -113,22 +133,26 @@ export function WorkspaceSetupForm() {
         },
     })
 
-    function cleanUrl(url: string) {
-        return url
-            .replace(/^https?:\/\//, '') // Remove protocol
-            .split(/[/?#]/)[0] // Remove paths and query parameters
-    }
-
     async function onWebsiteSubmit(data: WebsiteFormValues) {
-        const cleanedUrl = cleanUrl(data.website)
-        setWebsite(cleanedUrl)
+        try {
+            // Store the original input for later use
+            setWebsite(data.website)
 
-        // Extract domain info and pre-fill workspace form
-        const { domainPart, suggestedName } = extractDomainInfo(cleanedUrl)
-        workspaceForm.setValue('name', suggestedName)
-        workspaceForm.setValue('slug', generateSlug(domainPart))
+            // Extract domain info and pre-fill workspace form
+            const { domainPart, suggestedName } = extractDomainInfo(
+                data.website,
+            )
+            workspaceForm.setValue('name', suggestedName)
+            workspaceForm.setValue('slug', generateSlug(domainPart))
 
-        setStep(2)
+            setStep(2)
+        } catch (error) {
+            console.error('Failed to process website:', error)
+            websiteForm.setError('root', {
+                type: 'manual',
+                message: 'Failed to process website. Please try again.',
+            })
+        }
     }
 
     async function onWorkspaceSubmit(data: WorkspaceFormValues) {
@@ -137,7 +161,7 @@ export function WorkspaceSetupForm() {
                 name: data.name,
                 slug: data.slug,
                 settings: {
-                    website: `https://${website}`,
+                    website: ensureFullyQualifiedUrl(website),
                 },
             })
 
@@ -149,18 +173,21 @@ export function WorkspaceSetupForm() {
                 throw new Error('No workspace ID returned')
             }
 
-            // Save workspace info for next steps
-            sessionStorage.setItem('workspace_website', website)
+            // Store workspace info in session storage
             sessionStorage.setItem('workspace_id', workspace.id)
+            sessionStorage.setItem(
+                'workspace_website',
+                ensureFullyQualifiedUrl(website),
+            )
 
-            // Redirect to the data ingestion setup
-            router.push('/onboarding/data-sources')
+            // Show completion message and trigger redirect
+            assistant.handleNextStep()
         } catch (error) {
             console.error('Failed to create workspace:', error)
-            // Show error through form validation
             workspaceForm.setError('root', {
                 type: 'manual',
-                message: 'Failed to create workspace. Please try again.',
+                message:
+                    'Failed to create workspace. Please try again or contact support.',
             })
         }
     }

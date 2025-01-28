@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { type Json } from '@/lib/supabase/types'
+import { cleanUrl, ensureFullyQualifiedUrl, isValidUrl } from '@/lib/utils/url'
 import { Button } from '@/components/ui/button'
 import {
     Form,
@@ -20,6 +21,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useAIAssistant } from '@/components/ai/use-ai-assistant'
+import { ingestWebpages } from '@/actions/ai.actions'
 import { updateWorkspace } from '@/actions/workspace.actions'
 
 import { LoadingIndicator } from './loading-indicator'
@@ -88,19 +90,6 @@ export function DataSourcesSetupForm({
         setWorkspaceId(id)
     }, [])
 
-    function cleanUrl(url: string) {
-        return url
-            .replace(/^https?:\/\//, '') // Remove protocol
-            .split(/[/?#]/)[0] // Remove paths and query parameters
-    }
-
-    function isValidUrl(url: string) {
-        // Basic URL validation - checks if it's a domain with at least one dot
-        return /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/.test(
-            url,
-        )
-    }
-
     const form = useForm<DataSourcesFormValues>({
         resolver: zodResolver(dataSourcesSchema),
         defaultValues: {
@@ -118,8 +107,9 @@ export function DataSourcesSetupForm({
                 setIsLoadingLinks(true)
                 setLinksError(null)
 
+                const fullUrl = ensureFullyQualifiedUrl(websiteUrl)
                 const response = await fetch(
-                    `https://llmd.hbauer.workers.dev/links/https://${websiteUrl}`,
+                    `https://llmd.hbauer.workers.dev/links/${fullUrl}`,
                 )
 
                 if (!response.ok) {
@@ -128,7 +118,8 @@ export function DataSourcesSetupForm({
 
                 const data: WebsiteLinksResponse = await response.json()
                 setWebsiteLinks(data)
-                // Select all pages by default
+
+                // The links from the API should already be full URLs
                 form.setValue('website_paths', data.links)
             } catch (error) {
                 console.error('Failed to fetch website links:', error)
@@ -150,8 +141,9 @@ export function DataSourcesSetupForm({
                 setIsLoadingDocsLinks(true)
                 setDocsLinksError(null)
 
+                const fullUrl = ensureFullyQualifiedUrl(docsUrl)
                 const response = await fetch(
-                    `https://llmd.hbauer.workers.dev/links/https://${docsUrl}`,
+                    `https://llmd.hbauer.workers.dev/links/${fullUrl}`,
                 )
 
                 if (!response.ok) {
@@ -160,7 +152,8 @@ export function DataSourcesSetupForm({
 
                 const data: WebsiteLinksResponse = await response.json()
                 setDocsLinks(data)
-                // Select all pages by default
+
+                // The links from the API should already be full URLs
                 form.setValue('docs_paths', data.links)
             } catch (error) {
                 console.error('Failed to fetch documentation links:', error)
@@ -192,8 +185,40 @@ export function DataSourcesSetupForm({
         }
 
         try {
+            // Send request to worker to crawl and ingest pages
+            const { data: ingestResult, error: ingestError } =
+                await ingestWebpages({
+                    workspace_id: workspaceId,
+                    sources: {
+                        website: {
+                            url: ensureFullyQualifiedUrl(data.website_url),
+                            paths: data.website_paths,
+                        },
+                        docs: {
+                            url: data.docs_url
+                                ? ensureFullyQualifiedUrl(data.docs_url)
+                                : undefined,
+                            paths: data.docs_paths,
+                        },
+                    },
+                })
+
+            if (ingestError || !ingestResult) {
+                throw new Error(
+                    ingestError || 'Failed to ingest webpage content',
+                )
+            }
+
+            console.log('Ingestion complete:', ingestResult.stats)
+
             const settings = {
-                data_sources: data,
+                data_sources: {
+                    ...data,
+                    website_url: ensureFullyQualifiedUrl(data.website_url),
+                    docs_url: data.docs_url
+                        ? ensureFullyQualifiedUrl(data.docs_url)
+                        : undefined,
+                },
                 onboarding_completed: true,
             } satisfies Json
 
@@ -209,7 +234,6 @@ export function DataSourcesSetupForm({
             assistant.handleNextStep()
         } catch (error) {
             console.error('Failed to update data sources:', error)
-            // Show error through form validation
             form.setError('root', {
                 type: 'manual',
                 message:

@@ -17,6 +17,7 @@ export default function ProfileSetupPage() {
     const [showForm, setShowForm] = useState(false)
     const [showAI, setShowAI] = useState(true)
     const [formData, setFormData] = useState<FormData | null>(null)
+    const [showGreeting, setShowGreeting] = useState(true)
 
     const initialSteps = [
         {
@@ -36,11 +37,20 @@ export default function ProfileSetupPage() {
 
     const postSubmitSteps = formData
         ? [
-              {
-                  useGreeting: true as const,
-                  greetingData: formData,
-                  waitForAction: false,
-              },
+              showGreeting
+                  ? {
+                        useGreeting: true as const,
+                        greetingData: formData,
+                        waitForAction: false,
+                        action: () => {
+                            // Disable greeting step for future renders
+                            setShowGreeting(false)
+                        },
+                    }
+                  : {
+                        message: `Welcome back, ${formData.full_name}!`,
+                        waitForAction: false,
+                    },
               {
                   message: "Let's set up your workspace next!",
                   action: () => {
@@ -61,9 +71,12 @@ export default function ProfileSetupPage() {
     }, [showAI])
 
     const handleFormSubmit = (data: FormData) => {
-        setFormData(data)
         setShowForm(false)
-        setTimeout(() => setShowAI(true), 300) // Wait for fade out
+        // Wait for form to fade out, then update data and show AI
+        setTimeout(() => {
+            setFormData(data)
+            setShowAI(true)
+        }, 300)
     }
 
     return (
@@ -73,6 +86,7 @@ export default function ProfileSetupPage() {
                     <AnimatePresence mode="wait">
                         {showAI && (
                             <motion.div
+                                key="ai"
                                 className="absolute inset-0"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -91,6 +105,7 @@ export default function ProfileSetupPage() {
                         )}
                         {showForm && (
                             <motion.div
+                                key="form"
                                 className="absolute inset-0"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}

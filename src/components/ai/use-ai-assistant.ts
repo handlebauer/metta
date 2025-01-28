@@ -28,6 +28,7 @@ export function useAIAssistant(steps: Step[], onComplete?: () => void) {
     const [messages, setMessages] = useState<string[]>([])
     const [isTypingDone, setIsTypingDone] = useState<boolean>(false)
     const autoAdvanceTimeoutId = useRef<number>(null)
+    const greetingRequestId = useRef<string | null>(null)
 
     // Reset state when steps array changes
     useEffect(() => {
@@ -70,31 +71,39 @@ export function useAIAssistant(steps: Step[], onComplete?: () => void) {
         }
 
         if (step.useGreeting && step.greetingData) {
-            // Handle AI greeting step
-            const fetchGreeting = async () => {
-                try {
-                    const { data } = await getAIGreeting(
-                        step.greetingData!.full_name,
-                        step.greetingData!.bio,
-                    )
+            // Generate a unique ID for this greeting request
+            const requestId = `${step.greetingData.full_name}-${Date.now()}`
 
-                    if (!isSubscribed) return
+            // Only proceed if this is a new greeting request
+            if (requestId !== greetingRequestId.current) {
+                greetingRequestId.current = requestId
 
-                    if (data) {
-                        setMessages(prev => [...prev, data.greeting])
-                    } else {
-                        setMessages(prev => [
-                            ...prev,
-                            `Welcome to Metta, ${step.greetingData!.full_name}!`,
-                        ])
+                // Handle AI greeting step
+                const fetchGreeting = async () => {
+                    try {
+                        const { data } = await getAIGreeting(
+                            step.greetingData!.full_name,
+                            step.greetingData!.bio,
+                        )
+
+                        if (!isSubscribed) return
+
+                        if (data) {
+                            setMessages(prev => [...prev, data.greeting])
+                        } else {
+                            setMessages(prev => [
+                                ...prev,
+                                `Welcome to Metta, ${step.greetingData!.full_name}!`,
+                            ])
+                        }
+                    } catch (error) {
+                        if (!isSubscribed) return
+                        console.error('Failed to fetch greeting:', error)
                     }
-                } catch (error) {
-                    if (!isSubscribed) return
-                    console.error('Failed to fetch greeting:', error)
                 }
-            }
 
-            fetchGreeting()
+                fetchGreeting()
+            }
         } else {
             // Handle regular message step
             setMessages(prev => [...prev, step.message])
@@ -107,7 +116,7 @@ export function useAIAssistant(steps: Step[], onComplete?: () => void) {
                 window.clearTimeout(autoAdvanceTimeoutId.current)
             }
         }
-    }, [currentStep, steps, handleNextStep])
+    }, [currentStep, steps])
 
     return {
         currentStep,

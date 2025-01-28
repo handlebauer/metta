@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
-import { Header } from '@/components/header'
 
 import { createClient } from '@/lib/supabase/server'
+import { Brand } from '@/components/ui/brand'
+import { UserNav } from '@/components/dashboard/user-nav'
 
 import type { UserWithProfile } from '@/lib/schemas/user-with-profile.schemas'
 
@@ -60,9 +61,16 @@ export default async function OnboardingLayout({
     }
 
     return (
-        <div className="relative min-h-screen">
-            <Header user={user} />
-            {children}
+        <div className="flex h-screen flex-col">
+            <header className="flex-none border-b">
+                <div className="flex h-16 items-center gap-4 px-4 font-outfit">
+                    <Brand>metta</Brand>
+                    <div className="ml-auto flex items-center gap-4">
+                        <UserNav user={user} />
+                    </div>
+                </div>
+            </header>
+            <main className="flex-1">{children}</main>
         </div>
     )
 }
