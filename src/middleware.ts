@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
 
+import { updateSession } from './auth/update-session'
+
 import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
+    await updateSession(request)
+
     // Only process onboarding routes
     if (!request.nextUrl.pathname.startsWith('/onboarding')) {
         return NextResponse.next()

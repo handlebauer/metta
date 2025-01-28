@@ -13,16 +13,16 @@ import type { Step } from './use-ai-assistant'
 
 export interface AIAssistantProps {
     steps: Step[]
+    showMessages?: boolean
     onComplete?: () => void
     className?: string
-    showMessages?: boolean
 }
 
 export function AIAssistant({
     steps,
+    showMessages = true,
     onComplete,
     className,
-    showMessages = true,
 }: AIAssistantProps) {
     const {
         currentStep,
@@ -33,6 +33,7 @@ export function AIAssistant({
     } = useAIAssistant(steps, onComplete)
     const actionTriggeredRef = useRef(false)
 
+    // Handle keyboard events for navigation
     useEffect(() => {
         function handleKeyDown(e: KeyboardEvent) {
             if (
@@ -62,6 +63,8 @@ export function AIAssistant({
     useEffect(() => {
         actionTriggeredRef.current = false
     }, [currentStep])
+
+    if (!showMessages) return null
 
     return (
         <motion.div
@@ -112,32 +115,30 @@ export function AIAssistant({
                 </div>
 
                 <AnimatePresence>
-                    {currentStep < steps.length && isTypingDone && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{
-                                duration: 0.2,
-                                ease: 'easeOut',
-                            }}
-                            className="flex items-center justify-end gap-2 pr-8 text-xs text-muted-foreground"
-                        >
-                            <span>Press</span>
-                            <kbd className="rounded border border-border bg-muted px-2 py-1 font-mono">
-                                <span className="text-[10px] tracking-widest">
-                                    ⏎
-                                </span>{' '}
-                                Enter
-                            </kbd>
-                            <span>
-                                to{' '}
-                                {steps[currentStep].waitForAction
-                                    ? 'continue to form'
-                                    : 'continue'}
-                            </span>
-                        </motion.div>
-                    )}
+                    {currentStep < steps.length &&
+                        isTypingDone &&
+                        steps[currentStep].action &&
+                        steps[currentStep].waitForAction && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{
+                                    duration: 0.2,
+                                    ease: 'easeOut',
+                                }}
+                                className="flex items-center justify-end gap-2 pr-8 text-xs text-muted-foreground"
+                            >
+                                <span>Press</span>
+                                <kbd className="rounded border border-border bg-muted px-2 py-1 font-mono">
+                                    <span className="text-[10px] tracking-widest">
+                                        ⏎
+                                    </span>{' '}
+                                    Enter
+                                </kbd>
+                                <span>to continue</span>
+                            </motion.div>
+                        )}
                 </AnimatePresence>
             </div>
         </motion.div>

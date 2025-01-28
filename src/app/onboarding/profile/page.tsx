@@ -1,19 +1,28 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { AIAssistant } from '@/components/ai'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { ProfileSetupForm } from './profile-setup-form.client'
 
+interface FormData {
+    full_name: string
+    bio?: string
+}
+
 export default function ProfileSetupPage() {
+    const router = useRouter()
     const [showForm, setShowForm] = useState(false)
     const [showAI, setShowAI] = useState(true)
+    const [formData, setFormData] = useState<FormData | null>(null)
 
-    const steps = [
+    const initialSteps = [
         {
             message:
                 "Let's start by setting up your profile. This will help personalize your experience with Metta.",
+            waitForAction: false,
         },
         {
             message:
@@ -25,6 +34,23 @@ export default function ProfileSetupPage() {
         },
     ]
 
+    const postSubmitSteps = formData
+        ? [
+              {
+                  useGreeting: true as const,
+                  greetingData: formData,
+                  waitForAction: false,
+              },
+              {
+                  message: "Let's set up your workspace next!",
+                  action: () => {
+                      router.push('/onboarding/workspace')
+                  },
+                  waitForAction: true,
+              },
+          ]
+        : []
+
     // Watch for AI being hidden and trigger form show after animation
     useEffect(() => {
         if (!showAI) {
@@ -34,7 +60,8 @@ export default function ProfileSetupPage() {
         }
     }, [showAI])
 
-    const handleFormSubmit = () => {
+    const handleFormSubmit = (data: FormData) => {
+        setFormData(data)
         setShowForm(false)
         setTimeout(() => setShowAI(true), 300) // Wait for fade out
     }
@@ -53,7 +80,11 @@ export default function ProfileSetupPage() {
                                 transition={{ duration: 0.3 }}
                             >
                                 <AIAssistant
-                                    steps={steps}
+                                    steps={
+                                        formData
+                                            ? postSubmitSteps
+                                            : initialSteps
+                                    }
                                     showMessages={showAI}
                                 />
                             </motion.div>

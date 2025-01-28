@@ -1,7 +1,8 @@
 import { IBM_Plex_Mono, Inter, Outfit } from 'next/font/google'
+import { DevModeButton } from '@/components/dev-mode-button.client'
 
-import { Toaster } from '@/components/ui/toaster'
 import { cn } from '@/lib/utils'
+import { Toaster } from '@/components/ui/toaster'
 
 import './globals.css'
 
@@ -47,6 +48,7 @@ export default function RootLayout({
             >
                 {children}
                 <Toaster />
+                {process.env.NODE_ENV === 'development' && <DevModeButton />}
             </body>
         </html>
     )

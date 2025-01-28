@@ -1,46 +1,119 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-export interface Step {
-    message: string
+import { getAIGreeting } from '@/actions/ai.actions'
+
+export type Step = {
     action?: () => void
     waitForAction?: boolean
-}
+} & (
+    | {
+          useGreeting: true
+          greetingData: {
+              full_name: string
+              bio?: string
+          }
+          message?: string
+      }
+    | {
+          useGreeting?: false
+          greetingData?: never
+          message: string
+      }
+)
 
 export function useAIAssistant(steps: Step[], onComplete?: () => void) {
-    const [currentStep, setCurrentStep] = useState(0)
+    const [currentStep, setCurrentStep] = useState<number>(0)
     const [messages, setMessages] = useState<string[]>([])
-    const [isTypingDone, setIsTypingDone] = useState(false)
+    const [isTypingDone, setIsTypingDone] = useState<boolean>(false)
+    const autoAdvanceTimeoutId = useRef<number>(null)
 
-    // Initialize first message
+    // Reset state when steps array changes
     useEffect(() => {
-        if (currentStep === 0) {
-            setMessages([steps[0].message])
-            setIsTypingDone(false)
-        }
-    }, [steps, currentStep])
+        setCurrentStep(0)
+        setMessages([])
+        setIsTypingDone(false)
+    }, [steps])
 
     const handleNextStep = useCallback(() => {
-        const nextStep = currentStep + 1
-        if (nextStep < steps.length) {
-            setMessages(prev => [...prev, steps[nextStep].message])
-            setCurrentStep(nextStep)
+        if (currentStep < steps.length - 1) {
+            setCurrentStep(prev => prev + 1)
             setIsTypingDone(false)
         } else if (onComplete) {
             onComplete()
         }
-    }, [currentStep, steps, onComplete])
+    }, [currentStep, steps.length, onComplete])
 
     const handleTypingComplete = useCallback(() => {
         setIsTypingDone(true)
-    }, [])
+        // If this step should auto-advance, do it after typing is complete
+        const currentStepData = steps[currentStep]
+        if (currentStepData && !currentStepData.waitForAction) {
+            autoAdvanceTimeoutId.current = window.setTimeout(
+                handleNextStep,
+                500,
+            )
+        }
+    }, [currentStep, steps, handleNextStep])
+
+    useEffect(() => {
+        const step = steps[currentStep]
+        if (!step) return
+
+        let isSubscribed = true
+        const controller = new AbortController()
+
+        // Clear any existing auto-advance timeout
+        if (autoAdvanceTimeoutId.current) {
+            window.clearTimeout(autoAdvanceTimeoutId.current)
+        }
+
+        if (step.useGreeting && step.greetingData) {
+            // Handle AI greeting step
+            const fetchGreeting = async () => {
+                try {
+                    const { data } = await getAIGreeting(
+                        step.greetingData!.full_name,
+                        step.greetingData!.bio,
+                    )
+
+                    if (!isSubscribed) return
+
+                    if (data) {
+                        setMessages(prev => [...prev, data.greeting])
+                    } else {
+                        setMessages(prev => [
+                            ...prev,
+                            `Welcome to Metta, ${step.greetingData!.full_name}!`,
+                        ])
+                    }
+                } catch (error) {
+                    if (!isSubscribed) return
+                    console.error('Failed to fetch greeting:', error)
+                }
+            }
+
+            fetchGreeting()
+        } else {
+            // Handle regular message step
+            setMessages(prev => [...prev, step.message])
+        }
+
+        return () => {
+            isSubscribed = false
+            controller.abort()
+            if (autoAdvanceTimeoutId.current) {
+                window.clearTimeout(autoAdvanceTimeoutId.current)
+            }
+        }
+    }, [currentStep, steps, handleNextStep])
 
     return {
         currentStep,
         messages,
-        handleNextStep,
         isTypingDone,
+        handleNextStep,
         handleTypingComplete,
     }
 }

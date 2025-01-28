@@ -1,6 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
@@ -30,13 +29,12 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>
 
 interface ProfileSetupFormProps {
-    onSubmit?: () => void
+    onSubmit?: (data: ProfileFormValues) => void
 }
 
 export function ProfileSetupForm({
     onSubmit: onSubmitCallback,
 }: ProfileSetupFormProps) {
-    const router = useRouter()
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
         defaultValues: {
@@ -67,11 +65,8 @@ export function ProfileSetupForm({
                 throw new Error(error)
             }
 
-            // Call the callback if provided
-            onSubmitCallback?.()
-
-            // Proceed to workspace setup
-            router.push('/onboarding/workspace')
+            // Call the callback if provided with the form data
+            onSubmitCallback?.(data)
         } catch (error) {
             console.error('Failed to update profile:', error)
             // In a real app, we'd show this error to the user

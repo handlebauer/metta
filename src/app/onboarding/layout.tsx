@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import { DevModeButton } from '@/components/dev-mode-button.client'
 import { Header } from '@/components/header'
 
 import { createClient } from '@/lib/supabase/server'
@@ -63,7 +62,6 @@ export default async function OnboardingLayout({
     return (
         <div className="relative min-h-screen">
             <Header user={user} />
-            {process.env.NODE_ENV === 'development' && <DevModeButton />}
             {children}
         </div>
     )

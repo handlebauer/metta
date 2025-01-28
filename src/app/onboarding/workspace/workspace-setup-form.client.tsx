@@ -116,7 +116,6 @@ export function WorkspaceSetupForm() {
     function cleanUrl(url: string) {
         return url
             .replace(/^https?:\/\//, '') // Remove protocol
-            .replace(/^www\./, '') // Remove www
             .split(/[/?#]/)[0] // Remove paths and query parameters
     }
 
