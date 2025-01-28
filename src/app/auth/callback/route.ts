@@ -13,10 +13,17 @@ export async function GET(request: Request) {
             // Exchange code for session
             await supabase.auth.exchangeCodeForSession(code)
 
-            // Redirect to dashboard first, then they can select a workspace
-            return NextResponse.redirect(
-                new URL('/dashboard', requestUrl.origin),
-            )
+            // Check if user has any workspaces
+            const { data: workspaces } = await supabase
+                .from('workspaces')
+                .select('id')
+                .limit(1)
+
+            // Redirect to onboarding if no workspaces, otherwise to dashboard
+            const hasWorkspaces = workspaces && workspaces.length > 0
+            const targetPath = hasWorkspaces ? '/dashboard' : '/onboarding'
+
+            return NextResponse.redirect(new URL(targetPath, requestUrl.origin))
         } catch (error) {
             console.error('[GET auth/callback] error:', error)
             return NextResponse.redirect(new URL('/login', requestUrl.origin))

@@ -1,3 +1,4 @@
+import { PostgrestError } from '@supabase/supabase-js'
 import { z } from 'zod'
 
 import { DatabaseError } from '@/lib/errors'
@@ -9,6 +10,8 @@ import {
 import { createClient } from '@/lib/supabase/server'
 
 import type { Tables } from '@/lib/supabase/types'
+
+type Workspace = Tables<'workspaces'>
 
 export class WorkspaceService {
     private async getDb() {
@@ -39,17 +42,48 @@ export class WorkspaceService {
         return workspaceSchema.parse(data)
     }
 
-    async create(input: z.infer<typeof createWorkspaceSchema>) {
-        const db = await this.getDb()
+    async create(
+        input: Parameters<(typeof createWorkspaceSchema)['parse']>[0],
+    ): Promise<Workspace> {
+        const supabase = await createClient()
+
+        // Get the current user
+        const {
+            data: { user },
+            error: userError,
+        } = await supabase.auth.getUser()
+        if (userError || !user) {
+            throw new DatabaseError('Not authenticated')
+        }
+
+        // Validate input
         const validated = createWorkspaceSchema.parse(input)
-        const { data, error } = await db
-            .from('workspaces')
-            .insert(validated)
-            .select()
-            .single()
+
+        // Use the create_workspace_with_admin function
+        const { data: workspace, error } = (await supabase.rpc(
+            'create_workspace_with_admin',
+            {
+                workspace_name: validated.name,
+                workspace_slug: validated.slug,
+                creator_id: user.id,
+            },
+        )) as { data: Workspace | null; error: PostgrestError | null }
 
         if (error) throw new DatabaseError(error.message)
-        return data as Tables<'workspaces'> // Already validated by RLS and schema
+        if (!workspace) throw new DatabaseError('Failed to create workspace')
+
+        // If we have settings, update them separately
+        if (validated.settings && Object.keys(validated.settings).length > 0) {
+            const { error: updateError } = await supabase
+                .from('workspaces')
+                .update({ settings: validated.settings })
+                .eq('id', workspace.id)
+                .single()
+
+            if (updateError) throw new DatabaseError(updateError.message)
+        }
+
+        return workspace
     }
 
     async update(id: string, input: z.infer<typeof updateWorkspaceSchema>) {

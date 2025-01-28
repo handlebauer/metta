@@ -5,6 +5,22 @@ import {
     DEMO_USER_NO_WORKSPACE,
 } from '../../scripts/db/seed-data/users'
 
+// Helper function to check workspaces and redirect
+async function handlePostSignIn() {
+    const supabase = createClient()
+
+    // Check if user has any workspaces
+    const { data: workspaces } = await supabase
+        .from('workspaces')
+        .select('id')
+        .limit(1)
+
+    // Redirect to onboarding if no workspaces, otherwise to dashboard
+    const hasWorkspaces = workspaces && workspaces.length > 0
+    const targetPath = hasWorkspaces ? '/dashboard' : '/onboarding'
+    window.location.href = targetPath
+}
+
 export async function signInWithGitHub() {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithOAuth({
@@ -69,6 +85,9 @@ export async function signInAsDemoUser(
     if (error) {
         throw new Error('The database may not be seeded yet')
     }
+
+    // For password sign-in, we need to handle the redirect ourselves
+    await handlePostSignIn()
 }
 
 export async function signOut() {

@@ -59,7 +59,13 @@ export async function updateSession(request: NextRequest) {
      * If user is signed in and tries to access auth routes, redirect to dashboard
      */
     if (user) {
-        if (pathname.startsWith('/login') || pathname.startsWith('/auth')) {
+        // Only handle OAuth redirects, password sign-in is handled client-side
+        if (pathname.startsWith('/auth/callback')) {
+            // Let the callback route handle the redirect
+            return supabaseResponse
+        }
+
+        if (pathname.startsWith('/login')) {
             const url = request.nextUrl.clone()
             url.pathname = '/dashboard'
             return NextResponse.redirect(url)

@@ -14,11 +14,7 @@ export default async function WorkspacesPage() {
     }
 
     if (!workspaces?.length) {
-        return (
-            <div className="flex h-full items-center justify-center">
-                <p className="text-muted-foreground">No workspaces found</p>
-            </div>
-        )
+        redirect('/onboarding')
     }
 
     return (
