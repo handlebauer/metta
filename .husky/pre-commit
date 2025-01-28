@@ -1,5 +1,5 @@
 # Run linting
-bun run lint
+bun lint
 bunx lint-staged --allow-empty
 
 # Run critical path tests (can be skipped with SKIP_TESTS=1)
