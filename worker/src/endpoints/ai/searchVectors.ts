@@ -1,7 +1,8 @@
 import { OpenAPIRoute } from 'chanfana'
-import { Langfuse } from 'langfuse'
 import OpenAI from 'openai'
 import { z } from 'zod'
+
+import { withLangfuseTrace } from '../../lib/langfuse'
 
 const SearchVectorsRequest = z.object({
     workspace_id: z.string(),
@@ -73,88 +74,84 @@ export class SearchVectors extends OpenAPIRoute {
             const data = await this.getValidatedData<typeof this.schema>()
             const { workspace_id, query, limit } = data.body
 
-            // Initialize clients
+            // Initialize OpenAI
             const openai = new OpenAI({
                 apiKey: context.env.OPENAI_API_KEY,
             })
-            const langfuse = new Langfuse({
-                secretKey: context.env.LANGFUSE_SECRET_KEY,
-                publicKey: context.env.LANGFUSE_PUBLIC_KEY,
-                baseUrl: context.env.LANGFUSE_BASEURL,
-            })
 
-            // Start trace
-            const trace = langfuse.trace({
-                name: 'search-vectors',
-                metadata: { workspace_id, query },
-            })
-
-            // Create generation for embeddings
-            const embeddingGen = trace.generation({
-                name: 'create-search-embedding',
-                model: 'text-embedding-3-small',
-                input: query,
-            })
-
-            // Generate embedding for the search query
-            const embedding = await openai.embeddings.create({
-                model: 'text-embedding-3-small',
-                input: query,
-                encoding_format: 'float',
-            })
-
-            embeddingGen.end({
-                output: `Generated embedding with ${embedding.data[0].embedding.length} dimensions`,
-            })
-
-            // Create span for vector search
-            const searchSpan = trace.span({
-                name: 'vector-search',
-                input: { query, limit, workspace_id },
-            })
-
-            // Search vectors using the query embedding
-            const searchResults = await context.env.VECTORIZE.query(
-                embedding.data[0].embedding,
+            return await withLangfuseTrace(
                 {
-                    topK: limit,
-                    returnMetadata: 'all',
-                    token: context.env.VECTORIZE_TOKEN,
+                    secretKey: context.env.LANGFUSE_SECRET_KEY,
+                    publicKey: context.env.LANGFUSE_PUBLIC_KEY,
+                    baseUrl: context.env.LANGFUSE_BASEURL,
+                },
+                {
+                    name: 'search-vectors',
+                    metadata: { workspace_id, query },
+                    fn: async trace => {
+                        // Create generation for embeddings
+                        const embeddingGen = trace.generation({
+                            name: 'create-search-embedding',
+                            model: 'text-embedding-3-small',
+                            input: query,
+                        })
+
+                        // Generate embedding for the search query
+                        const embedding = await openai.embeddings.create({
+                            model: 'text-embedding-3-small',
+                            input: query,
+                            encoding_format: 'float',
+                        })
+
+                        embeddingGen.end({
+                            output: `Generated embedding with ${embedding.data[0].embedding.length} dimensions`,
+                        })
+
+                        // Create span for vector search
+                        const searchSpan = trace.span({
+                            name: 'vector-search',
+                            input: { query, limit, workspace_id },
+                        })
+
+                        // Search vectors using the query embedding
+                        const searchResults = await context.env.VECTORIZE.query(
+                            embedding.data[0].embedding,
+                            {
+                                topK: limit,
+                                returnMetadata: 'all',
+                                token: context.env.VECTORIZE_TOKEN,
+                            },
+                        )
+
+                        // Filter results by workspace_id
+                        const filteredMatches = searchResults.matches.filter(
+                            match =>
+                                match.metadata?.workspace_id === workspace_id,
+                        )
+
+                        searchSpan.end({
+                            output: {
+                                matchCount: filteredMatches.length,
+                                scores: filteredMatches.map(m => m.score),
+                            },
+                        })
+
+                        // Format and return results
+                        return {
+                            success: true,
+                            result: {
+                                results: filteredMatches.map(match => ({
+                                    id: match.id,
+                                    score: match.score,
+                                    values: match.values,
+                                    metadata: match.metadata,
+                                })),
+                                timestamp: new Date().toISOString(),
+                            },
+                        }
+                    },
                 },
             )
-
-            // Filter results by workspace_id
-            const filteredMatches = searchResults.matches.filter(
-                match => match.metadata?.workspace_id === workspace_id,
-            )
-
-            searchSpan.end({
-                output: {
-                    matchCount: filteredMatches.length,
-                    scores: filteredMatches.map(m => m.score),
-                },
-            })
-
-            // Format and return results
-            const response = {
-                success: true,
-                result: {
-                    results: filteredMatches.map(match => ({
-                        id: match.id,
-                        score: match.score,
-                        values: match.values,
-                        metadata: match.metadata,
-                    })),
-                    timestamp: new Date().toISOString(),
-                },
-            }
-
-            await langfuse
-                .flushAsync()
-                .then(() => console.log('Sent traces to Langfuse'))
-                .catch(console.error)
-
-            return response
         } catch (error) {
             console.error('Error searching vectors:', error)
             return {

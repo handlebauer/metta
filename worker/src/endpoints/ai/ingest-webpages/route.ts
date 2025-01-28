@@ -1,8 +1,9 @@
 import { OpenAPIRoute } from 'chanfana'
-import { Langfuse } from 'langfuse'
 import OpenAI from 'openai'
 import { z } from 'zod'
 
+import { withLangfuseTrace } from '../../../lib/langfuse'
+import { chunkText } from '../../../lib/text'
 import {
     IngestWebpagesRequest,
     IngestWebpagesResponse,
@@ -61,112 +62,111 @@ export class IngestWebpages extends OpenAPIRoute {
                 JSON.stringify(validatedData, null, 2),
             )
 
-            // Initialize clients
+            // Initialize OpenAI
             const openai = new OpenAI({ apiKey: context.env.OPENAI_API_KEY })
-            const langfuse = new Langfuse({
-                secretKey: context.env.LANGFUSE_SECRET_KEY,
-                publicKey: context.env.LANGFUSE_PUBLIC_KEY,
-                baseUrl: context.env.LANGFUSE_BASEURL,
-            })
 
-            // Start trace
-            const trace = langfuse.trace({
-                name: 'ingest-webpages',
-                metadata: { workspace_id },
-            })
+            return await withLangfuseTrace(
+                {
+                    secretKey: context.env.LANGFUSE_SECRET_KEY,
+                    publicKey: context.env.LANGFUSE_PUBLIC_KEY,
+                    baseUrl: context.env.LANGFUSE_BASEURL,
+                },
+                {
+                    name: 'ingest-webpages',
+                    metadata: { workspace_id },
+                    fn: async trace => {
+                        // Create span for website scraping
+                        const scrapeSpan = trace.generation({
+                            name: 'scrape-website',
+                            input: sources.website.paths,
+                        })
 
-            // Create span for website scraping
-            const scrapeSpan = trace.generation({
-                name: 'scrape-website',
-                input: sources.website.paths,
-            })
+                        // Scrape website pages
+                        const urlsToScrape = sources.website.paths.join(',')
+                        console.log('Scraping URLs:', urlsToScrape)
 
-            // Scrape website pages
-            const urlsToScrape = sources.website.paths.join(',')
-            console.log('Scraping URLs:', urlsToScrape)
+                        const websiteData = await fetch(
+                            `https://llmd.hbauer.workers.dev/scrape/${urlsToScrape}`,
+                        ).then(res => res.json() as Promise<ScrapeResponse>)
 
-            const websiteData = await fetch(
-                `https://llmd.hbauer.workers.dev/scrape/${urlsToScrape}`,
-            ).then(res => res.json() as Promise<ScrapeResponse>)
+                        scrapeSpan.end({
+                            output: websiteData,
+                        })
 
-            scrapeSpan.end({
-                output: websiteData,
-            })
+                        // Prepare documents for ingestion
+                        const documents: Document[] = []
 
-            // Prepare documents for ingestion
-            const documents: Document[] = []
+                        // Add scraped pages with chunking
+                        if (websiteData) {
+                            for (const page of websiteData.pages) {
+                                // Create chunks from the page content
+                                const chunks = chunkText(page.markdown, {
+                                    chunkSize: 500,
+                                    overlapSize: 100,
+                                })
 
-            // Add scraped pages
-            if (websiteData) {
-                const pages =
-                    websiteData.metadata.stats.successfulPages > 0
-                        ? websiteData.pages
-                        : []
+                                // Create a document for each chunk
+                                for (const chunk of chunks) {
+                                    documents.push({
+                                        content: chunk.content,
+                                        url: page.url,
+                                        workspace_id,
+                                        chunk_metadata: {
+                                            startChar: chunk.metadata.startChar,
+                                            endChar: chunk.metadata.endChar,
+                                        },
+                                    })
+                                }
+                            }
+                        }
 
-                console.log('Successfully scraped pages:', pages.length)
-                documents.push(
-                    ...pages.map(page => ({
-                        content: page.markdown,
-                        url: page.url,
-                        workspace_id,
-                    })),
-                )
-            }
+                        // Create embeddings for documents
+                        const embeddingSpan = trace.generation({
+                            name: 'create-embeddings',
+                            model: 'text-embedding-3-small',
+                            input: documents.map(d => d.content),
+                        })
 
-            console.log('Total documents to vectorize:', documents.length)
+                        const embeddings = await createEmbeddings(
+                            documents,
+                            openai,
+                        )
 
-            if (documents.length > 0) {
-                // Create generation for OpenAI embeddings
-                const embeddingGen = trace.generation({
-                    name: 'create-embeddings',
-                    model: 'text-embedding-3-small',
-                    modelParameters: {
-                        batchSize: documents.length,
-                    },
-                    input: documents.map(doc => doc.content),
-                })
+                        embeddingSpan.end({
+                            output: `Generated ${embeddings.length} embeddings`,
+                        })
 
-                // Create embeddings using OpenAI
-                const embeddings = await createEmbeddings(documents, openai)
+                        // Prepare vectors for ingestion
+                        const vectors = prepareVectors(documents, embeddings)
 
-                embeddingGen.end({
-                    output: `Generated ${embeddings.length} embeddings`,
-                })
+                        // Create span for vector ingestion
+                        const ingestSpan = trace.span({
+                            name: 'ingest-vectors',
+                            input: { vectorCount: vectors.length },
+                        })
 
-                // Create vectors with embeddings
-                const vectors = prepareVectors(documents, embeddings)
+                        // Ingest vectors into database
+                        await context.env.VECTORIZE.upsert(vectors, {
+                            token: context.env.VECTORIZE_TOKEN,
+                        })
 
-                // Create span for vector storage
-                const vectorSpan = trace.generation({
-                    name: 'store-vectors',
-                    input: { vectorCount: vectors.length },
-                })
+                        ingestSpan.end()
 
-                // Upsert vectors
-                console.log('Upserting vectors:', vectors.length)
-                await context.env.VECTORIZE.upsert(vectors)
-
-                vectorSpan.end({
-                    output: { storedVectors: vectors.length },
-                })
-            }
-
-            await langfuse
-                .flushAsync()
-                .then(() => console.log('Sent traces to Langfuse'))
-                .catch(console.error)
-
-            return {
-                success: true,
-                result: {
-                    success: true,
-                    timestamp: new Date().toISOString(),
-                    stats: {
-                        total_pages: documents.length,
-                        website_pages: documents.length,
+                        return {
+                            success: true,
+                            result: {
+                                success: true,
+                                timestamp: new Date().toISOString(),
+                                stats: {
+                                    total_pages: websiteData.pages.length,
+                                    website_pages: websiteData.pages.length,
+                                    total_chunks: documents.length,
+                                },
+                            },
+                        }
                     },
                 },
-            }
+            )
         } catch (error) {
             console.error('Error ingesting webpages:', error)
             return {
