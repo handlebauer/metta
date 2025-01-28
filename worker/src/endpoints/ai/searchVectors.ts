@@ -3,6 +3,12 @@ import OpenAI from 'openai'
 import { z } from 'zod'
 
 import { withLangfuseTrace } from '../../lib/langfuse'
+import {
+    type VectorizeMatch,
+    type VectorizeResponse,
+} from '../../lib/vectorize'
+
+import type { Env } from '../../lib/env'
 
 const SearchVectorsRequest = z.object({
     workspace_id: z.string(),
@@ -22,6 +28,14 @@ const SearchVectorsResponse = z.object({
                     url: z.string(),
                     workspace_id: z.string(),
                     content: z.string(),
+                    chunk_position: z
+                        .object({
+                            startChar: z.number(),
+                            endChar: z.number(),
+                        })
+                        .optional(),
+                    added_at: z.string(),
+                    type: z.literal('webpage'),
                 })
                 .optional(),
         }),
@@ -68,11 +82,11 @@ export class SearchVectors extends OpenAPIRoute {
         },
     }
 
-    async handle(context) {
+    async handle(context: { env: Env }) {
         try {
             // Get validated data
             const data = await this.getValidatedData<typeof this.schema>()
-            const { workspace_id, query, limit } = data.body
+            const { workspace_id, query, limit, minSimilarity } = data.body
 
             // Initialize OpenAI
             const openai = new OpenAI({
@@ -110,29 +124,59 @@ export class SearchVectors extends OpenAPIRoute {
                         // Create span for vector search
                         const searchSpan = trace.span({
                             name: 'vector-search',
-                            input: { query, limit, workspace_id },
+                            input: {
+                                query,
+                                limit,
+                                workspace_id,
+                                minSimilarity,
+                            },
                         })
 
                         // Search vectors using the query embedding
-                        const searchResults = await context.env.VECTORIZE.query(
-                            embedding.data[0].embedding,
-                            {
-                                topK: limit,
-                                returnMetadata: 'all',
-                                token: context.env.VECTORIZE_TOKEN,
-                            },
-                        )
+                        const searchResults: VectorizeResponse =
+                            await context.env.VECTORIZE.query(
+                                embedding.data[0].embedding,
+                                {
+                                    topK: limit * 2, // Get more results for better filtering
+                                    returnMetadata: 'all',
+                                    token: context.env.VECTORIZE_TOKEN,
+                                },
+                            )
 
-                        // Filter results by workspace_id
-                        const filteredMatches = searchResults.matches.filter(
-                            match =>
-                                match.metadata?.workspace_id === workspace_id,
-                        )
+                        // Filter and validate results
+                        const filteredMatches = searchResults.matches
+                            .filter((match: VectorizeMatch) => {
+                                // Ensure workspace isolation
+                                if (
+                                    match.metadata?.workspace_id !==
+                                    workspace_id
+                                ) {
+                                    return false
+                                }
+                                // Apply similarity threshold
+                                if (match.score < minSimilarity) {
+                                    return false
+                                }
+                                // Validate metadata shape
+                                if (
+                                    !match.metadata?.url ||
+                                    !match.metadata?.content ||
+                                    match.metadata?.type !== 'webpage'
+                                ) {
+                                    return false
+                                }
+                                return true
+                            })
+                            // Limit after filtering
+                            .slice(0, limit)
 
                         searchSpan.end({
                             output: {
                                 matchCount: filteredMatches.length,
                                 scores: filteredMatches.map(m => m.score),
+                                minScore: Math.min(
+                                    ...filteredMatches.map(m => m.score),
+                                ),
                             },
                         })
 
@@ -143,7 +187,6 @@ export class SearchVectors extends OpenAPIRoute {
                                 results: filteredMatches.map(match => ({
                                     id: match.id,
                                     score: match.score,
-                                    values: match.values,
                                     metadata: match.metadata,
                                 })),
                                 timestamp: new Date().toISOString(),

@@ -50,7 +50,7 @@ export class IngestWebpages extends OpenAPIRoute {
         },
     }
 
-    async handle(context) {
+    async handle(context: { env: Env }) {
         try {
             // Get and validate data first
             const rawData = await this.getValidatedData<typeof this.schema>()
@@ -146,9 +146,7 @@ export class IngestWebpages extends OpenAPIRoute {
                         })
 
                         // Ingest vectors into database
-                        await context.env.VECTORIZE.upsert(vectors, {
-                            token: context.env.VECTORIZE_TOKEN,
-                        })
+                        await context.env.VECTORIZE.upsert(vectors)
 
                         ingestSpan.end()
 
