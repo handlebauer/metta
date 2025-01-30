@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Code, Loader2 } from 'lucide-react'
 
@@ -28,7 +28,7 @@ interface DemoAction {
     onClick: () => Promise<void>
 }
 
-export function DemoWrapper({ children }: DemoWrapperProps) {
+function DemoContent({ children }: DemoWrapperProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [isDemoEnabled, setIsDemoEnabled] = useState(false)
@@ -87,7 +87,7 @@ export function DemoWrapper({ children }: DemoWrapperProps) {
                         />
                     ),
                     className: 'p-0 bg-background border',
-                    duration: 24 * 60 * 60 * 1000, // 24 hours
+                    duration: Infinity,
                 })
             },
         },
@@ -250,5 +250,13 @@ export function DemoWrapper({ children }: DemoWrapperProps) {
                 </SheetContent>
             </Sheet>
         </>
+    )
+}
+
+export function DemoWrapper(props: DemoWrapperProps) {
+    return (
+        <Suspense>
+            <DemoContent {...props} />
+        </Suspense>
     )
 }
