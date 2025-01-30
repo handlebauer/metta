@@ -285,6 +285,9 @@ export async function createTicket(
                       agent_id: input.get('agent_id') as string,
                       priority:
                           (input.get('priority') as TicketPriority) || 'medium',
+                      parent_ticket_id: null,
+                      chaos_score: null,
+                      crisis_keywords: null,
                   }
                 : input
 
@@ -292,7 +295,9 @@ export async function createTicket(
 
         // Revalidate relevant paths
         revalidatePath('/tickets')
-        revalidatePath(`/customers/${ticketData.customer_id}/tickets`)
+        if (ticketData.customer_id) {
+            revalidatePath(`/customers/${ticketData.customer_id}/tickets`)
+        }
 
         return { data, error: null }
     } catch (error) {

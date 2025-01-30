@@ -1,11 +1,10 @@
 import { type NextRequest } from 'next/server'
 import { FirebreakResponse } from '@/app/api/ai/firebreak/schemas'
 
-interface AnalysisPageProps {
-    params: Promise<{ id: string }>
-}
-
-export async function GET(_: NextRequest, params: AnalysisPageProps['params']) {
+export async function GET(
+    _: NextRequest,
+    { params }: { params: Promise<{ id: string }> },
+) {
     try {
         const { id } = await params
 
