@@ -4,6 +4,8 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { agent } from '../agent'
 import { FirebreakResponse } from '../schemas'
 
+export const maxDuration = 60
+
 const SYSTEM_PROMPT = `
     You are the Firebreak agent, responsible for analyzing tickets for potential crisis patterns.
     Your task is to:
