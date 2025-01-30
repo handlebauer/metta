@@ -104,11 +104,6 @@ function DemoContent({ children }: DemoWrapperProps) {
                 if (!response.ok) {
                     throw new Error('Failed to insert test tickets')
                 }
-                toast({
-                    title: 'Tickets Created',
-                    description:
-                        'Test tickets have been inserted successfully. Run the Firebreak Analysis to detect patterns.',
-                })
             },
         },
         {
@@ -123,22 +118,6 @@ function DemoContent({ children }: DemoWrapperProps) {
                 })
                 if (!response.ok) {
                     throw new Error('Failed to run firebreak analysis')
-                }
-                const data = await response.json()
-
-                if (data.created_incidents?.length > 0) {
-                    toast({
-                        title: 'Analysis Complete',
-                        description: `Found ${data.identified_patterns.length} patterns and created ${data.created_incidents.length} incidents. You should see notifications shortly.`,
-                        className: 'bg-background border',
-                    })
-                } else {
-                    toast({
-                        title: 'Analysis Complete',
-                        description:
-                            'No incidents were detected in the recent tickets.',
-                        className: 'bg-background border',
-                    })
                 }
             },
         },
@@ -155,11 +134,6 @@ function DemoContent({ children }: DemoWrapperProps) {
                 if (!response.ok) {
                     throw new Error('Failed to delete test data')
                 }
-                toast({
-                    title: 'Data Deleted',
-                    description:
-                        'All test tickets and incidents have been removed.',
-                })
             },
         },
     ]
