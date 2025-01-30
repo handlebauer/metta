@@ -1,11 +1,14 @@
 import { type NextRequest } from 'next/server'
 import { FirebreakResponse } from '@/app/api/ai/firebreak/schemas'
 
-export async function GET(
-    _: NextRequest,
-    { params }: { params: { id: string } },
-) {
+interface AnalysisPageProps {
+    params: Promise<{ id: string }>
+}
+
+export async function GET(_: NextRequest, params: AnalysisPageProps['params']) {
     try {
+        const { id } = await params
+
         // TODO: In production, this would fetch the actual analysis data from your database
         // For demo purposes, we'll return mock data
         const mockData = {
@@ -53,7 +56,7 @@ export async function GET(
             ],
             created_incidents: [
                 {
-                    id: params.id,
+                    id,
                     title: 'Payment System Performance Degradation',
                     description:
                         'Critical incident: Multiple customers reporting payment processing issues. Investigation shows increased error rates and timeouts across the payment infrastructure.',
