@@ -47,12 +47,10 @@ export default function RootLayout({
                     ibmPlexMono.variable,
                 )}
             >
-                <IncidentListener>
-                    <DemoWrapper>
-                        {children}
-                        <Toaster />
-                    </DemoWrapper>
-                </IncidentListener>
+                <DemoWrapper>
+                    <Toaster />
+                    <IncidentListener>{children}</IncidentListener>
+                </DemoWrapper>
             </body>
         </html>
     )

@@ -5,7 +5,7 @@ import * as React from 'react'
 
 import type { ToastActionElement, ToastProps } from '@/components/ui/toast'
 
-const TOAST_LIMIT = 1
+const TOAST_LIMIT = 5
 const TOAST_REMOVE_DELAY = 1000000
 
 type ToasterToast = ToastProps & {
@@ -64,8 +64,8 @@ const addToRemoveQueue = (toastId: string) => {
     // Find the toast
     const toast = memoryState.toasts.find(t => t.id === toastId)
 
-    // Don't add to removal queue if duration is Infinity
-    if (toast?.duration === Infinity) {
+    // Don't add to removal queue if duration is Infinity or if it's an incident notification
+    if (toast?.duration === Infinity || toast?.id.startsWith('toast-')) {
         return
     }
 

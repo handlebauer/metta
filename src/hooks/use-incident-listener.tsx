@@ -39,7 +39,7 @@ export function showTestIncidentNotification() {
                 }}
             />
         ),
-        className: 'p-0',
+        className: 'p-0 bg-background border toast-important',
         duration: Infinity,
     })
 }
@@ -68,32 +68,48 @@ export function useIncidentListener() {
                         incident.title,
                     )
 
-                    toast({
-                        description: (
-                            <AIIncidentNotification
-                                id={toastId}
-                                incidentId={incident.id}
-                                numRelatedTickets={
-                                    incident.linked_ticket_ids.length
-                                }
-                                description={incident.description}
-                                onOpenChange={() => {
-                                    const toastEl =
-                                        document.getElementById(toastId)
-                                    if (toastEl?.parentElement) {
-                                        toastEl.parentElement.remove()
+                    try {
+                        toast({
+                            description: (
+                                <AIIncidentNotification
+                                    id={toastId}
+                                    incidentId={incident.id}
+                                    numRelatedTickets={
+                                        incident.linked_ticket_ids.length
                                     }
-                                }}
-                            />
-                        ),
-                        className: 'p-0',
-                        duration: Infinity,
-                    })
+                                    description={incident.description}
+                                    onOpenChange={() => {
+                                        try {
+                                            const toastEl =
+                                                document.getElementById(toastId)
+                                            if (toastEl?.parentElement) {
+                                                toastEl.parentElement.remove()
+                                            }
+                                        } catch (error) {
+                                            console.error(
+                                                '[IncidentListener] Failed to cleanup toast:',
+                                                error,
+                                            )
+                                        }
+                                    }}
+                                />
+                            ),
+                            className:
+                                'p-0 bg-background border toast-important',
+                            duration: Infinity,
+                        })
+                    } catch (error) {
+                        console.error(
+                            '[IncidentListener] Failed to show notification:',
+                            error,
+                        )
+                    }
                 },
             )
             .subscribe()
 
         return () => {
+            console.log('[IncidentListener] Cleaning up...')
             channel.unsubscribe()
         }
     }, [])

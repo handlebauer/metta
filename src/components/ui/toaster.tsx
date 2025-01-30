@@ -14,7 +14,7 @@ export function Toaster() {
     const { toasts } = useToast()
 
     return (
-        <ToastProvider>
+        <ToastProvider duration={Infinity} swipeDirection="right">
             {toasts.map(function ({
                 id,
                 title,
