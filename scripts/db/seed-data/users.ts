@@ -10,6 +10,17 @@ export interface SeedUser {
     profile: Omit<ProfileInsert, 'user_id'>
 }
 
+export const SYSTEM_USER: SeedUser = {
+    email: 'ai.sysadmin@metta.now',
+    password: crypto.randomUUID(),
+    profile: {
+        full_name: 'Metta AI System',
+        bio: 'System account for AI operations',
+        role: 'admin',
+        avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=metta-ai',
+    },
+}
+
 export const DEMO_USER: SeedUser = {
     email: 'demo@metta.now',
     password: 'demo123',
@@ -96,8 +107,14 @@ export async function seedUsers(
 
     const userMap: Record<number, string> = {}
     const agentMap: Record<number, string> = {}
+    let systemUserId: string | undefined
 
-    const allUsers = [DEMO_USER, DEMO_USER_NO_WORKSPACE, ...TEST_USERS]
+    const allUsers = [
+        SYSTEM_USER,
+        DEMO_USER,
+        DEMO_USER_NO_WORKSPACE,
+        ...TEST_USERS,
+    ]
     for (const [_index, userData] of allUsers.entries()) {
         const existingUser = existingUsers?.users.find(
             u => u.email === userData.email,
@@ -136,6 +153,11 @@ export async function seedUsers(
             .single()
 
         if (userError) throw userError
+
+        // Store the system user ID if this is the system user
+        if (userData.email === SYSTEM_USER.email) {
+            systemUserId = user.id
+        }
 
         // Store the user ID in the appropriate map
         if (
@@ -184,6 +206,10 @@ export async function seedUsers(
         createdUsers.push(user)
     }
 
+    if (!systemUserId) {
+        throw new Error('Failed to create or find system user')
+    }
+
     console.log('✅ Users created')
-    return { userMap, agentMap }
+    return { userMap, agentMap, systemUserId }
 }

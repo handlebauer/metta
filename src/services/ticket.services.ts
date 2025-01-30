@@ -10,6 +10,7 @@ import {
     ticketUpdateSchema,
 } from '@/lib/schemas/ticket.schemas'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { EmailService } from '@/services/email.services'
 import { generateTicketAccessToken } from '@/services/ticket-access.services'
 import { UserWithProfileService } from '@/services/user-with-profile.services'
@@ -187,10 +188,15 @@ export class TicketService {
 
     async create(
         input: z.infer<typeof ticketInsertSchema>,
+        options: { useServiceClient?: boolean } = {},
     ): Promise<TicketRow> {
         try {
             const validated = ticketInsertSchema.parse(input)
-            const db = await createClient()
+            // Use service client for system operations (like Firebreak), normal client for user operations
+            const db = options.useServiceClient
+                ? createServiceClient()
+                : await createClient()
+
             const { data, error } = await db
                 .from('tickets')
                 .insert(validated)

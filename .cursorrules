@@ -10,6 +10,7 @@ Metta is an AI-powered Customer Relationship Management system designed to minim
 4. Use Client Components only when necessary for interactivity or client-side state.
 5. Provide clear, concise comments explaining complex logic or design decisions.
 6. Never create new interfaces or types without first checking the `@/lib/schemas` directory.
+7. Use camelCase for all variable and function names.
 
 ## Project Structure
 

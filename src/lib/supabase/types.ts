@@ -78,6 +78,39 @@ export type Database = {
                     },
                 ]
             }
+            incidents: {
+                Row: {
+                    created_at: string | null
+                    description: string
+                    id: string
+                    linked_ticket_ids: string[]
+                    pattern_name: string
+                    severity: string
+                    status: string
+                    title: string
+                }
+                Insert: {
+                    created_at?: string | null
+                    description: string
+                    id?: string
+                    linked_ticket_ids?: string[]
+                    pattern_name: string
+                    severity: string
+                    status?: string
+                    title: string
+                }
+                Update: {
+                    created_at?: string | null
+                    description?: string
+                    id?: string
+                    linked_ticket_ids?: string[]
+                    pattern_name?: string
+                    severity?: string
+                    status?: string
+                    title?: string
+                }
+                Relationships: []
+            }
             messages: {
                 Row: {
                     content: string
@@ -350,10 +383,13 @@ export type Database = {
             tickets: {
                 Row: {
                     agent_id: string | null
+                    chaos_score: number | null
                     created_at: string | null
+                    crisis_keywords: string[] | null
                     customer_id: string
                     description: string
                     id: string
+                    parent_ticket_id: string | null
                     priority:
                         | Database['public']['Enums']['ticket_priority']
                         | null
@@ -363,10 +399,13 @@ export type Database = {
                 }
                 Insert: {
                     agent_id?: string | null
+                    chaos_score?: number | null
                     created_at?: string | null
+                    crisis_keywords?: string[] | null
                     customer_id: string
                     description: string
                     id?: string
+                    parent_ticket_id?: string | null
                     priority?:
                         | Database['public']['Enums']['ticket_priority']
                         | null
@@ -376,10 +415,13 @@ export type Database = {
                 }
                 Update: {
                     agent_id?: string | null
+                    chaos_score?: number | null
                     created_at?: string | null
+                    crisis_keywords?: string[] | null
                     customer_id?: string
                     description?: string
                     id?: string
+                    parent_ticket_id?: string | null
                     priority?:
                         | Database['public']['Enums']['ticket_priority']
                         | null
@@ -400,6 +442,13 @@ export type Database = {
                         columns: ['customer_id']
                         isOneToOne: false
                         referencedRelation: 'users'
+                        referencedColumns: ['id']
+                    },
+                    {
+                        foreignKeyName: 'tickets_parent_ticket_id_fkey'
+                        columns: ['parent_ticket_id']
+                        isOneToOne: false
+                        referencedRelation: 'tickets'
                         referencedColumns: ['id']
                     },
                 ]

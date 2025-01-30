@@ -56,6 +56,9 @@ export const ticketSchema = z.object({
     priority: ticketPriorityEnum,
     customer_id: z.string().min(1, 'Please select a requester'),
     agent_id: z.string().nullable(),
+    parent_ticket_id: z.string().nullable(),
+    crisis_keywords: z.array(z.string()).nullable(),
+    chaos_score: z.number().min(0).max(100).nullable(),
 }) satisfies z.ZodType<TicketRow>
 
 // Insert schema for customers creating tickets

@@ -1,8 +1,9 @@
 import { IBM_Plex_Mono, Inter, Outfit } from 'next/font/google'
-import { DevModeButton } from '@/components/dev-mode-button.client'
 
 import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/toaster'
+import { DemoWrapper } from '@/components/demo/demo-wrapper.client'
+import { IncidentListener } from '@/components/providers/incident-listener.client'
 
 import './globals.css'
 
@@ -46,9 +47,12 @@ export default function RootLayout({
                     ibmPlexMono.variable,
                 )}
             >
-                {children}
-                <Toaster />
-                {process.env.NODE_ENV === 'development' && <DevModeButton />}
+                <IncidentListener>
+                    <DemoWrapper>
+                        {children}
+                        <Toaster />
+                    </DemoWrapper>
+                </IncidentListener>
             </body>
         </html>
     )

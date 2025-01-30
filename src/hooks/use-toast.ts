@@ -13,6 +13,7 @@ type ToasterToast = ToastProps & {
     title?: React.ReactNode
     description?: React.ReactNode
     action?: ToastActionElement
+    duration?: number
 }
 
 const _actionTypes = {
@@ -57,6 +58,14 @@ const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
 const addToRemoveQueue = (toastId: string) => {
     if (toastTimeouts.has(toastId)) {
+        return
+    }
+
+    // Find the toast
+    const toast = memoryState.toasts.find(t => t.id === toastId)
+
+    // Don't add to removal queue if duration is Infinity
+    if (toast?.duration === Infinity) {
         return
     }
 
@@ -155,6 +164,7 @@ function toast({ ...props }: Toast) {
             ...props,
             id,
             open: true,
+            duration: props.duration,
             onOpenChange: open => {
                 if (!open) dismiss()
             },
