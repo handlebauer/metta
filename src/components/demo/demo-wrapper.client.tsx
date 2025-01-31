@@ -96,6 +96,20 @@ function DemoContent({ children }: DemoWrapperProps) {
                 }
             },
         },
+        {
+            id: 'delete-test-data',
+            title: 'Clean Test Data',
+            description: 'Delete all test tickets and incidents',
+            buttonText: 'Delete Test Data',
+            onClick: async () => {
+                const response = await fetch('/api/demo/delete-test-tickets', {
+                    method: 'POST',
+                })
+                if (!response.ok) {
+                    throw new Error('Failed to delete test data')
+                }
+            },
+        },
     ]
 
     const handleAction = async (action: DemoAction) => {
