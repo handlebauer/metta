@@ -1,7 +1,7 @@
-import { ArrowUpDown } from 'lucide-react'
+import { AlertOctagon, ArrowUpDown } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
 import { formatDate, formatTimeAgo } from '@/lib/utils/dates'
+import { Button } from '@/components/ui/button'
 
 import { TicketPriorityBadge } from './ticket-priority-badge'
 import { TicketStatusBadge } from './ticket-status-badge'
@@ -43,6 +43,11 @@ function SortableHeader<TData>({
     )
 }
 
+// Helper to check if a ticket is an AI incident
+const isAIIncident = (ticket: TicketWithCustomer) =>
+    !ticket.parent_ticket_id &&
+    ticket.customer.email === 'ai.sysadmin@metta.now'
+
 export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
     {
         accessorKey: 'subject',
@@ -52,15 +57,28 @@ export const ticketColumns: ColumnDef<TicketWithCustomer>[] = [
                 title="Subject"
             />
         ),
-        cell: ({ row }) => (
-            <div
-                className="max-w-[300px] truncate font-medium"
-                title={row.getValue('subject')}
-            >
-                {row.getValue('subject')}
-            </div>
-        ),
-        size: 200,
+        cell: ({ row }) => {
+            const ticket = row.original
+            const isAI = isAIIncident(ticket)
+
+            return (
+                <div className="flex items-center gap-2">
+                    {isAI && (
+                        <div className="flex items-center gap-1.5 rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-medium text-red-700 dark:text-red-400">
+                            <AlertOctagon className="h-3 w-3" />
+                            Incident
+                        </div>
+                    )}
+                    <div
+                        className="max-w-[300px] truncate font-medium"
+                        title={row.getValue('subject')}
+                    >
+                        {row.getValue('subject')}
+                    </div>
+                </div>
+            )
+        },
+        size: 300,
     },
     {
         accessorKey: 'status',

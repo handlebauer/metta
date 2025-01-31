@@ -144,7 +144,7 @@ describe('TicketCrisisService - Firebreak Agent Methods', () => {
     test('updateCrisisMetadata - should update parent ticket relationship', async () => {
         // Create a parent incident ticket
         const incident = await ticketService.create({
-            subject: '[INCIDENT] Test Parent',
+            subject: 'Test Parent',
             description: 'Parent incident for testing',
             priority: 'high',
             customer_id: sysUserId,

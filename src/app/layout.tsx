@@ -2,6 +2,7 @@ import { IBM_Plex_Mono, Inter, Outfit } from 'next/font/google'
 
 import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/toaster'
+import { IncidentFAB } from '@/components/ai/incident-fab.client'
 import { DemoWrapper } from '@/components/demo/demo-wrapper.client'
 import { IncidentListener } from '@/components/providers/incident-listener.client'
 
@@ -50,6 +51,7 @@ export default function RootLayout({
                 <DemoWrapper>
                     <Toaster />
                     <IncidentListener>{children}</IncidentListener>
+                    <IncidentFAB />
                 </DemoWrapper>
             </body>
         </html>

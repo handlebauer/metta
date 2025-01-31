@@ -44,10 +44,13 @@ export type FirebreakResponseType = z.infer<typeof FirebreakResponse>
 
 const openai = new OpenAI()
 
-export async function parseFirebreakAnalysis(
-    content: string,
-    originalTickets: { id: string }[],
-): Promise<FirebreakResponseType> {
+export async function parseFirebreakAnalysis(analysis: {
+    summary: string
+    pattern_found: string
+    incident_created_id: string
+    related_tickets: { id: string }[]
+    tickets_analyzed_length: number
+}): Promise<FirebreakResponseType> {
     const completion = await openai.beta.chat.completions.parse({
         model: 'gpt-4o-mini',
         messages: [
@@ -55,13 +58,13 @@ export async function parseFirebreakAnalysis(
                 role: 'system',
                 content: dedent`
                     Convert the following analysis into a structured format.
-                    IMPORTANT: Use ONLY these exact ticket IDs in your response: ${originalTickets.map(t => t.id).join(', ')}
+                    IMPORTANT: Use ONLY these exact ticket IDs in your response: ${analysis.related_tickets.map(t => t.id).join(', ')}
                     Do not generate new ticket IDs. Map the analysis to these existing tickets.
                 `,
             },
             {
                 role: 'user',
-                content,
+                content: JSON.stringify(analysis, null, 2),
             },
         ],
         response_format: zodResponseFormat(

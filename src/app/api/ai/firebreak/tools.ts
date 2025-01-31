@@ -82,7 +82,7 @@ export const createIncidentTicket = tool(
         // Create the incident ticket with service client
         const incident = await ticketService.create(
             {
-                subject: `[INCIDENT] ${subject}`,
+                subject: subject,
                 description: formattedDescription,
                 priority: 'high',
                 customer_id: sysUserId,
@@ -217,12 +217,9 @@ export const reviewAnalysis = tool(
 )
 
 export const structureAnalysis = tool(
-    async ({ analysis, related_tickets }) => {
+    async ({ analysis }) => {
         console.log('[Firebreak] Structuring analysis...')
-        const structured = await parseFirebreakAnalysis(
-            analysis,
-            related_tickets,
-        )
+        const structured = await parseFirebreakAnalysis(analysis)
         return JSON.stringify(structured)
     },
     {
@@ -230,12 +227,13 @@ export const structureAnalysis = tool(
         description:
             'Convert your analysis into a structured format that can be used by the system.',
         schema: z.object({
-            related_tickets: z.array(z.object({ id: z.string() })),
-            analysis: z
-                .string()
-                .describe(
-                    'Your complete analysis of the situation, including patterns found, incidents created, and tickets analyzed.',
-                ),
+            analysis: z.object({
+                summary: z.string(),
+                pattern_found: z.string(),
+                incident_created_id: z.string(),
+                related_tickets: z.array(z.object({ id: z.string() })),
+                tickets_analyzed_length: z.number(),
+            }),
         }),
     },
 )

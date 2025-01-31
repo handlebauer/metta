@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Toast, ToastClose } from '@/components/ui/toast'
 import { FirebreakAnalysisSheet } from '@/components/ai/firebreak-analysis-sheet'
+import { useIncidentQueue } from '@/hooks/use-incident-queue'
 import { toast } from '@/hooks/use-toast'
 
 import type { FirebreakResponseType } from '@/app/api/ai/firebreak/schemas'
@@ -24,12 +25,14 @@ interface AIIncidentNotificationProps {
 
 export function AIIncidentNotification({
     id,
+    incidentId,
     numRelatedTickets,
     description,
     analysisId,
     className,
     onOpenChange,
 }: AIIncidentNotificationProps) {
+    const { addToQueue } = useIncidentQueue()
     const [isAnalysisOpen, setIsAnalysisOpen] = useState(false)
     const [analysisData, setAnalysisData] =
         useState<FirebreakResponseType | null>(null)
@@ -39,6 +42,17 @@ export function AIIncidentNotification({
         try {
             setIsLoading(true)
             setIsAnalysisOpen(true)
+
+            // Add to queue when viewing
+            if (analysisId) {
+                addToQueue({
+                    id: incidentId,
+                    analysisId,
+                    description,
+                    numRelatedTickets,
+                    timestamp: new Date().toISOString(),
+                })
+            }
 
             // Dismiss the notification
             onOpenChange?.(false)
@@ -64,7 +78,14 @@ export function AIIncidentNotification({
         } finally {
             setIsLoading(false)
         }
-    }, [onOpenChange, analysisId])
+    }, [
+        onOpenChange,
+        analysisId,
+        addToQueue,
+        incidentId,
+        description,
+        numRelatedTickets,
+    ])
 
     const handleSheetOpenChange = useCallback((open: boolean) => {
         setIsAnalysisOpen(open)
