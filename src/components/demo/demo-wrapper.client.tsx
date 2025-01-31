@@ -13,11 +13,7 @@ import {
     SheetTitle,
 } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
-import { FirebreakAnalysisSheet } from '@/components/ai/firebreak-analysis-sheet'
-import { AIIncidentNotification } from '@/components/notifications/ai-incident-notification.client'
 import { toast } from '@/hooks/use-toast'
-
-import type { FirebreakResponseType } from '@/app/api/ai/firebreak/schemas'
 
 interface DemoWrapperProps {
     children: React.ReactNode
@@ -37,9 +33,6 @@ function DemoContent({ children }: DemoWrapperProps) {
     const [isDemoEnabled, setIsDemoEnabled] = useState(false)
     const [isInitialized, setIsInitialized] = useState(false)
     const [loadingActions, setLoadingActions] = useState<Set<string>>(new Set())
-    const [isAnalysisSheetOpen, setIsAnalysisSheetOpen] = useState(false)
-    const [analysisData, setAnalysisData] =
-        useState<FirebreakResponseType | null>(null)
 
     // Sync with URL params only on initial load
     useEffect(() => {
@@ -70,41 +63,17 @@ function DemoContent({ children }: DemoWrapperProps) {
 
     const demoActions: DemoAction[] = [
         {
-            id: 'test-notification',
-            title: 'Test AI Incident Alert',
-            description:
-                'Show a sample AI incident notification to test the UI and interaction.',
-            buttonText: 'Show Notification',
-            onClick: async () => {
-                const toastId = `toast-${Date.now()}`
-                toast({
-                    description: (
-                        <AIIncidentNotification
-                            id={toastId}
-                            incidentId="test-123"
-                            numRelatedTickets={3}
-                            description="Multiple users reporting slow response times and timeouts in the checkout flow."
-                            onOpenChange={() => {
-                                const toastEl = document.getElementById(toastId)
-                                if (toastEl?.parentElement) {
-                                    toastEl.parentElement.remove()
-                                }
-                            }}
-                            analysisId={null}
-                        />
-                    ),
-                    className: 'p-0 bg-background border',
-                    duration: Infinity,
-                })
-            },
-        },
-        {
             id: 'test-tickets',
             title: 'Test Data Generation',
-            description:
-                'Create 10 test tickets (6 performance-related, 4 unrelated) spread across multiple customers.',
+            description: 'Create 10 test tickets',
             buttonText: 'Insert Test Tickets',
             onClick: async () => {
+                // First clean existing test data
+                await fetch('/api/demo/delete-test-tickets', {
+                    method: 'POST',
+                })
+
+                // Then insert new test data
                 const response = await fetch('/api/demo/insert-test-tickets', {
                     method: 'POST',
                 })
@@ -116,8 +85,7 @@ function DemoContent({ children }: DemoWrapperProps) {
         {
             id: 'firebreak',
             title: 'Firebreak Analysis',
-            description:
-                'Analyze tickets for patterns and potential issues that need immediate attention.',
+            description: 'Analyze tickets for patterns and potential issues',
             buttonText: 'Run Analysis',
             onClick: async () => {
                 const response = await fetch('/api/ai/firebreak/detect', {
@@ -125,37 +93,6 @@ function DemoContent({ children }: DemoWrapperProps) {
                 })
                 if (!response.ok) {
                     throw new Error('Failed to run firebreak analysis')
-                }
-            },
-        },
-        {
-            id: 'view-seed-analysis',
-            title: 'View Seeded Analysis',
-            description:
-                'View the seeded firebreak analysis showing performance issues across systems.',
-            buttonText: 'View Analysis',
-            onClick: async () => {
-                const response = await fetch('/api/demo/seed-analysis')
-                if (!response.ok) {
-                    throw new Error('Failed to fetch seeded analysis')
-                }
-                const data = await response.json()
-                setAnalysisData(data)
-                setIsAnalysisSheetOpen(true)
-            },
-        },
-        {
-            id: 'delete-test-data',
-            title: 'Clean Test Data',
-            description:
-                'Delete all test tickets and incidents from the last 2 hours.',
-            buttonText: 'Delete Test Data',
-            onClick: async () => {
-                const response = await fetch('/api/demo/delete-test-tickets', {
-                    method: 'POST',
-                })
-                if (!response.ok) {
-                    throw new Error('Failed to delete test data')
                 }
             },
         },
@@ -246,13 +183,6 @@ function DemoContent({ children }: DemoWrapperProps) {
                     </div>
                 </SheetContent>
             </Sheet>
-
-            <FirebreakAnalysisSheet
-                open={isAnalysisSheetOpen}
-                onOpenChange={setIsAnalysisSheetOpen}
-                data={analysisData ?? ({} as FirebreakResponseType)}
-                isLoading={false}
-            />
         </>
     )
 }
