@@ -31,7 +31,7 @@ export function showTestIncidentNotification() {
                 id={toastId}
                 incidentId={testIncident.id}
                 numRelatedTickets={testIncident.linked_ticket_ids.length}
-                description={testIncident.description}
+                description={testIncident.pattern_name}
                 analysisId={testIncident.analysis_id}
                 onOpenChange={() => {
                     const toastEl = document.getElementById(toastId)
@@ -79,7 +79,7 @@ export function useIncidentListener() {
                                     numRelatedTickets={
                                         incident.linked_ticket_ids.length
                                     }
-                                    description={incident.description}
+                                    description={incident.pattern_name}
                                     analysisId={incident.analysis_id}
                                     onOpenChange={() => {
                                         try {

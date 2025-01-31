@@ -57,7 +57,7 @@ export function useSSE() {
                                         numRelatedTickets={
                                             incident.linked_ticket_ids.length
                                         }
-                                        description={incident.description}
+                                        description={incident.pattern_name}
                                         onOpenChange={() => {
                                             const toastEl =
                                                 document.getElementById(toastId)

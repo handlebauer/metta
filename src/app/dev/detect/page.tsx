@@ -45,7 +45,7 @@ export default function DetectTestPage() {
                         id={`incident-${incident.id}`}
                         incidentId={incident.id}
                         numRelatedTickets={data.found_tickets.length}
-                        description={incident.description}
+                        description={incident.pattern_name}
                         onOpenChange={() => {
                             const toastEl = document.getElementById(
                                 `incident-${incident.id}`,

@@ -228,11 +228,19 @@ export const structureAnalysis = tool(
             'Convert your analysis into a structured format that can be used by the system.',
         schema: z.object({
             analysis: z.object({
-                summary: z.string(),
+                summary: z
+                    .string()
+                    .describe(
+                        'Summary of the analysis, e.g. "Severe performance issues affecting multiple services',
+                    ),
                 pattern_found: z.string(),
-                incident_created_id: z.string(),
+                incident_created_id: z
+                    .string()
+                    .describe('ID of the incident created'),
                 related_tickets: z.array(z.object({ id: z.string() })),
-                tickets_analyzed_length: z.number(),
+                tickets_analyzed_length: z
+                    .number()
+                    .describe('Number of tickets analyzed'),
             }),
         }),
     },
