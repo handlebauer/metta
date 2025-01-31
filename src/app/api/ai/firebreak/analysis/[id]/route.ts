@@ -48,12 +48,17 @@ export async function GET(
                     linked_ticket_ids: incident.linked_ticket_ids,
                 }),
             ),
+            agent_steps: analysis.agent_steps || [],
         }
 
         // Validate the response format
         const validatedData = FirebreakResponse.parse(formattedData)
 
-        return Response.json(validatedData)
+        // Return both the validated data and the agent steps
+        return Response.json({
+            ...validatedData,
+            agent_steps: analysis.agent_steps || [],
+        })
     } catch (error) {
         console.error('[Firebreak Analysis] Failed to fetch analysis:', error)
         return Response.json(

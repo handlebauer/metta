@@ -28,6 +28,3 @@ export interface FirebreakResponse {
     identified_patterns: Pattern[]
     created_incidents: Incident[]
 }
-
-// Re-export AgentMessage for convenience
-export type { AgentMessage } from './agent.schemas'

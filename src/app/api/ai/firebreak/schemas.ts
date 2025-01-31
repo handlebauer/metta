@@ -33,11 +33,32 @@ export const Incident = z.object({
     linked_ticket_ids: z.array(z.string()),
 })
 
+export const AgentStep = z.object({
+    timestamp: z.string(),
+    type: z.enum(['action', 'reflection', 'result']),
+    content: z.string(),
+    tool_calls: z
+        .array(
+            z.object({
+                id: z.string(),
+                type: z.string(),
+                function: z.object({
+                    name: z.string(),
+                    arguments: z.string(),
+                }),
+            }),
+        )
+        .optional(),
+    name: z.string().optional(),
+    tool_call_id: z.string().optional(),
+})
+
 export const FirebreakResponse = z.object({
     analysis_state: AnalysisState,
     found_tickets: z.array(Ticket),
     identified_patterns: z.array(Pattern),
     created_incidents: z.array(Incident),
+    agent_steps: z.array(AgentStep).optional(),
 })
 
 export type FirebreakResponseType = z.infer<typeof FirebreakResponse>

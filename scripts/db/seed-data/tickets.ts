@@ -242,7 +242,8 @@ export async function seedTickets(supabase: SupabaseClient) {
 
         // Calculate creation date based on index to spread tickets across weeks
         const now = new Date()
-        const daysAgo = Math.floor(index * 2.5) // Spread tickets every 2-3 days
+        const baseOffset = 0.5 // Ensure all tickets start at least 0.5 days ago
+        const daysAgo = baseOffset + Math.floor(index * 2.5) // Spread tickets every 2-3 days
         const createdAt = new Date(now)
         createdAt.setDate(now.getDate() - daysAgo)
         createdAt.setHours(10, 0, 0, 0) // Set to 10 AM for consistency

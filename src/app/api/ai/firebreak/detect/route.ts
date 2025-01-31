@@ -1,3 +1,7 @@
+import {
+    agentStepSchema,
+    langGraphMessageSchema,
+} from '@/lib/schemas/agent.schemas'
 import { createIncidentSchema } from '@/lib/schemas/incident.schemas'
 import { createServiceClient } from '@/lib/supabase/service'
 
@@ -29,9 +33,121 @@ const SYSTEM_PROMPT = `
     This ensures we have structured data about the analysis state and any findings.
 `
 
+interface AgentStep {
+    timestamp: string
+    type: 'action' | 'reflection' | 'result'
+    content: string
+    tool_calls?: Array<{
+        id: string
+        type: string
+        function: {
+            name: string
+            arguments: string
+        }
+    }>
+    name?: string
+    tool_call_id?: string
+}
+
+function processAgentMessage(
+    key: string,
+    message: Record<string, unknown>,
+): AgentStep[] {
+    try {
+        // Parse and validate the raw message
+        const parseResult = langGraphMessageSchema.safeParse(message)
+        if (!parseResult.success) {
+            console.error(
+                '[Firebreak] Invalid message format:',
+                parseResult.error,
+            )
+            return []
+        }
+
+        const parsedMessage = parseResult.data
+        const timestamp = new Date().toISOString()
+        const steps: AgentStep[] = []
+
+        // Debug log the parsed message
+        console.log('[Firebreak] Processing message:', {
+            key,
+            type: parsedMessage.type,
+            content: parsedMessage.content?.slice(0, 100),
+            tool_calls: parsedMessage.tool_calls?.length,
+            name: parsedMessage.name,
+        })
+
+        // Handle AI messages (reflections and actions)
+        if (key === 'callModel') {
+            // Always capture the reflection if there's content
+            if (parsedMessage.content?.trim()) {
+                const reflectionStep = agentStepSchema.parse({
+                    timestamp,
+                    type: 'reflection',
+                    content: parsedMessage.content,
+                })
+                console.log(
+                    '[Firebreak] Adding reflection:',
+                    reflectionStep.content.slice(0, 100),
+                )
+                steps.push(reflectionStep)
+            }
+
+            // If it has tool_calls, also capture the action
+            if (parsedMessage.tool_calls?.length) {
+                const actionStep = agentStepSchema.parse({
+                    timestamp,
+                    type: 'action',
+                    content: parsedMessage.content || '',
+                    tool_calls: parsedMessage.tool_calls.map(call => ({
+                        id: call.id,
+                        type: call.type,
+                        function: {
+                            name: call.name,
+                            arguments:
+                                typeof call.args === 'string'
+                                    ? call.args
+                                    : JSON.stringify(call.args),
+                        },
+                    })),
+                })
+                console.log('[Firebreak] Adding action:', {
+                    content: actionStep.content.slice(0, 100),
+                    tool_calls: actionStep.tool_calls?.map(
+                        t => t.function.name,
+                    ),
+                })
+                steps.push(actionStep)
+            }
+        }
+
+        // Handle tool results
+        if (key === 'callTool' && parsedMessage.name) {
+            const resultStep = agentStepSchema.parse({
+                timestamp,
+                type: 'result',
+                content: parsedMessage.content || '',
+                name: parsedMessage.name,
+                tool_call_id: parsedMessage.tool_call_id || '',
+            })
+            console.log('[Firebreak] Adding result:', {
+                name: resultStep.name,
+                content: resultStep.content.slice(0, 100),
+            })
+            steps.push(resultStep)
+        }
+
+        return steps
+    } catch (error) {
+        console.error('[Firebreak] Failed to process message:', error)
+        return []
+    }
+}
+
 export async function POST(_req: Request) {
     try {
         console.log('[CRITICAL] [Firebreak] Starting analysis...')
+        const agentSteps: AgentStep[] = []
 
         const agentStream = await agent.stream([
             { role: 'system', content: SYSTEM_PROMPT },
@@ -41,6 +157,31 @@ export async function POST(_req: Request) {
             for (const [key, message] of Object.entries(step)) {
                 if (message && typeof message === 'object') {
                     const msg = message as Record<string, unknown>
+
+                    // Debug log to see exact message format
+                    console.log('[DEBUG] [Firebreak] Message:', {
+                        key,
+                        type: msg.type,
+                        content: msg.content?.toString()?.slice(0, 200) + '...',
+                        tool_calls: msg.tool_calls,
+                        name: msg.name,
+                        tool_call_id: msg.tool_call_id,
+                    })
+
+                    // Process and collect agent steps with the key for context
+                    const newSteps = processAgentMessage(key, msg)
+                    if (newSteps.length > 0) {
+                        agentSteps.push(...newSteps)
+                        for (const step of newSteps) {
+                            console.log(
+                                '[CRITICAL] [Firebreak] Collected step:',
+                                {
+                                    type: step.type,
+                                    content: step.content.slice(0, 100) + '...',
+                                },
+                            )
+                        }
+                    }
 
                     // Check if this is the structureAnalysis result
                     if (
@@ -128,6 +269,41 @@ export async function POST(_req: Request) {
                                     created_incident_ids: [],
                                     workspace_id: workspace.data.id,
                                     created_by: user.data.id,
+                                    agent_steps: agentSteps.map(step => {
+                                        // Only include tool_calls if they exist and have the correct structure
+                                        const tool_calls = step.tool_calls?.map(
+                                            call => ({
+                                                id: call.id,
+                                                type: call.type,
+                                                function: {
+                                                    name:
+                                                        call.function?.name ||
+                                                        '',
+                                                    arguments:
+                                                        call.function
+                                                            ?.arguments || '{}',
+                                                },
+                                            }),
+                                        )
+
+                                        return {
+                                            timestamp: step.timestamp,
+                                            type: step.type,
+                                            content: step.content,
+                                            ...(tool_calls
+                                                ? { tool_calls }
+                                                : {}),
+                                            ...(step.name
+                                                ? { name: step.name }
+                                                : {}),
+                                            ...(step.tool_call_id
+                                                ? {
+                                                      tool_call_id:
+                                                          step.tool_call_id,
+                                                  }
+                                                : {}),
+                                        }
+                                    }),
                                 })
                                 .select()
                                 .single()

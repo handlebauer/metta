@@ -17,6 +17,9 @@ CREATE TABLE public.firebreak_analysis (
     -- Created Incidents (Array of UUIDs linking to incidents table)
     created_incident_ids TEXT[] NOT NULL DEFAULT '{}',
 
+    -- Agent Process Steps (JSONB array to store the agent's thought process)
+    agent_steps JSONB[] NOT NULL DEFAULT '{}',
+
     -- Metadata
     workspace_id TEXT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
     created_by UUID NOT NULL REFERENCES auth.users(id)

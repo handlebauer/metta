@@ -80,6 +80,7 @@ export type Database = {
             }
             firebreak_analysis: {
                 Row: {
+                    agent_steps: Json[]
                     created_at: string | null
                     created_by: string
                     created_incident_ids: string[]
@@ -92,6 +93,7 @@ export type Database = {
                     workspace_id: string
                 }
                 Insert: {
+                    agent_steps?: Json[]
                     created_at?: string | null
                     created_by: string
                     created_incident_ids?: string[]
@@ -104,6 +106,7 @@ export type Database = {
                     workspace_id: string
                 }
                 Update: {
+                    agent_steps?: Json[]
                     created_at?: string | null
                     created_by?: string
                     created_incident_ids?: string[]

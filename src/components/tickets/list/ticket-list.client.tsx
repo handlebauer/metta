@@ -131,14 +131,97 @@ export function TicketList({
     const router = useRouter()
     const { slug } = useParams()
     const [tickets, setTickets] = useState<TicketWithCustomer[]>(initialTickets)
-    const [sorting, setSorting] = useState<SortingState>([]) // Remove default sorting since we handle it in flattenGroupedTickets
+    const [sorting, setSorting] = useState<SortingState>([])
+
+    // CRITICAL: Only update from initialTickets if the length changes
+    // This preserves our realtime updates while still catching bulk changes
+    useEffect(() => {
+        setTickets(current => {
+            // If lengths are different, take the new tickets
+            if (current.length !== initialTickets.length) {
+                console.log('[TicketList] Bulk update - lengths different:', {
+                    current: current.length,
+                    initial: initialTickets.length,
+                })
+                return initialTickets
+            }
+
+            // If we have the same number of tickets, preserve our state
+            // This keeps our realtime updates intact
+            console.log('[TicketList] Preserving current state - same length')
+            return current
+        })
+    }, [initialTickets])
+
+    // Create update handler - NO DEBOUNCE, INSTANT UPDATES
+    const handleTicketUpdates = useMemo(
+        () =>
+            (
+                ticket: TicketWithCustomer,
+                type: 'INSERT' | 'UPDATE' | 'DELETE',
+            ) => {
+                console.log('[TicketList] Processing update:', { ticket, type })
+                setTickets(currentTickets => {
+                    switch (type) {
+                        case 'INSERT':
+                            // Don't add if we already have it
+                            if (currentTickets.some(t => t.id === ticket.id)) {
+                                console.log(
+                                    '[TicketList] Ticket already exists:',
+                                    ticket.id,
+                                )
+                                return currentTickets
+                            }
+                            console.log(
+                                '[TicketList] Adding new ticket:',
+                                ticket.id,
+                            )
+                            return [...currentTickets, ticket]
+                        case 'UPDATE':
+                            console.log(
+                                '[TicketList] Updating ticket:',
+                                ticket.id,
+                            )
+                            return currentTickets.map(t =>
+                                t.id === ticket.id ? ticket : t,
+                            )
+                        case 'DELETE':
+                            console.log(
+                                '[TicketList] Deleting ticket:',
+                                ticket.id,
+                            )
+                            return currentTickets.filter(
+                                t =>
+                                    t.id !== ticket.id &&
+                                    t.parent_ticket_id !== ticket.id,
+                            )
+                        default:
+                            return currentTickets
+                    }
+                })
+            },
+        [],
+    )
+
+    // Keep track of updates - DIRECT, NO DEBOUNCE
+    const pendingUpdates = useMemo(
+        () => ({
+            add: (
+                ticket: TicketWithCustomer,
+                type: 'INSERT' | 'UPDATE' | 'DELETE',
+            ) => {
+                console.log('[TicketList] Adding update:', { ticket, type })
+                handleTicketUpdates(ticket, type)
+            },
+        }),
+        [handleTicketUpdates],
+    )
 
     // Set up realtime subscription
     useEffect(() => {
         const supabase = createClient()
         console.log('[TicketList] Setting up realtime subscription...')
 
-        // Subscribe to all ticket changes
         const channel = supabase
             .channel('ticket-updates')
             .on<Ticket>(
@@ -149,108 +232,79 @@ export function TicketList({
                     table: 'tickets',
                 },
                 async (payload: RealtimePostgresChangesPayload<Ticket>) => {
-                    console.log('[TicketList] Received ticket update:', payload)
+                    console.log('[TicketList] Received update:', payload)
 
-                    // Only proceed if we have a valid ticket ID
-                    const newTicket = payload.new
-                    const oldTicket = payload.old
+                    // Handle DELETE events
+                    if (
+                        payload.eventType === 'DELETE' &&
+                        payload.old &&
+                        'id' in payload.old
+                    ) {
+                        console.log(
+                            '[TicketList] Processing DELETE:',
+                            payload.old.id,
+                        )
+                        pendingUpdates.add(
+                            { id: payload.old.id } as TicketWithCustomer,
+                            'DELETE',
+                        )
+                        return
+                    }
 
-                    // For DELETE events, we only need the old ticket ID
-                    if (payload.eventType === 'DELETE') {
-                        if (!oldTicket || !('id' in oldTicket)) {
-                            console.log(
-                                '[TicketList] Invalid DELETE payload:',
-                                payload,
+                    // Handle INSERT/UPDATE events
+                    if (payload.new && 'id' in payload.new) {
+                        // Fetch complete ticket data
+                        const { data: ticket, error } = await supabase
+                            .from('tickets')
+                            .select(
+                                `
+                                *,
+                                customer:users!tickets_customer_id_fkey (
+                                    email,
+                                    profiles!inner (
+                                        full_name
+                                    )
+                                )
+                            `,
+                            )
+                            .eq('id', payload.new.id)
+                            .single()
+
+                        if (error || !ticket) {
+                            console.error(
+                                '[TicketList] Error fetching ticket:',
+                                error,
                             )
                             return
                         }
-                        console.log(
-                            '[TicketList] Removing ticket:',
-                            oldTicket.id,
-                        )
-                        setTickets(currentTickets =>
-                            currentTickets.filter(t => t.id !== oldTicket.id),
-                        )
-                        return
-                    }
 
-                    // For INSERT and UPDATE events, we need the new ticket
-                    if (!newTicket || !('id' in newTicket)) {
-                        console.log('[TicketList] Invalid payload:', payload)
-                        return
-                    }
-
-                    // Fetch the complete ticket data with customer info
-                    const { data: updatedTicket, error } = await supabase
-                        .from('tickets')
-                        .select(
-                            `
-                            *,
-                            customer:users!tickets_customer_id_fkey (
-                                email,
-                                profiles!inner (
-                                    full_name
-                                )
-                            )
-                        `,
-                        )
-                        .eq('id', newTicket.id)
-                        .single()
-
-                    if (error || !updatedTicket) {
-                        console.log(
-                            '[TicketList] Error fetching updated ticket:',
-                            error,
-                        )
-                        return
-                    }
-
-                    // Transform the data to match TicketWithCustomer type
-                    const ticketWithCustomer: TicketWithCustomer = {
-                        ...updatedTicket,
-                        customer: {
-                            email: updatedTicket.customer.email,
-                            full_name:
-                                updatedTicket.customer.profiles.full_name,
-                        },
-                    }
-
-                    console.log(
-                        '[TicketList] Updating tickets with:',
-                        ticketWithCustomer,
-                    )
-
-                    // Update tickets based on the event type
-                    setTickets(currentTickets => {
-                        switch (payload.eventType) {
-                            case 'INSERT':
-                                return [...currentTickets, ticketWithCustomer]
-                            case 'UPDATE':
-                                return currentTickets.map(t =>
-                                    t.id === ticketWithCustomer.id
-                                        ? ticketWithCustomer
-                                        : t,
-                                )
-                            default:
-                                return currentTickets
+                        // Transform and add the update
+                        const ticketWithCustomer: TicketWithCustomer = {
+                            ...ticket,
+                            customer: {
+                                email: ticket.customer.email,
+                                full_name: ticket.customer.profiles.full_name,
+                            },
                         }
-                    })
+
+                        console.log(
+                            '[TicketList] Adding ticket:',
+                            ticketWithCustomer,
+                        )
+                        pendingUpdates.add(
+                            ticketWithCustomer,
+                            payload.eventType as 'INSERT' | 'UPDATE',
+                        )
+                    }
                 },
             )
-            .subscribe(status => {
-                console.log('[TicketList] Subscription status:', status)
-            })
+            .subscribe()
 
         return () => {
-            console.log('[TicketList] Cleaning up realtime subscription...')
+            console.log('[TicketList] Cleaning up subscription...')
             supabase.removeChannel(channel)
         }
-    }, [slug])
-
-    // Update local tickets when initialTickets changes
-    useEffect(() => {
-        setTickets(initialTickets)
-    }, [initialTickets])
+    }, [pendingUpdates])
 
     const handleTicketClick = (ticketId: string) => {
         router.push(`/${slug}/tickets/${ticketId}`)
