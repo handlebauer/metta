@@ -11,6 +11,7 @@ export const incidentSchema = z.object({
     severity: z.enum(['low', 'medium', 'high']),
     linked_ticket_ids: z.array(z.string()),
     status: z.enum(['open', 'closed', 'resolved']),
+    analysis_id: z.string().nullable(),
 }) satisfies z.ZodType<Tables<'incidents'>>
 
 export const createIncidentSchema = incidentSchema.omit({

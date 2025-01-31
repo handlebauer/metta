@@ -80,6 +80,69 @@ export async function POST(_req: Request) {
                             )
                         }
 
+                        // Save the analysis to the database
+                        const supabase = createServiceClient()
+
+                        // Get the demo workspace and system user
+                        const workspacePromise = supabase
+                            .from('workspaces')
+                            .select('id')
+                            .eq('slug', 'demohost')
+                            .single()
+
+                        const userPromise = supabase
+                            .from('users')
+                            .select('id')
+                            .eq('email', 'ai.sysadmin@metta.now')
+                            .single()
+
+                        const [workspace, user] = await Promise.all([
+                            workspacePromise,
+                            userPromise,
+                        ])
+
+                        if (workspace.error || user.error) {
+                            console.error(
+                                '[CRITICAL] [Firebreak] Failed to get workspace/user:',
+                                workspace.error || user.error,
+                            )
+                            return Response.json(
+                                { error: 'Failed to get workspace/user' },
+                                { status: 500 },
+                            )
+                        }
+
+                        // Save the analysis
+                        const { data: savedAnalysis, error: analysisError } =
+                            await supabase
+                                .from('firebreak_analysis')
+                                .insert({
+                                    total_tickets:
+                                        analysis.analysis_state.total_tickets,
+                                    time_window:
+                                        analysis.analysis_state.time_window,
+                                    status: analysis.analysis_state.status,
+                                    found_tickets: analysis.found_tickets,
+                                    identified_patterns:
+                                        analysis.identified_patterns,
+                                    created_incident_ids: [],
+                                    workspace_id: workspace.data.id,
+                                    created_by: user.data.id,
+                                })
+                                .select()
+                                .single()
+
+                        if (analysisError) {
+                            console.error(
+                                '[CRITICAL] [Firebreak] Failed to save analysis:',
+                                analysisError,
+                            )
+                            return Response.json(
+                                { error: 'Failed to save analysis' },
+                                { status: 500 },
+                            )
+                        }
+
                         // Only create incidents if we found patterns
                         if (
                             analysis.identified_patterns.length > 0 &&
@@ -89,7 +152,6 @@ export async function POST(_req: Request) {
                                 `[CRITICAL] [Firebreak] Found ${analysis.identified_patterns.length} patterns, creating ${analysis.created_incidents.length} incidents...`,
                             )
 
-                            const supabase = createServiceClient()
                             const incidents = analysis.created_incidents.map(
                                 incident => ({
                                     title: incident.subject,
@@ -99,6 +161,7 @@ export async function POST(_req: Request) {
                                     linked_ticket_ids:
                                         incident.linked_ticket_ids,
                                     status: 'open',
+                                    analysis_id: savedAnalysis.id,
                                 }),
                             )
 
@@ -107,9 +170,11 @@ export async function POST(_req: Request) {
                                 createIncidentSchema.parse(incident),
                             )
 
-                            const { error } = await supabase
-                                .from('incidents')
-                                .insert(validatedIncidents)
+                            const { data: createdIncidents, error } =
+                                await supabase
+                                    .from('incidents')
+                                    .insert(validatedIncidents)
+                                    .select()
 
                             if (error) {
                                 console.error(
@@ -119,6 +184,23 @@ export async function POST(_req: Request) {
                                 return Response.json(
                                     { error: 'Failed to create incidents' },
                                     { status: 500 },
+                                )
+                            }
+
+                            // Update the analysis with the created incident IDs
+                            const { error: updateError } = await supabase
+                                .from('firebreak_analysis')
+                                .update({
+                                    created_incident_ids: createdIncidents.map(
+                                        i => i.id,
+                                    ),
+                                })
+                                .eq('id', savedAnalysis.id)
+
+                            if (updateError) {
+                                console.error(
+                                    '[CRITICAL] [Firebreak] Failed to update analysis with incident IDs:',
+                                    updateError,
                                 )
                             }
 

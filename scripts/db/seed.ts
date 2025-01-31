@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 
 import { seedAccessTokens } from './seed-data/access-tokens'
 import { seedApiKeys } from './seed-data/api-keys'
+import { seedFirebreakAnalysis } from './seed-data/firebreak-analysis'
 import { seedInternalNotes } from './seed-data/internal-notes'
 import { seedMessages } from './seed-data/messages'
 import { seedStatusHistory } from './seed-data/status-history'
@@ -66,6 +67,11 @@ async function main() {
             .throwOnError()
         await supabase.from('profiles').delete().neq('id', '0').throwOnError()
         await supabase.from('users').delete().neq('id', '0').throwOnError()
+        await supabase
+            .from('firebreak_analysis')
+            .delete()
+            .neq('id', '0')
+            .throwOnError()
         console.log('✅ Database cleaned')
 
         console.log('🌱 Creating application data...')
@@ -80,6 +86,7 @@ async function main() {
         await seedApiKeys(supabase)
         await seedStatusHistory(supabase, ticketMap, agentMap)
         const { ticketId, token } = await seedAccessTokens(supabase)
+        await seedFirebreakAnalysis(supabase, { ticketMap })
         console.log('✅ Seed data created successfully')
 
         // Log the access URL if we're not in production

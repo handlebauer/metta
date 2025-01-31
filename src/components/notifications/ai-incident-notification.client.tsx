@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Toast, ToastClose } from '@/components/ui/toast'
 import { FirebreakAnalysisSheet } from '@/components/ai/firebreak-analysis-sheet'
+import { toast } from '@/hooks/use-toast'
 
 import type { FirebreakResponseType } from '@/app/api/ai/firebreak/schemas'
 
@@ -16,15 +17,16 @@ interface AIIncidentNotificationProps {
     incidentId: string
     numRelatedTickets: number
     description: string
+    analysisId?: string | null
     className?: string
     onOpenChange?: (open: boolean) => void
 }
 
 export function AIIncidentNotification({
     id,
-    incidentId,
     numRelatedTickets,
     description,
+    analysisId,
     className,
     onOpenChange,
 }: AIIncidentNotificationProps) {
@@ -41,8 +43,12 @@ export function AIIncidentNotification({
             // Dismiss the notification
             onOpenChange?.(false)
 
+            if (!analysisId) {
+                throw new Error('No analysis ID provided')
+            }
+
             const response = await fetch(
-                `/api/ai/firebreak/analysis/${incidentId}`,
+                `/api/ai/firebreak/analysis/${analysisId}`,
             )
             if (!response.ok) throw new Error('Failed to fetch analysis')
 
@@ -50,11 +56,15 @@ export function AIIncidentNotification({
             setAnalysisData(data)
         } catch (error) {
             console.error('Failed to load analysis:', error)
-            // Could add error toast here
+            toast({
+                title: 'Error',
+                description: 'Failed to load analysis data.',
+                variant: 'destructive',
+            })
         } finally {
             setIsLoading(false)
         }
-    }, [incidentId, onOpenChange])
+    }, [onOpenChange, analysisId])
 
     const handleSheetOpenChange = useCallback((open: boolean) => {
         setIsAnalysisOpen(open)
@@ -121,6 +131,7 @@ export function AIIncidentNotification({
                         size="sm"
                         onClick={handleViewIncident}
                         className="h-9 gap-1.5 px-4 text-xs font-medium shadow-sm"
+                        disabled={!analysisId}
                     >
                         View Analysis
                         <ExternalLink className="h-3.5 w-3.5" />

@@ -78,8 +78,56 @@ export type Database = {
                     },
                 ]
             }
+            firebreak_analysis: {
+                Row: {
+                    created_at: string | null
+                    created_by: string
+                    created_incident_ids: string[]
+                    found_tickets: Json
+                    id: string
+                    identified_patterns: Json
+                    status: string
+                    time_window: string
+                    total_tickets: number
+                    workspace_id: string
+                }
+                Insert: {
+                    created_at?: string | null
+                    created_by: string
+                    created_incident_ids?: string[]
+                    found_tickets?: Json
+                    id?: string
+                    identified_patterns?: Json
+                    status: string
+                    time_window: string
+                    total_tickets: number
+                    workspace_id: string
+                }
+                Update: {
+                    created_at?: string | null
+                    created_by?: string
+                    created_incident_ids?: string[]
+                    found_tickets?: Json
+                    id?: string
+                    identified_patterns?: Json
+                    status?: string
+                    time_window?: string
+                    total_tickets?: number
+                    workspace_id?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: 'firebreak_analysis_workspace_id_fkey'
+                        columns: ['workspace_id']
+                        isOneToOne: false
+                        referencedRelation: 'workspaces'
+                        referencedColumns: ['id']
+                    },
+                ]
+            }
             incidents: {
                 Row: {
+                    analysis_id: string | null
                     created_at: string | null
                     description: string
                     id: string
@@ -90,6 +138,7 @@ export type Database = {
                     title: string
                 }
                 Insert: {
+                    analysis_id?: string | null
                     created_at?: string | null
                     description: string
                     id?: string
@@ -100,6 +149,7 @@ export type Database = {
                     title: string
                 }
                 Update: {
+                    analysis_id?: string | null
                     created_at?: string | null
                     description?: string
                     id?: string
@@ -109,7 +159,15 @@ export type Database = {
                     status?: string
                     title?: string
                 }
-                Relationships: []
+                Relationships: [
+                    {
+                        foreignKeyName: 'incidents_analysis_id_fkey'
+                        columns: ['analysis_id']
+                        isOneToOne: false
+                        referencedRelation: 'firebreak_analysis'
+                        referencedColumns: ['id']
+                    },
+                ]
             }
             messages: {
                 Row: {

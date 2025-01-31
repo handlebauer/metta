@@ -17,13 +17,15 @@ const SYSTEM_PROMPT = dedent`
         - Review your pattern analysis to validate clustering decisions
         - Merge clusters if they are too similar
         - Tend towards creating fewer incidents
+        - IMPORTANT: Always preserve and use the exact ticket IDs provided in the input
     5. For each validated pattern:
         - Create a new incident ticket summarizing the pattern
-        - Link the related tickets to this incident
+        - Link the related tickets to this incident using their exact IDs
 
     Focus on identifying clear patterns that suggest a broader system issue rather than isolated problems.
     Do not make redundant tool calls - if a tool returns no results, proceed to the final reflection.
     Always review patterns before creating incidents to ensure high-quality clustering.
+    Remember to always use the exact ticket IDs from the input when referencing tickets.
 `
 
 interface BasePayload {
@@ -57,7 +59,7 @@ async function formatReflection(
     content: string,
 ): Promise<string> {
     try {
-        const structured = await parseFirebreakAnalysis(content)
+        const structured = await parseFirebreakAnalysis(content, [])
         console.log(
             '[Firebreak] Analysis state:',
             structured.analysis_state.status,

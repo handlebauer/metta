@@ -1,72 +1,57 @@
 import { type NextRequest } from 'next/server'
 import { FirebreakResponse } from '@/app/api/ai/firebreak/schemas'
 
+import { createServiceClient } from '@/lib/supabase/service'
+import { type Tables } from '@/lib/supabase/types'
+
 export async function GET(
     _: NextRequest,
     { params }: { params: Promise<{ id: string }> },
 ) {
     try {
         const { id } = await params
+        const supabase = createServiceClient()
 
-        // TODO: In production, this would fetch the actual analysis data from your database
-        // For demo purposes, we'll return mock data
-        const mockData = {
+        // Get the analysis and its incidents
+        const { data: analysis, error: analysisError } = await supabase
+            .from('firebreak_analysis')
+            .select('*, incidents(*)')
+            .eq('id', id)
+            .single()
+
+        if (analysisError) {
+            console.error(
+                '[Firebreak Analysis] Failed to fetch analysis:',
+                analysisError,
+            )
+            return Response.json(
+                { error: 'Failed to fetch analysis data' },
+                { status: 500 },
+            )
+        }
+
+        // Format the data to match the FirebreakResponse schema
+        const formattedData = {
             analysis_state: {
-                total_tickets: 3,
-                time_window: '2 hours',
-                status: 'completed',
+                total_tickets: analysis.total_tickets,
+                time_window: analysis.time_window,
+                status: analysis.status,
             },
-            found_tickets: [
-                {
-                    id: 'ticket-1',
-                    title: 'Checkout page loading slowly',
-                    description:
-                        'Customer reported extremely slow loading times on the checkout page. Takes over 10 seconds to process payment.',
-                    status: 'open',
-                },
-                {
-                    id: 'ticket-2',
-                    title: 'Payment processing timeout',
-                    description:
-                        'Multiple customers experiencing timeouts during payment processing. Transactions are failing to complete.',
-                    status: 'open',
-                },
-                {
-                    id: 'ticket-3',
-                    title: 'Cart API errors',
-                    description:
-                        'Backend logs showing increased error rates from the cart service. Multiple 500 errors recorded.',
-                    status: 'new',
-                },
-            ],
-            identified_patterns: [
-                {
-                    name: 'Payment Processing Degradation',
-                    description:
-                        'Multiple reports of slow response times and timeouts specifically in the checkout and payment processing flow. This appears to be a systemic issue affecting the payment infrastructure.',
-                    affected_systems: [
-                        'Checkout Service',
-                        'Payment Gateway',
-                        'Cart API',
-                    ],
-                    severity: 'high',
-                    related_ticket_ids: ['ticket-1', 'ticket-2', 'ticket-3'],
-                },
-            ],
-            created_incidents: [
-                {
-                    id,
-                    title: 'Payment System Performance Degradation',
-                    description:
-                        'Critical incident: Multiple customers reporting payment processing issues. Investigation shows increased error rates and timeouts across the payment infrastructure.',
-                    pattern_name: 'Payment Processing Degradation',
-                    linked_ticket_ids: ['ticket-1', 'ticket-2', 'ticket-3'],
-                },
-            ],
+            found_tickets: analysis.found_tickets,
+            identified_patterns: analysis.identified_patterns,
+            created_incidents: analysis.incidents.map(
+                (incident: Tables<'incidents'>) => ({
+                    id: incident.id,
+                    subject: incident.title,
+                    description: incident.description,
+                    pattern_name: incident.pattern_name,
+                    linked_ticket_ids: incident.linked_ticket_ids,
+                }),
+            ),
         }
 
         // Validate the response format
-        const validatedData = FirebreakResponse.parse(mockData)
+        const validatedData = FirebreakResponse.parse(formattedData)
 
         return Response.json(validatedData)
     } catch (error) {

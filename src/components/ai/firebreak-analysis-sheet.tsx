@@ -1,6 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { AlertOctagon, Bot, Clock, Loader2, Server } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -28,6 +30,9 @@ export function FirebreakAnalysisSheet({
     data,
     isLoading,
 }: FirebreakAnalysisSheetProps) {
+    const params = useParams()
+    const workspaceSlug = params.slug as string
+
     const pattern = useMemo(() => {
         if (!data?.identified_patterns?.length) return null
         return data.identified_patterns[0]
@@ -159,33 +164,38 @@ export function FirebreakAnalysisSheet({
                                 </div>
                                 <div className="space-y-2">
                                     {data.found_tickets.map(ticket => (
-                                        <div
+                                        <Link
                                             key={ticket.id}
-                                            className="flex items-start gap-3 rounded-lg border bg-card p-3"
+                                            href={`/${workspaceSlug}/tickets/${ticket.id}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="block transition-colors hover:bg-muted/50"
                                         >
-                                            <AlertOctagon className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                                            <div className="min-w-0 flex-1">
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <p className="truncate text-sm font-medium">
-                                                        {ticket.subject}
+                                            <div className="flex items-start gap-3 rounded-lg border bg-card p-3">
+                                                <AlertOctagon className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <p className="truncate text-sm font-medium">
+                                                            {ticket.subject}
+                                                        </p>
+                                                        <Badge
+                                                            variant="outline"
+                                                            className={cn(
+                                                                'flex-shrink-0',
+                                                                ticket.status ===
+                                                                    'closed' &&
+                                                                    'bg-muted',
+                                                            )}
+                                                        >
+                                                            {ticket.status}
+                                                        </Badge>
+                                                    </div>
+                                                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                                                        {ticket.description}
                                                     </p>
-                                                    <Badge
-                                                        variant="outline"
-                                                        className={cn(
-                                                            'flex-shrink-0',
-                                                            ticket.status ===
-                                                                'closed' &&
-                                                                'bg-muted',
-                                                        )}
-                                                    >
-                                                        {ticket.status}
-                                                    </Badge>
                                                 </div>
-                                                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                                                    {ticket.description}
-                                                </p>
                                             </div>
-                                        </div>
+                                        </Link>
                                     ))}
                                 </div>
                             </div>

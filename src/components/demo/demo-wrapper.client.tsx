@@ -13,8 +13,11 @@ import {
     SheetTitle,
 } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
+import { FirebreakAnalysisSheet } from '@/components/ai/firebreak-analysis-sheet'
 import { AIIncidentNotification } from '@/components/notifications/ai-incident-notification.client'
 import { toast } from '@/hooks/use-toast'
+
+import type { FirebreakResponseType } from '@/app/api/ai/firebreak/schemas'
 
 interface DemoWrapperProps {
     children: React.ReactNode
@@ -34,6 +37,9 @@ function DemoContent({ children }: DemoWrapperProps) {
     const [isDemoEnabled, setIsDemoEnabled] = useState(false)
     const [isInitialized, setIsInitialized] = useState(false)
     const [loadingActions, setLoadingActions] = useState<Set<string>>(new Set())
+    const [isAnalysisSheetOpen, setIsAnalysisSheetOpen] = useState(false)
+    const [analysisData, setAnalysisData] =
+        useState<FirebreakResponseType | null>(null)
 
     // Sync with URL params only on initial load
     useEffect(() => {
@@ -84,6 +90,7 @@ function DemoContent({ children }: DemoWrapperProps) {
                                     toastEl.parentElement.remove()
                                 }
                             }}
+                            analysisId={null}
                         />
                     ),
                     className: 'p-0 bg-background border',
@@ -119,6 +126,22 @@ function DemoContent({ children }: DemoWrapperProps) {
                 if (!response.ok) {
                     throw new Error('Failed to run firebreak analysis')
                 }
+            },
+        },
+        {
+            id: 'view-seed-analysis',
+            title: 'View Seeded Analysis',
+            description:
+                'View the seeded firebreak analysis showing performance issues across systems.',
+            buttonText: 'View Analysis',
+            onClick: async () => {
+                const response = await fetch('/api/demo/seed-analysis')
+                if (!response.ok) {
+                    throw new Error('Failed to fetch seeded analysis')
+                }
+                const data = await response.json()
+                setAnalysisData(data)
+                setIsAnalysisSheetOpen(true)
             },
         },
         {
@@ -223,6 +246,13 @@ function DemoContent({ children }: DemoWrapperProps) {
                     </div>
                 </SheetContent>
             </Sheet>
+
+            <FirebreakAnalysisSheet
+                open={isAnalysisSheetOpen}
+                onOpenChange={setIsAnalysisSheetOpen}
+                data={analysisData ?? ({} as FirebreakResponseType)}
+                isLoading={false}
+            />
         </>
     )
 }

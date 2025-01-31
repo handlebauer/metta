@@ -1,3 +1,4 @@
+import dedent from 'dedent'
 import { OpenAI } from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
@@ -45,14 +46,18 @@ const openai = new OpenAI()
 
 export async function parseFirebreakAnalysis(
     content: string,
+    originalTickets: { id: string }[],
 ): Promise<FirebreakResponseType> {
     const completion = await openai.beta.chat.completions.parse({
         model: 'gpt-4o-mini',
         messages: [
             {
                 role: 'system',
-                content:
-                    'Convert the following analysis into a structured format.',
+                content: dedent`
+                    Convert the following analysis into a structured format.
+                    IMPORTANT: Use ONLY these exact ticket IDs in your response: ${originalTickets.map(t => t.id).join(', ')}
+                    Do not generate new ticket IDs. Map the analysis to these existing tickets.
+                `,
             },
             {
                 role: 'user',

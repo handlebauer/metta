@@ -20,6 +20,7 @@ export function showTestIncidentNotification() {
         status: 'open',
         linked_ticket_ids: ['ticket-1', 'ticket-2', 'ticket-3'],
         created_at: new Date().toISOString(),
+        analysis_id: 'test-analysis-id',
     }
 
     const toastId = `toast-${testIncident.id}`
@@ -31,6 +32,7 @@ export function showTestIncidentNotification() {
                 incidentId={testIncident.id}
                 numRelatedTickets={testIncident.linked_ticket_ids.length}
                 description={testIncident.description}
+                analysisId={testIncident.analysis_id}
                 onOpenChange={() => {
                     const toastEl = document.getElementById(toastId)
                     if (toastEl?.parentElement) {
@@ -78,6 +80,7 @@ export function useIncidentListener() {
                                         incident.linked_ticket_ids.length
                                     }
                                     description={incident.description}
+                                    analysisId={incident.analysis_id}
                                     onOpenChange={() => {
                                         try {
                                             const toastEl =

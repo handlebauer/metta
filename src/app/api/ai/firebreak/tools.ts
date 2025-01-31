@@ -33,7 +33,8 @@ export const getRecentTickets = tool(
             .map(
                 t =>
                     dedent`
-                    ${t.id}: ${t.subject}
+                    Ticket ${t.id}: ${t.subject}
+                      - ID: ${t.id}
                       - Status: ${t.status}
                       - Description: ${t.description}
                       - Priority: ${t.priority}`,
@@ -216,9 +217,12 @@ export const reviewAnalysis = tool(
 )
 
 export const structureAnalysis = tool(
-    async ({ analysis }) => {
+    async ({ analysis, related_tickets }) => {
         console.log('[Firebreak] Structuring analysis...')
-        const structured = await parseFirebreakAnalysis(analysis)
+        const structured = await parseFirebreakAnalysis(
+            analysis,
+            related_tickets,
+        )
         return JSON.stringify(structured)
     },
     {
@@ -226,6 +230,7 @@ export const structureAnalysis = tool(
         description:
             'Convert your analysis into a structured format that can be used by the system.',
         schema: z.object({
+            related_tickets: z.array(z.object({ id: z.string() })),
             analysis: z
                 .string()
                 .describe(
