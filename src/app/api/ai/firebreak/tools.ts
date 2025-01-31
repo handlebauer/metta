@@ -54,7 +54,7 @@ export const getRecentTickets = tool(
 export const createIncidentTicket = tool(
     async ({ subject, description, related_tickets }) => {
         // Enforce minimum number of tickets for incident creation
-        if (related_tickets.length < MIN_TICKETS_FOR_INCIDENT) {
+        if (related_tickets.length <= MIN_TICKETS_FOR_INCIDENT) {
             return `Cannot create an incident with fewer than ${MIN_TICKETS_FOR_INCIDENT} related tickets. This helps ensure we only create incidents for actual patterns or systemic issues.`
         }
 
