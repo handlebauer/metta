@@ -1,3 +1,5 @@
+import { Client } from 'langsmith'
+
 import {
     agentStepSchema,
     langGraphMessageSchema,
@@ -6,12 +8,15 @@ import { createIncidentSchema } from '@/lib/schemas/incident.schemas'
 import { createServiceClient } from '@/lib/supabase/service'
 
 import { agent } from '../agent'
-import { FirebreakResponse } from '../schemas'
+import { FirebreakEvaluation, FirebreakResponse } from '../schemas'
 
 export const maxDuration = 60
 
 const SYSTEM_PROMPT = `
     You are the Firebreak agent, responsible for analyzing tickets for potential crisis patterns.
+
+    IMPORTANT: Always explain your thinking before taking any action. This helps users understand your decision-making process.
+
     Your task is to:
     1. Get tickets from the last 2 hours
     2. If no tickets are found, stop and report that there are no tickets to analyze
@@ -31,6 +36,10 @@ const SYSTEM_PROMPT = `
 
     IMPORTANT: Always end by calling structureAnalysis with your complete analysis, even if no patterns were found.
     This ensures we have structured data about the analysis state and any findings.
+
+    ALWAYS remember to:
+    1. Explain your thinking before each action
+    2. Summarize what you learned from each tool result
 `
 
 interface AgentStep {
@@ -145,15 +154,25 @@ function processAgentMessage(
 }
 
 export async function POST(_req: Request) {
+    const startTime = Date.now()
     try {
         console.log('[CRITICAL] [Firebreak] Starting analysis...')
         const agentSteps: AgentStep[] = []
+        let analysisResult: typeof FirebreakResponse._type | null = null
+        let runId: string | undefined
 
         const agentStream = await agent.stream([
             { role: 'system', content: SYSTEM_PROMPT },
         ])
 
+        // Process the stream once, capturing runId and processing messages
         for await (const step of agentStream) {
+            // Capture runId if present
+            if ('id' in step) {
+                runId = step.id as string
+            }
+
+            // Process messages
             for (const [key, message] of Object.entries(step)) {
                 if (message && typeof message === 'object') {
                     const msg = message as Record<string, unknown>
@@ -183,7 +202,7 @@ export async function POST(_req: Request) {
                         }
                     }
 
-                    // Check if this is the structureAnalysis result
+                    // Store the structureAnalysis result when found
                     if (
                         key === 'callTool' &&
                         'name' in msg &&
@@ -191,216 +210,227 @@ export async function POST(_req: Request) {
                         'content' in msg
                     ) {
                         const rawAnalysis = JSON.parse(String(msg.content))
-
-                        console.log({ rawAnalysis: msg.content })
-
-                        // Validate the analysis with our schema
                         const result = FirebreakResponse.safeParse(rawAnalysis)
+
                         if (!result.success) {
                             console.error(
                                 '[CRITICAL] [Firebreak] Invalid analysis structure:',
                                 result.error,
                             )
-                            return Response.json(
-                                { error: 'Invalid analysis structure' },
-                                { status: 500 },
-                            )
+                            continue
                         }
 
-                        const analysis = result.data
-
-                        // Ensure analysis is completed
-                        if (analysis.analysis_state.status !== 'completed') {
-                            console.error(
-                                '[CRITICAL] [Firebreak] Analysis incomplete:',
-                                analysis.analysis_state.status,
-                            )
-                            return Response.json(
-                                { error: 'Analysis not completed' },
-                                { status: 500 },
-                            )
-                        }
-
-                        // Save the analysis to the database
-                        const supabase = createServiceClient()
-
-                        // Get the demo workspace and system user
-                        const workspacePromise = supabase
-                            .from('workspaces')
-                            .select('id')
-                            .eq('slug', 'demohost')
-                            .single()
-
-                        const userPromise = supabase
-                            .from('users')
-                            .select('id')
-                            .eq('email', 'ai.sysadmin@metta.now')
-                            .single()
-
-                        const [workspace, user] = await Promise.all([
-                            workspacePromise,
-                            userPromise,
-                        ])
-
-                        if (workspace.error || user.error) {
-                            console.error(
-                                '[CRITICAL] [Firebreak] Failed to get workspace/user:',
-                                workspace.error || user.error,
-                            )
-                            return Response.json(
-                                { error: 'Failed to get workspace/user' },
-                                { status: 500 },
-                            )
-                        }
-
-                        // Save the analysis
-                        const { data: savedAnalysis, error: analysisError } =
-                            await supabase
-                                .from('firebreak_analysis')
-                                .insert({
-                                    total_tickets:
-                                        analysis.analysis_state.total_tickets,
-                                    time_window:
-                                        analysis.analysis_state.time_window,
-                                    status: analysis.analysis_state.status,
-                                    found_tickets: analysis.found_tickets,
-                                    identified_patterns:
-                                        analysis.identified_patterns,
-                                    created_incident_ids: [],
-                                    workspace_id: workspace.data.id,
-                                    created_by: user.data.id,
-                                    agent_steps: agentSteps.map(step => {
-                                        // Only include tool_calls if they exist and have the correct structure
-                                        const tool_calls = step.tool_calls?.map(
-                                            call => ({
-                                                id: call.id,
-                                                type: call.type,
-                                                function: {
-                                                    name:
-                                                        call.function?.name ||
-                                                        '',
-                                                    arguments:
-                                                        call.function
-                                                            ?.arguments || '{}',
-                                                },
-                                            }),
-                                        )
-
-                                        return {
-                                            timestamp: step.timestamp,
-                                            type: step.type,
-                                            content: step.content,
-                                            ...(tool_calls
-                                                ? { tool_calls }
-                                                : {}),
-                                            ...(step.name
-                                                ? { name: step.name }
-                                                : {}),
-                                            ...(step.tool_call_id
-                                                ? {
-                                                      tool_call_id:
-                                                          step.tool_call_id,
-                                                  }
-                                                : {}),
-                                        }
-                                    }),
-                                })
-                                .select()
-                                .single()
-
-                        if (analysisError) {
-                            console.error(
-                                '[CRITICAL] [Firebreak] Failed to save analysis:',
-                                analysisError,
-                            )
-                            return Response.json(
-                                { error: 'Failed to save analysis' },
-                                { status: 500 },
-                            )
-                        }
-
-                        // Only create incidents if we found patterns
-                        if (
-                            analysis.identified_patterns.length > 0 &&
-                            analysis.created_incidents.length > 0
-                        ) {
-                            console.log(
-                                `[CRITICAL] [Firebreak] Found ${analysis.identified_patterns.length} patterns, creating ${analysis.created_incidents.length} incidents...`,
-                            )
-
-                            const incidents = analysis.created_incidents.map(
-                                incident => ({
-                                    title: incident.subject,
-                                    description: incident.description,
-                                    pattern_name: incident.pattern_name,
-                                    severity: 'high',
-                                    linked_ticket_ids:
-                                        incident.linked_ticket_ids,
-                                    status: 'open',
-                                    analysis_id: savedAnalysis.id,
-                                }),
-                            )
-
-                            // Validate and insert incidents
-                            const validatedIncidents = incidents.map(incident =>
-                                createIncidentSchema.parse(incident),
-                            )
-
-                            const { data: createdIncidents, error } =
-                                await supabase
-                                    .from('incidents')
-                                    .insert(validatedIncidents)
-                                    .select()
-
-                            if (error) {
-                                console.error(
-                                    '[CRITICAL] [Firebreak] Failed to create incidents:',
-                                    error,
-                                )
-                                return Response.json(
-                                    { error: 'Failed to create incidents' },
-                                    { status: 500 },
-                                )
-                            }
-
-                            // Update the analysis with the created incident IDs
-                            const { error: updateError } = await supabase
-                                .from('firebreak_analysis')
-                                .update({
-                                    created_incident_ids: createdIncidents.map(
-                                        i => i.id,
-                                    ),
-                                })
-                                .eq('id', savedAnalysis.id)
-
-                            if (updateError) {
-                                console.error(
-                                    '[CRITICAL] [Firebreak] Failed to update analysis with incident IDs:',
-                                    updateError,
-                                )
-                            }
-
-                            console.log(
-                                `[CRITICAL] [Firebreak] Successfully created ${validatedIncidents.length} incidents`,
-                            )
-                            return Response.json(analysis)
-                        }
-
-                        // Return the analysis even when no incidents were created
-                        console.log(
-                            '[CRITICAL] [Firebreak] Analysis complete - no incidents created',
-                        )
-                        return Response.json({
-                            ...analysis,
-                            created_incidents: [],
-                        })
+                        analysisResult = result.data
                     }
                 }
             }
         }
 
-        console.error('[CRITICAL] [Firebreak] No analysis produced')
-        return Response.json({ error: 'No analysis produced' }, { status: 500 })
+        // After stream is complete, process the analysis result
+        if (!analysisResult) {
+            console.error('[CRITICAL] [Firebreak] No analysis produced')
+            return Response.json(
+                { error: 'No analysis produced' },
+                { status: 500 },
+            )
+        }
+
+        // Ensure analysis is completed
+        if (analysisResult.analysis_state.status !== 'completed') {
+            console.error(
+                '[CRITICAL] [Firebreak] Analysis incomplete:',
+                analysisResult.analysis_state.status,
+            )
+            return Response.json(
+                { error: 'Analysis not completed' },
+                { status: 500 },
+            )
+        }
+
+        // Save the analysis to the database
+        const supabase = createServiceClient()
+
+        // Get the demo workspace and system user
+        const workspacePromise = supabase
+            .from('workspaces')
+            .select('id')
+            .eq('slug', 'demohost')
+            .single()
+
+        const userPromise = supabase
+            .from('users')
+            .select('id')
+            .eq('email', 'ai.sysadmin@metta.now')
+            .single()
+
+        const [workspace, user] = await Promise.all([
+            workspacePromise,
+            userPromise,
+        ])
+
+        if (workspace.error || user.error) {
+            console.error(
+                '[CRITICAL] [Firebreak] Failed to get workspace/user:',
+                workspace.error || user.error,
+            )
+            return Response.json(
+                { error: 'Failed to get workspace/user' },
+                { status: 500 },
+            )
+        }
+
+        // Save the analysis
+        const { data: savedAnalysis, error: analysisError } = await supabase
+            .from('firebreak_analysis')
+            .insert({
+                total_tickets: analysisResult.analysis_state.total_tickets,
+                time_window: analysisResult.analysis_state.time_window,
+                status: analysisResult.analysis_state.status,
+                found_tickets: analysisResult.found_tickets,
+                identified_patterns: analysisResult.identified_patterns,
+                created_incident_ids: [],
+                workspace_id: workspace.data.id,
+                created_by: user.data.id,
+                agent_steps: agentSteps.map(step => {
+                    // Only include tool_calls if they exist and have the correct structure
+                    const tool_calls = step.tool_calls?.map(call => ({
+                        id: call.id,
+                        type: call.type,
+                        function: {
+                            name: call.function?.name || '',
+                            arguments: call.function?.arguments || '{}',
+                        },
+                    }))
+
+                    return {
+                        timestamp: step.timestamp,
+                        type: step.type,
+                        content: step.content,
+                        ...(tool_calls ? { tool_calls } : {}),
+                        ...(step.name ? { name: step.name } : {}),
+                        ...(step.tool_call_id
+                            ? { tool_call_id: step.tool_call_id }
+                            : {}),
+                    }
+                }),
+            })
+            .select()
+            .single()
+
+        if (analysisError) {
+            console.error(
+                '[CRITICAL] [Firebreak] Failed to save analysis:',
+                analysisError,
+            )
+            return Response.json(
+                { error: 'Failed to save analysis' },
+                { status: 500 },
+            )
+        }
+
+        // Collect evaluation metrics
+        const metrics = FirebreakEvaluation.parse({
+            pattern_identification_success:
+                analysisResult.identified_patterns.length > 0,
+            response_time_ms: Date.now() - startTime,
+        })
+
+        // Add LangSmith annotation if API key is available
+        if (process.env.LANGCHAIN_API_KEY && runId) {
+            const client = new Client({
+                apiUrl: process.env.LANGCHAIN_ENDPOINT,
+                apiKey: process.env.LANGCHAIN_API_KEY,
+            })
+
+            await client.addRunsToAnnotationQueue(
+                '4e2aa77c-7540-43b0-9ce6-ac40ba860ac3',
+                [runId],
+            )
+        }
+
+        // Only create incidents if we found patterns
+        if (
+            analysisResult.identified_patterns.length > 0 &&
+            analysisResult.created_incidents.length > 0
+        ) {
+            console.log(
+                `[CRITICAL] [Firebreak] Found ${analysisResult.identified_patterns.length} patterns, creating ${analysisResult.created_incidents.length} incidents...`,
+            )
+
+            const incidents = analysisResult.created_incidents.map(
+                (incident: {
+                    subject: string
+                    description: string
+                    pattern_name: string
+                    linked_ticket_ids: string[]
+                }) => ({
+                    title: incident.subject,
+                    description: incident.description,
+                    pattern_name: incident.pattern_name,
+                    severity: 'high',
+                    linked_ticket_ids: incident.linked_ticket_ids,
+                    status: 'open',
+                    analysis_id: savedAnalysis.id,
+                }),
+            )
+
+            // Validate and insert incidents
+            const validatedIncidents = incidents.map(
+                (incident: Record<string, unknown>) =>
+                    createIncidentSchema.parse(incident),
+            )
+
+            const { data: createdIncidents, error } = await supabase
+                .from('incidents')
+                .insert(validatedIncidents)
+                .select()
+
+            if (error) {
+                console.error(
+                    '[CRITICAL] [Firebreak] Failed to create incidents:',
+                    error,
+                )
+                return Response.json(
+                    { error: 'Failed to create incidents' },
+                    { status: 500 },
+                )
+            }
+
+            // Update the analysis with the created incident IDs
+            const { error: updateError } = await supabase
+                .from('firebreak_analysis')
+                .update({
+                    created_incident_ids: createdIncidents.map(i => i.id),
+                })
+                .eq('id', savedAnalysis.id)
+
+            if (updateError) {
+                console.error(
+                    '[CRITICAL] [Firebreak] Failed to update analysis with incident IDs:',
+                    updateError,
+                )
+            }
+
+            console.log(
+                `[CRITICAL] [Firebreak] Successfully created ${validatedIncidents.length} incidents`,
+            )
+
+            return Response.json({
+                ...analysisResult,
+                created_incidents: [],
+                _metrics: metrics,
+            })
+        }
+
+        // Return the analysis with metrics
+        console.log(
+            '[CRITICAL] [Firebreak] Analysis complete - no incidents created',
+        )
+        return Response.json({
+            ...analysisResult,
+            created_incidents: [],
+            _metrics: metrics,
+        })
     } catch (error) {
         console.error('[CRITICAL] [Firebreak] Analysis failed:', error)
         return Response.json(

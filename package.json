@@ -20,7 +20,8 @@
         "test:smoke": "playwright test --config=playwright.config.ts --grep @smoke",
         "test:critical": "playwright test --config=playwright.config.ts --grep @critical",
         "email:test": "bun run scripts/email/test.ts",
-        "verify-ticket": "bun run scripts/db/verify-ticket.ts"
+        "verify-ticket": "bun run scripts/db/verify-ticket.ts",
+        "test:firebreak": "bun run scripts/test-firebreak.ts"
     },
     "dependencies": {
         "@hookform/resolvers": "^3.10.0",

@@ -17,6 +17,10 @@ const MIN_TICKETS_FOR_INCIDENT = 2
 
 export const model = new ChatOpenAI({
     model: 'gpt-4o-mini',
+    temperature: 0.2,
+    modelKwargs: {
+        response_format: { type: 'text' },
+    },
 })
 
 export const getRecentTickets = tool(
@@ -160,6 +164,7 @@ export const reviewAnalysis = tool(
                     - Only group tickets that share a clear root cause or affected system
                     - Quality over quantity - fewer strongly related tickets is better than many loosely related ones
                     - If you do find a pattern and it has less than 3 tickets, this does not qualify as a pattern
+                    - The pattern title should be a concise description of the pattern (concise but NOT vague)
 
                     Provide your analysis in this format:
                     1. Pattern Found: Yes/No

@@ -68,6 +68,39 @@ function AgentStepIcon({ type }: { type: AgentStep['type'] }) {
 }
 
 function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
+    // Group steps by tool call to ensure reflections appear before their actions
+    const groupedSteps = useMemo(() => {
+        if (!steps?.length) return []
+
+        const groups: AgentStep[][] = []
+        let currentGroup: AgentStep[] = []
+
+        steps.forEach(step => {
+            if (step.type === 'reflection') {
+                // Start a new group with the reflection
+                if (currentGroup.length > 0) {
+                    groups.push(currentGroup)
+                }
+                currentGroup = [step]
+            } else {
+                // Add action/result to current group
+                currentGroup.push(step)
+                if (step.type === 'result') {
+                    // End group after result
+                    groups.push(currentGroup)
+                    currentGroup = []
+                }
+            }
+        })
+
+        // Add any remaining steps
+        if (currentGroup.length > 0) {
+            groups.push(currentGroup)
+        }
+
+        return groups.flat()
+    }, [steps])
+
     if (!steps?.length) {
         console.log('[AgentStepTimeline] No steps provided:', steps)
         return (
@@ -77,10 +110,10 @@ function AgentStepTimeline({ steps }: { steps: AgentStep[] }) {
         )
     }
 
-    console.log('[AgentStepTimeline] Rendering steps:', steps)
+    console.log('[AgentStepTimeline] Rendering grouped steps:', groupedSteps)
     return (
         <div className="relative space-y-3">
-            {steps.map((step, i) => (
+            {groupedSteps.map((step, i) => (
                 <Collapsible key={i}>
                     <CollapsibleTrigger className="flex w-full items-center gap-2 rounded-lg border bg-card p-3 text-left hover:bg-muted/50">
                         <AgentStepIcon type={step.type} />

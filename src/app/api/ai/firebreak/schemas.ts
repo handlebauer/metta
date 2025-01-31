@@ -63,6 +63,15 @@ export const FirebreakResponse = z.object({
 
 export type FirebreakResponseType = z.infer<typeof FirebreakResponse>
 
+export const FirebreakEvaluation = z.object({
+    pattern_identification_success: z
+        .boolean()
+        .describe('Whether patterns were found'),
+    response_time_ms: z.number().describe('Total time taken in milliseconds'),
+})
+
+export type FirebreakEvaluationType = z.infer<typeof FirebreakEvaluation>
+
 const openai = new OpenAI()
 
 export async function parseFirebreakAnalysis(analysis: {
